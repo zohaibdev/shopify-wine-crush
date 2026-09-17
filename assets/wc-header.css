@@ -1,0 +1,727 @@
+/* ==========================================================================
+   Wine Crush — header, mega menu, mobile drawer
+   ========================================================================== */
+
+.wc-header-section {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+/* Scoped so the header's measured box sizes hold regardless of what the rest
+   of the theme's reset does. */
+.wc-header-section *,
+.wc-header-section *::before,
+.wc-header-section *::after {
+  box-sizing: border-box;
+}
+
+.wc-header {
+  --header-inline-inset: 34px;
+  --header-cluster-gap: 37px;
+  /* The artboard leaves 43px before the cart circle where every other gap is 37. */
+  --header-cart-gap: 43px;
+
+  position: relative;
+  display: block;
+  background-color: var(--color-header-bg-active);
+  color: var(--color-text);
+  transition: background-color var(--transition-header);
+}
+
+/* Home only: the header floats over the hero until the page scrolls or a
+   mega menu opens, at which point it resolves into a solid surface. */
+.wc-header--transparent:not(.wc-header--scrolled):not(.wc-header--menu-open) {
+  background-color: var(--color-header-bg);
+}
+
+.wc-header__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--header-height);
+  padding-block: var(--header-padding-block);
+  padding-inline: var(--header-inline-inset);
+}
+
+/* --------------------------------------------------------------------------
+   Nav items
+   -------------------------------------------------------------------------- */
+
+.wc-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--header-cluster-gap);
+}
+
+.wc-header__nav--left {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.wc-header__nav--right {
+  grid-column: 3;
+  justify-self: end;
+}
+
+/* 1ch is one cell of the monospace body face, so "info +" occupies the same six
+   cells the artboard's single text run does. A fixed px gap makes it five. */
+.wc-header__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 1ch;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--text-nav);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition-button);
+}
+
+.wc-header__link:hover {
+  color: var(--color-accent);
+}
+
+.wc-header__link:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 4px;
+}
+
+/* The shop trigger is the pill primitive, so it keeps the primitive's own
+   padding and hover treatment rather than the plain link's. */
+.wc-header__trigger.wc-button {
+  padding-inline: var(--button-padding-inline-nav);
+}
+
+.wc-header__trigger.wc-button:hover {
+  color: var(--color-page);
+}
+
+.wc-header__trigger[aria-expanded='true'].wc-button {
+  background-color: var(--color-border);
+  color: var(--color-page);
+}
+
+.wc-header__trigger-plus {
+  display: inline-block;
+  transition: transform var(--transition-button);
+}
+
+.wc-header__trigger[aria-expanded='true'] .wc-header__trigger-plus {
+  transform: rotate(45deg);
+}
+
+/* --------------------------------------------------------------------------
+   Logo — hidden over the hero, revealed once the page scrolls.
+   Always in the DOM so the header never changes height.
+   -------------------------------------------------------------------------- */
+
+/* Held to the content row so the wordmark cannot open the bar past 58: the
+   artboard draws it 30px tall against a 28px row, i.e. 1px proud top and bottom
+   (y14..44 where the cart circle runs y15..43), and every section that tucks
+   under the header is positioned off that 58. */
+.wc-header__logo {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--header-row-height);
+  line-height: 0;
+  opacity: 1;
+  transition: opacity var(--transition-header), transform var(--transition-header);
+}
+
+/* Kept under the 28px cart circle so the logo never drives the bar height. */
+/* 30px is the wordmark's height on the menu artboards (x659 y14 122x30), which
+   are the only frames that draw it — on the home frame the header is transparent
+   over the hero and the logo is hidden until the page scrolls or a menu opens. */
+.wc-header__logo-img {
+  display: block;
+  width: auto;
+  height: 30px;
+}
+
+.wc-header--transparent:not(.wc-header--scrolled):not(.wc-header--menu-open) .wc-header__logo {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Cart
+   -------------------------------------------------------------------------- */
+
+.wc-header__cart {
+  margin-inline-start: calc(var(--header-cart-gap) - var(--header-cluster-gap));
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: var(--border-width) solid currentcolor;
+  border-radius: 50%;
+  color: inherit;
+  transition: background-color var(--transition-button), color var(--transition-button);
+}
+
+.wc-header__cart:hover {
+  background-color: var(--color-ivory);
+  color: var(--color-claret);
+}
+
+.wc-header__cart-icon,
+.wc-header__cart-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.wc-header__cart-icon svg {
+  fill: currentcolor;
+}
+
+.wc-header__cart-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 4px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-accent);
+  color: var(--color-ivory);
+  font-size: var(--text-caption);
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Hamburger — mobile only
+   -------------------------------------------------------------------------- */
+
+.wc-header__burger {
+  grid-column: 1;
+  justify-self: start;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-inline-start: -6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.wc-header__burger-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 20px;
+}
+
+.wc-header__burger-bar {
+  display: block;
+  height: 1px;
+  background-color: currentcolor;
+}
+
+/* --------------------------------------------------------------------------
+   Mega menu
+
+   The artboards draw the panel as a 1440x512 coral rectangle anchored at y0 —
+   it starts at the very top of the viewport and the header bar is painted over
+   it, rather than hanging below the bar. So the panel is a top:0 sibling of the
+   header row and the row is lifted above it; the panel's own top padding is what
+   clears the bar. Its bottom corners are square: coral still reaches x0 on the
+   last painted row of both renders.
+   -------------------------------------------------------------------------- */
+
+.wc-header__inner {
+  position: relative;
+  z-index: 2;
+}
+
+/* Black at 30% over the whole viewport — see --overlay-menu. Sits under the
+   panel and the header row but above the page, which the sticky z-index 4 on
+   .wc-header-section already provides. The explicit display defeats Dawn's
+   `div:empty { display: none }` in base.css — this veil is purely presentational
+   and so has, and should have, no content of its own. That reset scores (0,1,1)
+   on its `:empty`, hence the child selector here rather than a bare class. */
+.wc-header > .wc-header__scrim {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--overlay-menu);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-megamenu), visibility var(--transition-megamenu);
+}
+
+.wc-header--menu-open .wc-header__scrim {
+  opacity: 1;
+  visibility: visible;
+}
+
+.wc-megamenu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  min-height: var(--megamenu-height);
+  background-color: var(--color-megamenu-bg);
+  opacity: 0;
+  /* Slides out of its own height so the panel appears to drop from behind the
+     header bar, which stays put on top of it. */
+  transform: translateY(-100%);
+  transition: opacity var(--transition-megamenu), transform var(--transition-megamenu);
+}
+
+.wc-megamenu--open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The menu keeps a 34px gutter where the page grid uses 18: shop content runs
+   x34..1406 on a 1440 artboard. Top padding puts the panel heading on y101 and
+   clears the 58px header bar; the 39px bottom is what closes the panel at 512
+   under the promo card. */
+.wc-megamenu__inner {
+  display: flex;
+  align-items: flex-start;
+  padding-block: 101px 39px;
+  padding-inline: var(--header-inline-inset);
+}
+
+.wc-megamenu__heading {
+  margin: 0;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-size: var(--text-menu-heading);
+  line-height: 1;
+}
+
+.wc-megamenu__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Column starts on the artboard are 34/319/599/815 — deltas of 285/280/216,
+   which is hand placement against auto-width text rather than a grid. Fixed
+   tracks would fight that and the link titles are merchant content anyway, so
+   the columns size to their content on one gap. The measured gaps are 125/128/148
+   and 131 is the value whose worst column start is closest (within 9px); the
+   error compounds left to right, so a larger gap only helps the last column. */
+.wc-megamenu__columns {
+  display: flex;
+  align-items: flex-start;
+  gap: 131px;
+  margin-top: 116px;
+}
+
+.wc-megamenu__column-title {
+  margin: 0;
+  color: var(--color-heading);
+  font-size: var(--text-menu-link);
+  line-height: 18px;
+  text-transform: uppercase;
+}
+
+.wc-megamenu__list {
+  margin: 25px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-megamenu__link {
+  display: block;
+  color: var(--color-text);
+  font-size: var(--text-menu-link);
+  line-height: 21px;
+  text-decoration: none;
+  transition: color var(--transition-button);
+}
+
+.wc-megamenu__link:hover,
+.wc-megamenu__link:focus-visible {
+  color: var(--color-accent);
+}
+
+/* 232 on the artboard, against an inner that opens at 101. */
+.wc-megamenu__promo {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 335px;
+  height: 241px;
+  margin-top: 131px;
+  margin-inline-start: auto;
+  border-radius: var(--radius-menu-media);
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.wc-megamenu__promo-media {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.wc-megamenu__promo-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wc-megamenu__promo-cta {
+  position: relative;
+}
+
+/* --- Info panel — the shop panel mirrored: portrait left, copy right. ------ */
+
+.wc-megamenu__inner--info {
+  padding-block: 77px 33px;
+}
+
+.wc-megamenu__portrait {
+  flex: none;
+  width: 293px;
+  height: 402px;
+  border-radius: var(--radius-menu-media);
+  overflow: hidden;
+}
+
+.wc-megamenu__portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* x1105 on the artboard, which is the left edge of the header's right-hand nav
+   group, not the "info +" trigger. Held to the 34px gutter on the right, so the
+   measure is 1406 - 1105. The 24px lifts the heading off the portrait's 77 onto
+   its own 101. */
+.wc-megamenu__info-body {
+  flex: none;
+  width: 301px;
+  margin-top: 24px;
+  margin-inline-start: auto;
+}
+
+.wc-megamenu__info-item {
+  margin-top: 45px;
+}
+
+.wc-megamenu__info-item:first-of-type {
+  margin-top: 47px;
+}
+
+/* The column is 301 wide but the copy is held to 30 cells: the artboard's widest
+   line is "Crush, what we're into and why" at exactly 30 characters, and the
+   extra 13px of column would otherwise pull one more word onto every line and
+   lose the drawn line breaks. */
+.wc-megamenu__info-text {
+  max-width: 30ch;
+  color: var(--color-text);
+  font-size: var(--text-menu-body);
+  line-height: 17px;
+}
+
+.wc-megamenu__info-text p {
+  margin: 0;
+}
+
+.wc-megamenu__info-item .wc-button {
+  margin-top: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile drawer
+   -------------------------------------------------------------------------- */
+
+.wc-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+/* This one stays a real element because it is also the tap-to-close target, so
+   it has to outrank Dawn's `div:empty { display: none }` on specificity. */
+.wc-drawer .wc-drawer__backdrop {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity var(--transition-drawer);
+}
+
+.wc-drawer--open .wc-drawer__backdrop {
+  opacity: 1;
+}
+
+.wc-drawer__panel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100%);
+  background-color: var(--color-claret);
+  color: var(--color-text);
+  transform: translateX(-100%);
+  transition: transform var(--transition-drawer);
+}
+
+.wc-drawer--open .wc-drawer__panel {
+  transform: translateX(0);
+}
+
+.wc-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  min-height: var(--header-height);
+  padding-block: var(--header-padding-block);
+  padding-inline: var(--page-gutter);
+}
+
+.wc-drawer__back,
+.wc-drawer__close {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--text-nav);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.wc-drawer__back[hidden] {
+  display: none;
+}
+
+.wc-drawer__close {
+  margin-inline-start: auto;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.wc-drawer__viewport {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.wc-drawer__level {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: var(--space-md) var(--page-gutter) var(--space-3xl);
+  overflow-y: auto;
+  list-style: none;
+  transform: translateX(0);
+  transition: transform var(--transition-drawer), opacity var(--transition-drawer);
+}
+
+.wc-drawer__level[hidden] {
+  display: none;
+}
+
+/* The outgoing root level parks to the left while a child level is shown. */
+.wc-drawer__level--stacked {
+  transform: translateX(-24%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wc-drawer__level--entering {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.wc-drawer__level-title {
+  margin: 0 0 var(--space-md);
+  color: var(--color-accent);
+  font-size: var(--text-nav);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-drawer__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  width: 100%;
+  padding-block: var(--space-xs);
+  border: 0;
+  border-bottom: var(--border-width) solid rgba(244, 231, 212, 0.18);
+  background: none;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--text-body-l);
+  line-height: var(--leading-flat);
+  text-align: start;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.wc-drawer__item--summary {
+  list-style: none;
+}
+
+.wc-drawer__item--summary::-webkit-details-marker {
+  display: none;
+}
+
+.wc-drawer__accordion[open] .wc-drawer__item--summary {
+  color: var(--color-accent);
+}
+
+.wc-drawer__sublist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: var(--space-xs) 0;
+  list-style: none;
+}
+
+.wc-drawer__sublink {
+  display: block;
+  color: var(--color-muted-strong);
+  font-size: var(--text-body-s);
+  line-height: var(--leading-body);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.wc-drawer__sublink:hover,
+.wc-drawer__sublink:focus-visible {
+  color: var(--color-text);
+}
+
+/* --------------------------------------------------------------------------
+   Breakpoints
+   -------------------------------------------------------------------------- */
+
+/* Below the artboard width the panel keeps its shape but stops holding the
+   artboard's absolute offsets — the four columns carry merchant link text, so
+   they are allowed to wrap rather than push the promo card off the gutter. */
+@media screen and (max-width: 1279px) {
+  .wc-header {
+    --header-inline-inset: var(--space-lg);
+    --header-cluster-gap: var(--space-lg);
+  }
+
+  .wc-megamenu__inner {
+    gap: var(--space-2xl);
+    padding-block: var(--space-5xl) var(--space-3xl);
+  }
+
+  .wc-megamenu__columns {
+    flex-wrap: wrap;
+    gap: var(--space-3xl) var(--space-2xl);
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-megamenu__promo {
+    width: 260px;
+    height: 187px;
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-megamenu__inner--info {
+    padding-block: var(--space-5xl) var(--space-3xl);
+  }
+
+  .wc-megamenu__portrait {
+    width: 240px;
+    height: 329px;
+  }
+
+  .wc-megamenu__info-body {
+    width: auto;
+    max-width: 301px;
+    margin-top: 0;
+  }
+
+  .wc-megamenu__info-item,
+  .wc-megamenu__info-item:first-of-type {
+    margin-top: var(--space-xl);
+  }
+}
+
+@media screen and (max-width: 989px) {
+  .wc-header__burger {
+    display: inline-flex;
+  }
+
+  .wc-header__nav--left,
+  .wc-header__account,
+  .wc-header__trigger {
+    display: none;
+  }
+
+  .wc-megamenu {
+    display: none;
+  }
+
+  /* The logo is the only branding on mobile, so it is always visible. */
+  .wc-header--transparent:not(.wc-header--scrolled):not(.wc-header--menu-open) .wc-header__logo {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .wc-drawer {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .wc-header {
+    --header-inline-inset: var(--page-gutter);
+  }
+
+  .wc-header__logo-img {
+    height: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-megamenu,
+  .wc-drawer__panel,
+  .wc-drawer__backdrop,
+  .wc-drawer__level,
+  .wc-header__logo {
+    transition-duration: 0.01ms;
+  }
+}

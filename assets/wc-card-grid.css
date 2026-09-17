@@ -1,0 +1,112 @@
+/* --------------------------------------------------------------------------
+   Card grid
+   Four 339 x 498 cards with a 16px gap, which is exactly the 1404 measure.
+   Used for both the journal row and the image row.
+   -------------------------------------------------------------------------- */
+
+.wc-card-grid {
+  padding-block: var(--grid-padding-top) var(--grid-padding-bottom);
+}
+
+.wc-card-grid__heading {
+  margin: 0 0 var(--space-4xl);
+}
+
+/* A scroll-snap rail rather than a grid: the artboard shows four cards, but the
+   blog can hold more, and a grid would either clip them or reflow into a second
+   row that runs into the section below. At the 1404 measure four 339 slides and
+   three 16 gaps come out exact, so the rail is visually identical to the grid
+   until there is a fifth article to scroll to. */
+.wc-card-grid__list {
+  display: flex;
+  gap: var(--grid-gap);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  list-style: none;
+}
+
+.wc-card-grid__list::-webkit-scrollbar {
+  display: none;
+}
+
+.wc-card-grid__item {
+  flex: 0 0 calc((100% - (var(--grid-columns) - 1) * var(--grid-gap)) / var(--grid-columns));
+  scroll-snap-align: start;
+}
+
+.wc-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 339 / 498;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.wc-card__media,
+.wc-card__media img,
+.wc-card__media svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wc-card__caption {
+  position: absolute;
+  inset-inline: var(--space-md);
+  bottom: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+}
+
+.wc-card__pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 19px;
+  padding-inline: var(--space-2xs);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+}
+
+.wc-card__title {
+  font-family: var(--font-body);
+  font-size: var(--text-blog-title);
+  line-height: var(--leading-flat);
+  color: var(--color-accent);
+}
+
+/* The section padding is authored against the 1440 artboard; below it the
+   shared graduated rhythm takes over. */
+@media screen and (max-width: 989px) {
+  .wc-card-grid {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .wc-card-grid__heading {
+    margin-bottom: var(--space-2xl);
+  }
+}
+
+/* On phones the rail shows a partial second card so the swipe is discoverable
+   without an arrow control. */
+@media screen and (max-width: 749px) {
+  .wc-card-grid__item {
+    flex-basis: calc((100% - (var(--slides-visible) - 1) * var(--grid-gap)) / var(--slides-visible));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-card-grid__list {
+    scroll-behavior: auto;
+  }
+}

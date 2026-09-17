@@ -1,0 +1,213 @@
+{{ 'wc-bundle-band.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-bundle wc-band wc-band--{{ section.settings.background }}{% if section.settings.cap %} wc-band--capped{% endif %}"
+  style="
+    --bundle-padding-top: {{ section.settings.padding_top }}px;
+    --bundle-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container wc-bundle__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="wc-bundle__eyebrow wc-label">
+        {%- assign eyebrow_parts = section.settings.eyebrow | split: '|' -%}
+        {%- for part in eyebrow_parts -%}
+          <span class="wc-bundle__dot" aria-hidden="true"></span>
+          <span>{{ part | strip }}</span>
+        {%- endfor -%}
+        <span class="wc-bundle__dot" aria-hidden="true"></span>
+      </p>
+    {%- endif -%}
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="wc-bundle__heading wc-display-xl">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.body != blank -%}
+      <div class="wc-bundle__body wc-body-s rte">{{ section.settings.body }}</div>
+    {%- endif -%}
+
+    {%- if section.settings.button_label != blank -%}
+      <a
+        href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+        class="wc-button wc-button--on-light wc-bundle__cta"
+      >
+        {{- section.settings.button_label -}}
+      </a>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%}
+    The scattered images have no grid in the design, so each one carries its own
+    position. Keeping them as blocks lets the merchant re-scatter them without
+    touching Liquid.
+  {%- endcomment -%}
+  {%- if section.blocks.size > 0 -%}
+    <div class="wc-bundle__scatter" aria-hidden="true">
+      {%- for block in section.blocks -%}
+        <div
+          class="wc-bundle__figure"
+          style="
+            --figure-x: {{ block.settings.x }};
+            --figure-y: {{ block.settings.y }};
+            --figure-width: {{ block.settings.width }};
+            --figure-rotate: {{ block.settings.rotate }}deg;
+          "
+          {{ block.shopify_attributes }}
+        >
+          {%- if block.settings.image != blank -%}
+            {{
+              block.settings.image
+              | image_url: width: 800
+              | image_tag: widths: '200, 400, 600, 800', sizes: '(min-width: 990px) 20vw, 40vw', alt: ''
+            }}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'wc-bundle__placeholder' }}
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Bundle band",
+  "tag": "div",
+  "class": "wc-bundle-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "select",
+      "id": "background",
+      "label": "Background",
+      "options": [
+        { "value": "ivory", "label": "Ivory" },
+        { "value": "claret", "label": "Claret" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "checkbox",
+      "id": "cap",
+      "label": "Round the page back over the band",
+      "info": "Covers the band's last 129px with the page colour, as the hero does.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "info": "Separate items with | to get the dot separators.",
+      "default": "pick your six | pick your price"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Build your bundle."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body text",
+      "default": "<p>Six bottles, chosen by you. Mix reds, whites and everything in between — we'll pack it and send it.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Label",
+      "default": "start building"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 200,
+      "max": 800,
+      "step": 6,
+      "unit": "px",
+      "default": 392
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "info": "The band's last 129px sit under the section that follows.",
+      "min": 200,
+      "max": 800,
+      "step": 6,
+      "unit": "px",
+      "default": 578
+    }
+  ],
+  "blocks": [
+    {
+      "type": "figure",
+      "name": "Scattered image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "width",
+          "label": "Width",
+          "info": "Any CSS width. A percentage is measured against the band's width, which keeps the image in proportion on smaller screens.",
+          "default": "17.71%"
+        },
+        {
+          "type": "text",
+          "id": "x",
+          "label": "Distance from left",
+          "info": "Any CSS length, e.g. 1.25% or 18px. A percentage keeps the scatter in proportion as the band narrows.",
+          "default": "1.25%"
+        },
+        {
+          "type": "text",
+          "id": "y",
+          "label": "Distance from top",
+          "info": "Any CSS length. A percentage is measured against the band's height.",
+          "default": "50%"
+        },
+        {
+          "type": "range",
+          "id": "rotate",
+          "label": "Rotation",
+          "min": -30,
+          "max": 30,
+          "step": 1,
+          "unit": "deg",
+          "default": 0
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle band",
+      "blocks": [
+        { "type": "figure", "settings": { "width": "17.71%", "x": "1.25%", "y": "50%", "rotate": 0 } },
+        { "type": "figure", "settings": { "width": "18.82%", "x": "79.93%", "y": "5.48%", "rotate": 0 } },
+        { "type": "figure", "settings": { "width": "11.32%", "x": "14.24%", "y": "10.59%", "rotate": 0 } },
+        { "type": "figure", "settings": { "width": "11.32%", "x": "74.24%", "y": "66.59%", "rotate": 0 } }
+      ]
+    }
+  ]
+}
+{% endschema %}

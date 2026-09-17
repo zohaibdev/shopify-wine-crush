@@ -1,0 +1,33 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "t:sections.footer.name",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "wc-footer",
+      "settings": {
+        "menu": "footer",
+        "show_social": true,
+        "contact": "<p>hello@winecrush.com.au</p><p>Shop 5/327 Honour Avenue Graceville 4075</p>",
+        "legal": "<p>Payment Methods Accepted - Visa - Mastercard - American Express - ApplePay. winecrush supports the responsible service of alcohol. It is against the law to sell or supply alcohol too, or obtain alcohol on behalf of, a person under the age of 18 years. SA Liquor Licensing Act 1997, Section 113. Liquor Licence Number: 57708146 Liquor Must Not Be Supplied To Persons Under 18.</p>",
+        "padding_top": 31,
+        "padding_bottom": 16,
+        "policies_label": "policies",
+        "policies_link": "",
+        "credit_label": "a w\u00fclfe site",
+        "credit_link": ""
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

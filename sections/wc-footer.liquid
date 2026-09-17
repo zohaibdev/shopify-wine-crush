@@ -1,0 +1,154 @@
+{{ 'wc-footer.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign policies_url = section.settings.policies_link
+  if policies_url == blank
+    assign policies_url = shop.privacy_policy.url
+  endif
+-%}
+
+<footer
+  class="wc-footer wc-band wc-band--ivory"
+  style="--footer-padding-top: {{ section.settings.padding_top }}px; --footer-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="wc-container wc-footer__inner">
+    {%- if section.settings.menu != blank -%}
+      <nav class="wc-footer__nav" aria-label="{{ 'accessibility.footer_menu' | t }}">
+        {%- for link in section.settings.menu.links -%}
+          <a href="{{ link.url }}" class="wc-button wc-button--sm wc-button--footer">{{ link.title }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
+    {%- if section.settings.show_social -%}
+      {%- render 'social-icons', class: 'wc-footer__social' -%}
+    {%- endif -%}
+
+    {%- if section.settings.contact != blank -%}
+      <div class="wc-footer__contact rte">{{ section.settings.contact }}</div>
+    {%- endif -%}
+
+    <div class="wc-footer__logo">
+      {%- if section.settings.logo != blank -%}
+        {{
+          section.settings.logo
+          | image_url: width: 876
+          | image_tag: widths: '438, 657, 876', sizes: '(min-width: 990px) 438px, 70vw', alt: shop.name
+        }}
+      {%- else -%}
+        <img src="{{ 'wine-crush-logo-dark.png' | asset_url }}" alt="{{ shop.name }}" width="438" height="108" loading="lazy">
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.legal != blank -%}
+      <div class="wc-footer__legal wc-legal rte">{{ section.settings.legal }}</div>
+    {%- endif -%}
+
+    <div class="wc-footer__base wc-legal">
+      <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</span>
+
+      {%- if section.settings.policies_label != blank and policies_url != blank -%}
+        <a href="{{ policies_url }}">{{ section.settings.policies_label }}</a>
+      {%- endif -%}
+
+      {%- if section.settings.credit_label != blank -%}
+        {%- if section.settings.credit_link != blank -%}
+          <a href="{{ section.settings.credit_link }}" rel="noopener">{{ section.settings.credit_label }}</a>
+        {%- else -%}
+          <span>{{ section.settings.credit_label }}</span>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "tag": "div",
+  "class": "wc-footer-section",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "footer"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "label": "Show social icons",
+      "info": "Links come from the theme's social media settings.",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "contact",
+      "label": "Contact details",
+      "default": "<p>hello@winecrush.com.au</p><p>Shop 5/327 Honour Avenue Graceville 4075</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "richtext",
+      "id": "legal",
+      "label": "Payment and liquor licensing text",
+      "default": "<p>Payment methods accepted - Visa - Mastercard - American Express - ApplePay. Winecrush supports the responsible service of alcohol. It is against the law to sell or supply alcohol too, or obtain alcohol on behalf of, a person under the age of 18 years. SA Liquor Licensing Act 1997, Section 113. Liquor licence number: 57708146 Liquor must not be supplied to persons under 18.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Bottom line"
+    },
+    {
+      "type": "text",
+      "id": "policies_label",
+      "label": "Policies label",
+      "default": "policies"
+    },
+    {
+      "type": "url",
+      "id": "policies_link",
+      "label": "Policies link",
+      "info": "Leave empty to link to the store's privacy policy."
+    },
+    {
+      "type": "text",
+      "id": "credit_label",
+      "label": "Credit text",
+      "default": "a wülfe site"
+    },
+    {
+      "type": "url",
+      "id": "credit_link",
+      "label": "Credit link"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,130 @@
+/* --------------------------------------------------------------------------
+   Footer
+   A single centred column on the ivory band: nav pills, social, contact, the
+   large logo, the licensing fine print, then the bottom line.
+
+   The vertical rhythm is uneven by design — the gaps below are the artboard's
+   own (nav→social 37, social→contact 10, contact→logo 54, logo→legal 43,
+   legal→base 21), which is what makes the band resolve to its 457px height.
+   -------------------------------------------------------------------------- */
+
+.wc-footer {
+  padding-block: var(--footer-padding-top) var(--footer-padding-bottom);
+  color: var(--color-text-footer);
+}
+
+.wc-footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wc-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+}
+
+.wc-footer__social {
+  display: flex;
+  gap: 6px;
+  margin: 37px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-footer__social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 31px;
+  color: var(--color-text-footer);
+}
+
+.wc-footer__social svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+/* The artboard draws the email and the address as two separate 18px text nodes
+   on a 23px pitch, so the block closes on the second line rather than a whole
+   line box below it. That 5px is what otherwise pushes the logo, the fine print
+   and the bottom line down and makes the band 462 instead of 457. */
+.wc-footer__contact {
+  margin-top: 10px;
+  font-size: var(--text-contact);
+  line-height: 18px;
+}
+
+.wc-footer__contact p {
+  margin: 0;
+}
+
+.wc-footer__contact p + p {
+  margin-top: 5px;
+}
+
+.wc-footer__logo {
+  width: min(438px, 70%);
+  margin-top: 54px;
+}
+
+.wc-footer__logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wc-footer__legal {
+  width: min(1248px, 100%);
+  margin-top: 43px;
+  line-height: 14px;
+  color: var(--color-fine-print);
+}
+
+.wc-footer__legal p {
+  margin: 0;
+}
+
+.wc-footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 26px;
+  margin-top: 21px;
+  font-size: var(--text-caption);
+  color: var(--color-fine-print);
+}
+
+.wc-footer__base a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.wc-footer__base a:hover,
+.wc-footer__base a:focus-visible {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 749px) {
+  .wc-footer__social {
+    margin-top: var(--space-xl);
+  }
+
+  .wc-footer__logo {
+    width: min(438px, 100%);
+    margin-top: var(--space-xl);
+  }
+
+  .wc-footer__legal {
+    margin-top: var(--space-xl);
+  }
+
+  .wc-footer__base {
+    gap: var(--space-sm);
+  }
+}

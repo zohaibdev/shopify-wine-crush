@@ -1,0 +1,93 @@
+{%- comment -%}
+  Renders one product card for the home slider.
+
+  Accepts:
+  - product: {Object} product object
+  - section_id: {String} used to keep the add-to-cart form ids unique
+  - add_label: {String} visible label on the add button
+  - placeholder: {Boolean} render sample content instead of a product
+  - index: {Number} placeholder only — picks which bottle image to use
+{%- endcomment -%}
+
+{%- if placeholder -%}
+  {%- assign bottle = index | modulo: 4 | plus: 1 -%}
+  <div class="wc-product-card">
+    <div class="wc-product-card__media">
+      <img
+        src="{{ 'wine-crush-bottle-' | append: bottle | append: '.png' | asset_url }}"
+        alt=""
+        width="324"
+        height="485"
+        loading="lazy"
+      >
+    </div>
+
+    <div class="wc-product-card__info">
+      <p class="wc-product-card__price wc-meta">{{ 3500 | money }}</p>
+
+      <div class="wc-product-card__row">
+        <h3 class="wc-product-card__title wc-meta">{{ 'onboarding.product_title' | t }}</h3>
+        <span class="wc-button wc-button--compact wc-product-card__add">
+          <span>{{ add_label | default: 'add' }}</span>
+          <span class="wc-product-card__plus">+</span>
+        </span>
+      </div>
+    </div>
+  </div>
+{%- else -%}
+
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign form_id = 'WcAdd-' | append: section_id | append: '-' | append: product.id
+-%}
+
+<div class="wc-product-card">
+  <div class="wc-product-card__media">
+    {%- if product.featured_image != blank -%}
+      {{
+        product.featured_image
+        | image_url: width: 648
+        | image_tag: widths: '324, 486, 648', sizes: '(min-width: 990px) 324px, 60vw', alt: product.featured_image.alt
+      }}
+    {%- else -%}
+      <img src="{{ 'wine-crush-bottle-1.png' | asset_url }}" alt="" width="324" height="485" loading="lazy">
+    {%- endif -%}
+  </div>
+
+  <div class="wc-product-card__info">
+    <p class="wc-product-card__price wc-meta">
+      {{- variant.price | money -}}
+      {%- if product.compare_at_price > product.price -%}
+        <s class="wc-product-card__was">{{ product.compare_at_price | money }}</s>
+      {%- endif -%}
+    </p>
+
+    <div class="wc-product-card__row">
+      <h3 class="wc-product-card__title wc-meta">
+        <a href="{{ product.url }}" class="wc-product-card__link">{{ product.title }}</a>
+      </h3>
+
+      {%- if product.available -%}
+        <product-form data-section-id="{{ section_id }}">
+          {%- form 'product', product, id: form_id, class: 'wc-product-card__form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+            <input type="hidden" name="id" value="{{ variant.id }}" class="product-variant-id">
+            <button
+              id="{{ form_id }}-submit"
+              type="submit"
+              name="add"
+              class="wc-button wc-button--compact wc-product-card__add"
+              aria-live="polite"
+              aria-label="{{ 'products.product.add_to_cart' | t }}: {{ product.title | escape }}"
+            >
+              <span aria-hidden="true">{{ add_label | default: 'add' }}</span>
+              <span class="wc-product-card__plus" aria-hidden="true">+</span>
+            </button>
+          {%- endform -%}
+        </product-form>
+      {%- else -%}
+        <span class="wc-product-card__soldout wc-caption">{{ 'products.product.sold_out' | t }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+{%- endif -%}

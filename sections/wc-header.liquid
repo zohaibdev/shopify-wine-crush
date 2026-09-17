@@ -1,0 +1,592 @@
+{{ 'wc-header.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'wc-header.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign is_home = false
+  if template.name == 'index'
+    assign is_home = true
+  endif
+-%}
+
+<wc-header
+  class="wc-header{% if is_home %} wc-header--transparent{% endif %}"
+  role="banner"
+>
+  <div class="wc-header__scrim" aria-hidden="true"></div>
+
+  <div class="wc-header__inner">
+    <button
+      class="wc-header__burger"
+      type="button"
+      aria-label="{{ 'sections.header.menu' | t }}"
+      aria-expanded="false"
+      aria-controls="WcDrawer"
+      data-wc-drawer-open
+    >
+      <span class="wc-header__burger-box" aria-hidden="true">
+        <span class="wc-header__burger-bar"></span>
+        <span class="wc-header__burger-bar"></span>
+      </span>
+    </button>
+
+    <nav class="wc-header__nav wc-header__nav--left" aria-label="{{ 'sections.header.menu' | t }}">
+      {%- for block in section.blocks -%}
+        {%- if block.settings.position != 'left' -%}
+          {%- continue -%}
+        {%- endif -%}
+        {%- render 'wc-header-nav-item', block: block -%}
+      {%- endfor -%}
+    </nav>
+
+    <a
+      href="{{ routes.root_url }}"
+      class="wc-header__logo"
+      aria-label="{{ shop.name }}"
+    >
+      {%- if settings.logo != blank -%}
+        {{
+          settings.logo
+          | image_url: width: 400
+          | image_tag: widths: '122, 244, 400', alt: shop.name, class: 'wc-header__logo-img'
+        }}
+      {%- else -%}
+        <img
+          src="{{ 'wine-crush-logo.svg' | asset_url }}"
+          alt="{{ shop.name }}"
+          class="wc-header__logo-img"
+          width="122"
+          height="30"
+        >
+      {%- endif -%}
+    </a>
+
+    <nav class="wc-header__nav wc-header__nav--right" aria-label="{{ 'sections.header.menu' | t }}">
+      {%- for block in section.blocks -%}
+        {%- if block.settings.position == 'left' -%}
+          {%- continue -%}
+        {%- endif -%}
+        {%- render 'wc-header-nav-item', block: block -%}
+      {%- endfor -%}
+
+      {%- if shop.customer_accounts_enabled and section.settings.show_account -%}
+        <a
+          href="{{ routes.account_url }}"
+          class="wc-header__link wc-header__account"
+        >
+          {{ section.settings.account_label | default: 'account' }}
+        </a>
+      {%- endif -%}
+
+      <a
+        href="{{ routes.cart_url }}"
+        class="wc-header__cart"
+        id="cart-icon-bubble"
+        aria-label="{{ 'templates.cart.cart' | t }}"
+      >
+        <span class="wc-header__cart-icon">{{ 'icon-wc-cart.svg' | inline_asset_content }}</span>
+        {%- if cart != empty -%}
+          <span class="wc-header__cart-count" aria-hidden="true">
+            {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
+          </span>
+          <span class="wc-visually-hidden">
+            {{- 'sections.header.cart_count' | t: count: cart.item_count -}}
+          </span>
+        {%- endif -%}
+      </a>
+    </nav>
+  </div>
+
+  {%- comment -%} Desktop mega menu panels {%- endcomment -%}
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when 'shop_mega_menu' -%}
+        <div
+          class="wc-megamenu"
+          id="WcMega-{{ block.id }}"
+          data-wc-megamenu
+          hidden
+          {{ block.shopify_attributes }}
+        >
+          <div class="wc-megamenu__inner">
+            <div class="wc-megamenu__body">
+              {%- if block.settings.heading != blank -%}
+                <p class="wc-megamenu__heading">{{ block.settings.heading }}</p>
+              {%- endif -%}
+
+              <div class="wc-megamenu__columns">
+              {%- for i in (1..4) -%}
+                {%- liquid
+                  case i
+                    when 1
+                      assign menu = block.settings.menu_1
+                    when 2
+                      assign menu = block.settings.menu_2
+                    when 3
+                      assign menu = block.settings.menu_3
+                    when 4
+                      assign menu = block.settings.menu_4
+                  endcase
+                -%}
+                {%- if menu != blank and menu.links.size > 0 -%}
+                  <div class="wc-megamenu__column">
+                    <p class="wc-megamenu__column-title">
+                      {{- menu.title -}}
+                      <span aria-hidden="true"> +</span>
+                    </p>
+                    <ul class="wc-megamenu__list" role="list">
+                      {%- for link in menu.links -%}
+                        <li>
+                          <a href="{{ link.url }}" class="wc-megamenu__link">{{ link.title }}</a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+              </div>
+            </div>
+
+            {%- if block.settings.promo_image != blank or block.settings.promo_heading != blank -%}
+              <a
+                class="wc-megamenu__promo"
+                {% if block.settings.promo_link != blank %}
+                  href="{{ block.settings.promo_link }}"
+                {% endif %}
+              >
+                {%- if block.settings.promo_image != blank -%}
+                  <span class="wc-megamenu__promo-media wc-media">
+                    {{
+                      block.settings.promo_image
+                      | image_url: width: 800
+                      | image_tag: widths: '331, 662, 800', loading: 'lazy', alt: block.settings.promo_heading
+                    }}
+                  </span>
+                {%- endif -%}
+                {%- if block.settings.promo_heading != blank -%}
+                  <span class="wc-button wc-megamenu__promo-cta">
+                    {{- block.settings.promo_heading -}}
+                  </span>
+                {%- endif -%}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+
+      {%- when 'info_mega_menu' -%}
+        <div
+          class="wc-megamenu"
+          id="WcMega-{{ block.id }}"
+          data-wc-megamenu
+          hidden
+          {{ block.shopify_attributes }}
+        >
+          <div class="wc-megamenu__inner wc-megamenu__inner--info">
+            {%- if block.settings.promo_image != blank -%}
+              <span class="wc-megamenu__portrait" aria-hidden="true">
+                {{
+                  block.settings.promo_image
+                  | image_url: width: 586
+                  | image_tag: widths: '293, 440, 586', loading: 'lazy', alt: ''
+                }}
+              </span>
+            {%- endif -%}
+
+            <div class="wc-megamenu__info-body">
+              {%- if block.settings.heading != blank -%}
+                <p class="wc-megamenu__heading">{{ block.settings.heading }}</p>
+              {%- endif -%}
+
+              {%- for i in (1..3) -%}
+                {%- liquid
+                  case i
+                    when 1
+                      assign item_text = block.settings.item_1_text
+                      assign item_label = block.settings.item_1_label
+                      assign item_url = block.settings.item_1_url
+                    when 2
+                      assign item_text = block.settings.item_2_text
+                      assign item_label = block.settings.item_2_label
+                      assign item_url = block.settings.item_2_url
+                    when 3
+                      assign item_text = block.settings.item_3_text
+                      assign item_label = block.settings.item_3_label
+                      assign item_url = block.settings.item_3_url
+                  endcase
+                -%}
+                {%- if item_text != blank or item_label != blank -%}
+                  <div class="wc-megamenu__info-item">
+                    {%- if item_text != blank -%}
+                      <div class="wc-megamenu__info-text rte">{{ item_text }}</div>
+                    {%- endif -%}
+
+                    {%- if item_label != blank -%}
+                      <a href="{{ item_url | default: routes.root_url }}" class="wc-button">
+                        {{- item_label -}}
+                      </a>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+    {%- endcase -%}
+  {%- endfor -%}
+</wc-header>
+
+{%- comment -%} Mobile drawer — two-level push stack {%- endcomment -%}
+<div class="wc-drawer" id="WcDrawer" data-wc-drawer hidden>
+  <div class="wc-drawer__backdrop" data-wc-drawer-close></div>
+
+  <div
+    class="wc-drawer__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ 'sections.header.menu' | t }}"
+  >
+    <div class="wc-drawer__head">
+      <button
+        class="wc-drawer__back"
+        type="button"
+        data-wc-drawer-back
+        hidden
+      >
+        <span aria-hidden="true">&larr;</span>
+        {{ 'accessibility.back' | t }}
+      </button>
+      <button
+        class="wc-drawer__close"
+        type="button"
+        aria-label="{{ 'accessibility.close' | t }}"
+        data-wc-drawer-close
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <div class="wc-drawer__viewport">
+      {%- comment -%} Level 1 {%- endcomment -%}
+      <ul class="wc-drawer__level" data-wc-drawer-level="root" role="list">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'shop_mega_menu', 'info_mega_menu' -%}
+              <li>
+                <button
+                  class="wc-drawer__item"
+                  type="button"
+                  data-wc-drawer-to="WcLevel-{{ block.id }}"
+                >
+                  {{ block.settings.label }}
+                  <span aria-hidden="true">&rarr;</span>
+                </button>
+              </li>
+            {%- when 'link' -%}
+              <li>
+                <a href="{{ block.settings.url }}" class="wc-drawer__item">{{ block.settings.label }}</a>
+              </li>
+          {%- endcase -%}
+        {%- endfor -%}
+
+        {%- if shop.customer_accounts_enabled and section.settings.show_account -%}
+          <li>
+            <a href="{{ routes.account_url }}" class="wc-drawer__item">
+              {{- section.settings.account_label | default: 'account' -}}
+            </a>
+          </li>
+        {%- endif -%}
+      </ul>
+
+      {%- comment -%} Level 2 — one per mega menu block {%- endcomment -%}
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'shop_mega_menu' -%}
+            <div class="wc-drawer__level" data-wc-drawer-level="WcLevel-{{ block.id }}" hidden>
+              <p class="wc-drawer__level-title">{{ block.settings.label }}</p>
+              {%- for i in (1..4) -%}
+                {%- liquid
+                  case i
+                    when 1
+                      assign menu = block.settings.menu_1
+                    when 2
+                      assign menu = block.settings.menu_2
+                    when 3
+                      assign menu = block.settings.menu_3
+                    when 4
+                      assign menu = block.settings.menu_4
+                  endcase
+                -%}
+                {%- if menu != blank and menu.links.size > 0 -%}
+                  <details class="wc-drawer__accordion">
+                    <summary class="wc-drawer__item wc-drawer__item--summary">
+                      {{ menu.title }}
+                      <span aria-hidden="true"> +</span>
+                    </summary>
+                    <ul class="wc-drawer__sublist" role="list">
+                      {%- for link in menu.links -%}
+                        <li><a href="{{ link.url }}" class="wc-drawer__sublink">{{ link.title }}</a></li>
+                      {%- endfor -%}
+                    </ul>
+                  </details>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+
+          {%- when 'info_mega_menu' -%}
+            <div class="wc-drawer__level" data-wc-drawer-level="WcLevel-{{ block.id }}" hidden>
+              <p class="wc-drawer__level-title">{{ block.settings.label }}</p>
+              <ul class="wc-drawer__sublist" role="list">
+                {%- for i in (1..3) -%}
+                  {%- liquid
+                    case i
+                      when 1
+                        assign item_label = block.settings.item_1_label
+                        assign item_url = block.settings.item_1_url
+                      when 2
+                        assign item_label = block.settings.item_2_label
+                        assign item_url = block.settings.item_2_url
+                      when 3
+                        assign item_label = block.settings.item_3_label
+                        assign item_url = block.settings.item_3_url
+                    endcase
+                  -%}
+                  {%- if item_label != blank -%}
+                    <li>
+                      <a href="{{ item_url | default: routes.root_url }}" class="wc-drawer__item">
+                        {{- item_label -}}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Wine Crush header",
+  "class": "wc-header-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Account"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "account_label",
+      "label": "Account link text",
+      "default": "account"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "shop_mega_menu",
+      "name": "Shop mega menu",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Menu label",
+          "default": "shop",
+          "info": "A + is added automatically to show this opens a menu."
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position in header",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Panel heading",
+          "default": "Shop"
+        },
+        {
+          "type": "header",
+          "content": "Menu columns"
+        },
+        {
+          "type": "link_list",
+          "id": "menu_1",
+          "label": "Column 1",
+          "default": "main-menu"
+        },
+        {
+          "type": "link_list",
+          "id": "menu_2",
+          "label": "Column 2"
+        },
+        {
+          "type": "link_list",
+          "id": "menu_3",
+          "label": "Column 3"
+        },
+        {
+          "type": "link_list",
+          "id": "menu_4",
+          "label": "Column 4"
+        },
+        {
+          "type": "header",
+          "content": "Featured card"
+        },
+        {
+          "type": "image_picker",
+          "id": "promo_image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "promo_heading",
+          "label": "Button text",
+          "default": "build your own bundle"
+        },
+        {
+          "type": "url",
+          "id": "promo_link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "info_mega_menu",
+      "name": "Info mega menu",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Menu label",
+          "default": "info",
+          "info": "A + is added automatically to show this opens a menu."
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position in header",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "right"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Panel heading",
+          "default": "Info"
+        },
+        {
+          "type": "image_picker",
+          "id": "promo_image",
+          "label": "Image"
+        },
+        {
+          "type": "header",
+          "content": "Item 1",
+          "info": "Each item is a short paragraph with its own button, which is how the panel is drawn."
+        },
+        {
+          "type": "richtext",
+          "id": "item_1_text",
+          "label": "Text",
+          "default": "<p>A little more about Wine Crush, what we’re into and why we think choosing a good bottle should be easy.</p>"
+        },
+        {
+          "type": "text",
+          "id": "item_1_label",
+          "label": "Button label",
+          "default": "about us"
+        },
+        {
+          "type": "url",
+          "id": "item_1_url",
+          "label": "Button link"
+        },
+        {
+          "type": "header",
+          "content": "Item 2"
+        },
+        {
+          "type": "richtext",
+          "id": "item_2_text",
+          "label": "Text",
+          "default": "<p>Everything you need to know about delivery, orders, and returns.</p>"
+        },
+        {
+          "type": "text",
+          "id": "item_2_label",
+          "label": "Button label",
+          "default": "shipping & faq’s"
+        },
+        {
+          "type": "url",
+          "id": "item_2_url",
+          "label": "Button link"
+        },
+        {
+          "type": "header",
+          "content": "Item 3"
+        },
+        {
+          "type": "richtext",
+          "id": "item_3_text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "item_3_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "item_3_url",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "link",
+      "name": "Link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Text",
+          "default": "journal"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position in header",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "right"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

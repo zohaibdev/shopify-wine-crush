@@ -1,0 +1,224 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "wc-hero",
+      "settings": {
+        "overlay_opacity": 30,
+        "desktop_height": "ratio",
+        "lede": "<p>Wine Crush is a neighbourhood bottle shop, online and in-store, for wine, beer and beyond. We bring together everyday favourites, new finds and producers worth knowing, making good drinking easy.</p>",
+        "wordmark_width": 706
+      }
+    },
+    "hero_statement": {
+      "type": "wc-statement",
+      "settings": {
+        "heading": "<p>Wine, beer and beyond, brought together for every taste and every kind of favourite.</p>",
+        "heading_size": "m",
+        "body": "",
+        "alignment": "center",
+        "tone": "default",
+        "max_width": 600,
+        "button_label": "",
+        "button_link": "shopify://collections/all",
+        "padding_top": 144,
+        "padding_bottom": 26
+      }
+    },
+    "product_tabs": {
+      "type": "wc-product-tabs",
+      "blocks": {
+        "new_arrivals": {
+          "type": "tab",
+          "settings": {
+            "label": "new arrivals",
+            "source": "collection",
+            "collection": "all",
+            "tag": ""
+          }
+        },
+        "staples": {
+          "type": "tab",
+          "settings": {
+            "label": "staples",
+            "source": "tag",
+            "collection": "",
+            "tag": "staples"
+          }
+        },
+        "bestsellers": {
+          "type": "tab",
+          "settings": {
+            "label": "bestsellers",
+            "source": "tag",
+            "collection": "",
+            "tag": "bestsellers"
+          }
+        }
+      },
+      "block_order": [
+        "new_arrivals",
+        "staples",
+        "bestsellers"
+      ],
+      "settings": {
+        "products_to_show": 8,
+        "add_label": "add",
+        "tablist_label": "Product categories",
+        "button_label": "explore all",
+        "button_link": "",
+        "padding_top": 84,
+        "padding_bottom": 162
+      }
+    },
+    "bundle": {
+      "type": "wc-bundle-band",
+      "blocks": {
+        "f1": {
+          "type": "figure",
+          "settings": {
+            "image": "shopify://shop_images/wine-crush-build-your-bundle-3.png",
+            "width": "17.71%",
+            "x": "1.25%",
+            "y": "50%",
+            "rotate": 0
+          }
+        },
+        "f2": {
+          "type": "figure",
+          "settings": {
+            "image": "shopify://shop_images/wine-crush-build-your-bundle-2.jpg",
+            "width": "18.82%",
+            "x": "79.93%",
+            "y": "5.48%",
+            "rotate": 0
+          }
+        },
+        "f3": {
+          "type": "figure",
+          "settings": {
+            "image": "shopify://shop_images/wine-crush-build-your-bundle-1.jpg",
+            "width": "11.32%",
+            "x": "14.24%",
+            "y": "10.59%",
+            "rotate": 0
+          }
+        },
+        "f4": {
+          "type": "figure",
+          "settings": {
+            "image": "shopify://shop_images/wine-crush-build-your-bundle-4.jpg",
+            "width": "11.32%",
+            "x": "74.24%",
+            "y": "66.59%",
+            "rotate": 0
+          }
+        }
+      },
+      "block_order": [
+        "f1",
+        "f2",
+        "f3",
+        "f4"
+      ],
+      "settings": {
+        "background": "ivory",
+        "eyebrow": "pick your six | pick your price",
+        "heading": "Build your bundle.",
+        "body": "<p>Build your six from a curated range of Wine Crush favourites. Choose the bottles that suit you and we\u2019ll take care of the rest. Easy drinking, easy choosing, no overthinking required.</p>",
+        "button_label": "get picking",
+        "button_link": "shopify://collections",
+        "padding_top": 392,
+        "padding_bottom": 578,
+        "cap": true
+      }
+    },
+    "journal_grid": {
+      "type": "wc-card-grid",
+      "settings": {
+        "heading": "",
+        "source": "blog",
+        "blog": "news",
+        "items_to_show": 4,
+        "show_date": true,
+        "padding_top": 26,
+        "padding_bottom": 50
+      }
+    },
+    "journal_intro": {
+      "type": "wc-statement",
+      "settings": {
+        "heading": "<p>For the curious, not the connoisseur. A mix of easy recommendations, food pairings and things we think are worth sharing.</p>",
+        "heading_size": "m",
+        "body": "",
+        "alignment": "start",
+        "tone": "accent",
+        "max_width": 830,
+        "button_label": "our journal",
+        "button_link": "shopify://collections/all",
+        "padding_top": 52,
+        "padding_bottom": 92
+      }
+    },
+    "membership": {
+      "type": "wc-membership",
+      "settings": {
+        "heading": "5% off for life",
+        "body": "<p>Become a Wine Crush member and get 5% off for life, both online and in-store, across most wine and selected products. One simple sign-up, ongoing savings whenever you shop with us.</p>",
+        "body_width": 346,
+        "button_label": "join the crush",
+        "button_link": "",
+        "padding_top": 162,
+        "padding_bottom": 78
+      }
+    },
+    "story": {
+      "type": "wc-story",
+      "settings": {
+        "lead": "<p>We bring together everyday favourites, interesting new finds and bottles from producers worth knowing, all chosen to make good drinking feel a little easier. </p>",
+        "lead_width": 410,
+        "closing": "<p>Familiar when you want it, unexpected when you don\u2019t. And never more complicated than it needs to be.</p>",
+        "closing_width": 300,
+        "image_width": 355,
+        "image_rotate": 0,
+        "icon": "shopify://shop_images/icon.png",
+        "address": "<p>Shop 5/327 Honour Avenue Graceville 4075</p>",
+        "button_label": "get directions",
+        "button_link": "shopify://collections",
+        "padding_top": 78,
+        "padding_bottom": 42
+      }
+    },
+    "image_grid": {
+      "type": "wc-card-grid",
+      "settings": {
+        "heading": "",
+        "source": "blocks",
+        "blog": "",
+        "items_to_show": 4,
+        "show_date": true,
+        "padding_top": 102,
+        "padding_bottom": 50
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "hero_statement",
+    "product_tabs",
+    "bundle",
+    "journal_grid",
+    "journal_intro",
+    "membership",
+    "story",
+    "image_grid"
+  ]
+}

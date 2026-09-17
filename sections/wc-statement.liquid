@@ -1,0 +1,140 @@
+{{ 'wc-statement.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-statement wc-statement--{{ section.settings.alignment }} wc-statement--{{ section.settings.tone }}"
+  style="
+    --statement-width: {{ section.settings.max_width }}px;
+    --statement-padding-top: {{ section.settings.padding_top }}px;
+    --statement-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container">
+    <div class="wc-statement__inner">
+      <div class="wc-statement__text">
+        {%- if section.settings.heading != blank -%}
+          <div class="wc-statement__heading wc-display-{{ section.settings.heading_size }}">
+            {{ section.settings.heading }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.body != blank -%}
+          <div class="wc-statement__body wc-body-s rte">{{ section.settings.body }}</div>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.button_label != blank -%}
+        <a
+          href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+          class="wc-button wc-statement__cta{% if section.settings.tone == 'accent' %} wc-button--accent{% endif %}"
+        >
+          {{- section.settings.button_label -}}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Statement",
+  "tag": "div",
+  "class": "wc-statement-section",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "<p>Wine that tastes like somewhere.</p>"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "m", "label": "Medium" },
+        { "value": "l", "label": "Large" },
+        { "value": "xl", "label": "Extra large" }
+      ],
+      "default": "m"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body text"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "center", "label": "Centred" },
+        { "value": "start", "label": "Left" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "tone",
+      "label": "Text colour",
+      "options": [
+        { "value": "default", "label": "Ivory" },
+        { "value": "accent", "label": "Sorbet" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Text width",
+      "min": 300,
+      "max": 1200,
+      "step": 10,
+      "unit": "px",
+      "default": 600
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 144
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 84
+    }
+  ],
+  "presets": [
+    {
+      "name": "Statement"
+    }
+  ]
+}
+{% endschema %}

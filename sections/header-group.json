@@ -1,0 +1,70 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "t:sections.header.name",
+  "type": "header",
+  "sections": {
+    "header": {
+      "type": "wc-header",
+      "blocks": {
+        "shop": {
+          "type": "shop_mega_menu",
+          "settings": {
+            "label": "shop",
+            "position": "left",
+            "heading": "Shop",
+            "menu_1": "whites",
+            "menu_2": "whites",
+            "menu_3": "reds",
+            "menu_4": "whites",
+            "promo_image": "shopify://shop_images/wine-crush-shop-menu.png",
+            "promo_heading": "build your own bundle",
+            "promo_link": ""
+          }
+        },
+        "journal": {
+          "type": "link",
+          "settings": {
+            "label": "journal",
+            "url": "/blogs/news",
+            "position": "right"
+          }
+        },
+        "info": {
+          "type": "info_mega_menu",
+          "settings": {
+            "label": "info",
+            "position": "right",
+            "heading": "Info",
+            "promo_image": "shopify://shop_images/wine-crush-info.png",
+            "item_1_text": "<p>A little more about Wine Crush, what we’re into and why we think choosing a good bottle should be easy.</p>",
+            "item_1_label": "about us",
+            "item_1_url": "/pages/about-us",
+            "item_2_text": "<p>Everything you need to know about delivery, orders, and returns.</p>",
+            "item_2_label": "shipping & faq’s",
+            "item_2_url": "/pages/shipping-faqs"
+          }
+        }
+      },
+      "block_order": [
+        "shop",
+        "journal",
+        "info"
+      ],
+      "settings": {
+        "show_account": true,
+        "account_label": "account"
+      }
+    }
+  },
+  "order": [
+    "header"
+  ]
+}

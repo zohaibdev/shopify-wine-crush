@@ -1,0 +1,512 @@
+/* ==========================================================================
+   Wine Crush — Global design system
+   Values extracted from Figma. See docs/UI-UX.md for the source measurements
+   and docs/CONTEXT.md for implementation decisions.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Fonts
+   Relative URLs resolve against the theme asset CDN directory.
+   -------------------------------------------------------------------------- */
+
+/* Every display heading is `Dahlia: Medium Condensed`, whose 0.700 cap ratio is
+   what the artboard's cap heights imply. The older dahlia.woff2/.woff still in
+   this folder are an unrelated free script face and are deliberately unused. */
+@font-face {
+  font-family: 'Dahlia';
+  src: url('Dahlia-MediumCondensed.woff2') format('woff2'),
+    url('Dahlia-MediumCondensed.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Only the weights the design actually uses are registered. Regular carries
+   every text style; Bold exists so <strong> isn't synthesised. */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('IBMPlexMono.woff2') format('woff2'), url('IBMPlexMono.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('IBMPlexMono-Bold.woff2') format('woff2'), url('IBMPlexMono-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   Tokens
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* --- Typography: families --- */
+  --font-display: 'Dahlia', 'Times New Roman', serif;
+  --font-body: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-heading: var(--font-display);
+
+  /* --- Typography: display scale (fluid, anchored to the 1440px artboard) ---
+     Sizes are px, not rem: Dawn sets the root font-size to 62.5% (10px), so a
+     rem here would resolve to 62.5% of the Figma measurement. */
+  --text-display-xl: clamp(56px, 10.42vw, 150px);
+  --text-display-l: clamp(52px, 8.34vw, 120px);
+  --text-display-m: clamp(32px, 4.31vw, 62px);
+
+  /* --- Typography: body scale --- */
+  --text-body-l: clamp(15px, 1.25vw, 18px);
+  --text-tab: clamp(14px, 1.25vw, 18px);
+  --text-blog-title: clamp(14px, 1.12vw, 16px);
+  --text-button: clamp(13px, 0.98vw, 14px);
+  --text-nav: 13px;
+  --text-contact: 14px;
+  --text-lede: 14px;
+  /* Mega menu. Every size below is read back off the artboards through IBM Plex
+     Mono's 0.6em advance, so an N-character run is exactly N cells wide:
+     "Cabernet Sauvignon" is 152/18 = 8.44 -> 14px, and the info panel's longest
+     line is 289/30 = 9.63 -> 16px. */
+  --text-menu-heading: 30px;
+  --text-menu-link: 14px;
+  --text-menu-body: 16px;
+  --text-body-s: 12px;
+  --text-meta: 12px;
+  --text-legal: 11px;
+  --text-caption: 10px;
+
+  /* --- Typography: line heights --- */
+  --leading-display: 1;
+  --leading-display-tight: 0.95;
+  /* IBM Plex Mono's own metrics: 1025 ascender + 275 descender = 1.3em, which
+     is what Figma's "normal" line-height resolves to for every mono label. */
+  --leading-flat: 1.3;
+  /* The artboard sets its two body sizes on different pitches: 12/17 for the
+     small runs and 18/26 for the long-form paragraphs. One ratio cannot serve
+     both — at 1.42 the 18px copy loses 2px over five lines. */
+  --leading-body: 1.42;
+  --leading-body-loose: 1.445;
+
+  /* --- Typography: tracking --- */
+  --tracking-caps: 1px;
+
+  /* --- Colours: brand palette --- */
+  --color-claret: #481111;
+  --color-ivory: #f4e7d4;
+  --color-ochre: #9a7331;
+  --color-crimson: #6a111e;
+  --color-sorbet: #f8cc8a;
+  --color-coral: #ee3d40;
+
+  /* --- Colours: semantic ---
+     Deliberately NOT named `--color-background`: Dawn reserves that name for a
+     comma-separated RGB triple (`244,231,212`) which it only ever reads through
+     `rgb(var(--color-background))`. Defining it here as a hex made every such
+     Dawn rule resolve to the invalid `rgb(#481111)`. */
+  --color-page: var(--color-claret);
+  --color-surface-light: var(--color-ivory);
+  --color-surface-card: var(--color-crimson);
+  --color-surface-accent: var(--color-coral);
+  --color-surface-accent-soft: var(--color-sorbet);
+
+  --color-text: var(--color-ivory);
+  --color-text-on-light: var(--color-claret);
+  --color-text-footer: var(--color-crimson);
+  --color-heading: var(--color-ivory);
+  --color-heading-on-light: var(--color-ochre);
+  --color-accent: var(--color-sorbet);
+
+  --color-muted: rgba(244, 231, 212, 0.66);
+  --color-muted-strong: rgba(244, 231, 212, 0.75);
+  --color-fine-print: var(--color-ochre);
+
+  --color-border: var(--color-ivory);
+  --color-border-on-light: var(--color-claret);
+  --color-border-footer: var(--color-crimson);
+  --color-border-accent: var(--color-sorbet);
+  --border-width: 1px;
+
+  /* --- Colours: header & mega menu surfaces --- */
+  --color-header-bg: transparent;
+  --color-header-bg-active: var(--color-claret);
+  --color-megamenu-bg: var(--color-coral);
+
+  /* --- Overlays --- */
+  --overlay-hero: rgba(0, 0, 0, 0.3);
+  --overlay-card: rgba(0, 0, 0, 0.3);
+  /* Differencing the two menu artboards against the un-scrimmed hero gives a flat
+     0.70x with a zero intercept, so the veil behind an open menu is plain black
+     at 30% rather than a tint of any brand colour. */
+  --overlay-menu: rgba(0, 0, 0, 0.3);
+
+  /* --- Layout ---
+     Content is full width; only the gutter is fixed. --container-width is the
+     1440 artboard's content measure, kept as the reference every ratio in this
+     file was derived from. */
+  --container-width: 1404px;
+  --page-gutter: 18px;
+
+  --grid-gap: 16px;
+  --grid-columns: 4;
+  --slider-gap: 15px;
+  --slider-card-width: 331px;
+  /* 4.1 is what makes the slide resolve to 331px inside the 1404px measure,
+     leaving the 35px peek of the fifth card the design shows. */
+  --slides-visible: 4.1;
+
+  /* --- Spacing scale --- */
+  --space-3xs: 4px;
+  --space-2xs: 8px;
+  --space-xs: 15px;
+  --space-sm: 18px;
+  --space-md: 20px;
+  --space-lg: 24px;
+  --space-xl: 30px;
+  --space-2xl: 39px;
+  --space-3xl: 56px;
+  --space-4xl: 74px;
+  --space-5xl: 84px;
+  --space-6xl: 102px;
+  --space-7xl: 129px;
+  --space-8xl: 162px;
+
+  /* Section rhythm */
+  --section-spacing-desktop: var(--space-8xl);
+  --section-spacing-mobile: var(--space-4xl);
+  --section-padding-block: var(--space-5xl);
+  --band-overlap: var(--space-7xl);
+
+  /* --- Radii --- */
+  --radius-band: 39px;
+  --radius-panel: 20px;
+  --radius-card: 10px;
+  /* Both mega menu images round at 8px: the corner bites 4px into the coral,
+     which is r - sqrt(2r - 1). */
+  --radius-menu-media: 8px;
+  --radius-pill: 37px;
+
+  /* --- Buttons --- */
+  --button-height: 30px;
+  --button-height-xs: 19px;
+  --button-height-sm: 25px;
+  --button-height-nav: 27px;
+  /* 18 + the 1px border is the 19px the artboard leaves between a button's edge
+     and its label. The artboard's button widths themselves disagree by a pixel
+     or two, so the inset is the stable measure to match. */
+  --button-padding-inline: 18px;
+  --button-padding-inline-sm: 9px;
+  --button-padding-inline-xs: 7px;
+  /* The nav pill is 75px around a 6-cell text run (46.8px), so 14px a side. */
+  --button-padding-inline-nav: 14px;
+  --button-padding-inline-compact: 11px;
+  --button-radius: var(--radius-pill);
+  --button-border-width: var(--border-width);
+  --button-font-size: var(--text-button);
+
+  /* --- Header --- */
+  /* 15px + 15px padding around the 28px content row (Figma frame 10055:448 is
+     1372x28). Sections that tuck under the header rely on 58 being exact. */
+  --header-height: 58px;
+  --header-row-height: 28px;
+  --header-padding-block: 15px;
+  --megamenu-height: 512px;
+
+  /* --- Transitions --- */
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --transition-button: 200ms ease;
+  --transition-header: 240ms ease;
+  --transition-megamenu: 320ms var(--ease-out-soft);
+  --transition-drawer: 280ms var(--ease-out-soft);
+}
+
+@media screen and (max-width: 749px) {
+  :root {
+    --radius-band: 24px;
+    --grid-columns: 1;
+    --slides-visible: 1.3;
+    --section-spacing-desktop: var(--section-spacing-mobile);
+  }
+}
+
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  :root {
+    --grid-columns: 2;
+    --slides-visible: 2.4;
+    --section-spacing-desktop: var(--space-6xl);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+body {
+  background-color: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-s);
+  line-height: var(--leading-body);
+  letter-spacing: 0;
+}
+
+/* Dawn sets heading families from theme settings; the Figma design uses the
+   self-hosted display face instead. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.wc-display-xl,
+.wc-display-l,
+.wc-display-m {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--color-heading);
+}
+
+/* --------------------------------------------------------------------------
+   Typography utilities
+   -------------------------------------------------------------------------- */
+
+.wc-display-xl {
+  font-size: var(--text-display-xl);
+  line-height: var(--leading-display);
+}
+
+.wc-display-l {
+  font-size: var(--text-display-l);
+  line-height: var(--leading-display-tight);
+  text-transform: uppercase;
+}
+
+.wc-display-m {
+  font-size: var(--text-display-m);
+  line-height: var(--leading-display);
+}
+
+.wc-body-l {
+  font-size: var(--text-body-l);
+  line-height: var(--leading-body-loose);
+}
+
+.wc-body-s {
+  font-size: var(--text-body-s);
+  line-height: var(--leading-body);
+}
+
+.wc-label {
+  font-size: var(--text-tab);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-lede {
+  font-size: var(--text-lede);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-meta {
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-caption {
+  font-size: var(--text-caption);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-legal {
+  font-size: var(--text-legal);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  color: var(--color-fine-print);
+}
+
+/* --------------------------------------------------------------------------
+   Layout
+   -------------------------------------------------------------------------- */
+
+/* Full width at every viewport — the design is near-full-bleed, so content
+   stretches and only the gutters are fixed. No centred max-width cap. */
+.wc-container {
+  width: 100%;
+  padding-inline: var(--page-gutter);
+}
+
+/* Full-bleed colour band with the signature rounded top corners. */
+.wc-band {
+  position: relative;
+  border-start-start-radius: var(--radius-band);
+  border-start-end-radius: var(--radius-band);
+}
+
+.wc-band--claret {
+  background-color: var(--color-claret);
+}
+
+.wc-band--ivory {
+  background-color: var(--color-surface-light);
+  color: var(--color-text-on-light);
+}
+
+/* The artboard closes every full-bleed band the way it closes the hero: the
+   claret page rounds back up over the band's last 129px rather than the band
+   pulling up over the section before it. Same cap as .wc-hero::after. */
+.wc-band--capped::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  height: var(--band-overlap);
+  background-color: var(--color-claret);
+  border-start-start-radius: var(--radius-band);
+  border-start-end-radius: var(--radius-band);
+}
+
+.wc-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  gap: var(--grid-gap);
+}
+
+.wc-section {
+  padding-block: var(--section-padding-block);
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   The design uses a single primitive: a 1px outlined pill, transparent fill.
+   -------------------------------------------------------------------------- */
+
+.wc-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  min-height: var(--button-height);
+  padding-inline: var(--button-padding-inline);
+  border: var(--button-border-width) solid var(--color-border);
+  border-radius: var(--button-radius);
+  background-color: transparent;
+  color: var(--color-border);
+  font-family: var(--font-body);
+  font-size: var(--button-font-size);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition-button), color var(--transition-button),
+    border-color var(--transition-button);
+}
+
+.wc-button:hover,
+.wc-button:focus-visible {
+  background-color: var(--color-border);
+  color: var(--color-page);
+}
+
+.wc-button:focus-visible {
+  outline: 2px solid var(--color-border);
+  outline-offset: 2px;
+}
+
+/* Size variants */
+.wc-button--xs {
+  min-height: var(--button-height-xs);
+  padding-inline: var(--button-padding-inline-xs);
+  font-size: var(--text-caption);
+}
+
+.wc-button--sm {
+  min-height: var(--button-height-sm);
+  padding-inline: var(--button-padding-inline-sm);
+  font-size: var(--text-body-s);
+}
+
+.wc-button--nav {
+  min-height: var(--button-height-nav);
+  padding-inline: var(--button-padding-inline-nav);
+  font-size: var(--text-nav);
+}
+
+.wc-button--compact {
+  padding-inline: var(--button-padding-inline-compact);
+}
+
+/* Colour variants — each swaps the single --color-border hook the primitive
+   reads for border, text, and hover fill. */
+.wc-button--on-light {
+  --color-border: var(--color-border-on-light);
+  --color-page: var(--color-surface-light);
+}
+
+.wc-button--footer {
+  --color-border: var(--color-border-footer);
+  --color-page: var(--color-surface-light);
+}
+
+.wc-button--accent {
+  --color-border: var(--color-border-accent);
+  --color-page: var(--color-claret);
+}
+
+/* --------------------------------------------------------------------------
+   Media
+   -------------------------------------------------------------------------- */
+
+.wc-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+
+.wc-media img,
+.wc-media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wc-media--overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--overlay-card);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility
+   -------------------------------------------------------------------------- */
+
+.wc-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

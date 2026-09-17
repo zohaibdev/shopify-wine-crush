@@ -1,0 +1,183 @@
+{{ 'wc-story.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-story"
+  style="
+    --story-padding-top: {{ section.settings.padding_top }}px;
+    --story-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --story-lead-width: {{ section.settings.lead_width }}px;
+    --story-closing-width: {{ section.settings.closing_width }}px;
+    --story-media-width: {{ section.settings.image_width }}px;
+    --story-media-rotate: {{ section.settings.image_rotate }}deg;
+  "
+>
+  <div class="wc-container wc-story__inner">
+    <div class="wc-story__head">
+      {%- if section.settings.lead != blank -%}
+        <div class="wc-story__lead wc-body-l rte">{{ section.settings.lead }}</div>
+      {%- endif -%}
+
+      {%- if section.settings.icon != blank -%}
+        <div class="wc-story__icon" aria-hidden="true">
+          {{ section.settings.icon | image_url: width: 132 | image_tag: widths: '44, 88, 132', alt: '' }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="wc-story__media" aria-hidden="true">
+      {%- if section.settings.image != blank -%}
+        {{
+          section.settings.image
+          | image_url: width: 710
+          | image_tag: widths: '355, 533, 710', sizes: '(min-width: 990px) 355px, 70vw', alt: ''
+        }}
+      {%- else -%}
+        <img src="{{ 'wine-crush-direction-image.png' | asset_url }}" alt="" width="355" height="301" loading="lazy">
+      {%- endif -%}
+    </div>
+
+    <div class="wc-story__foot">
+      <div class="wc-story__place">
+        {%- if section.settings.address != blank -%}
+          <div class="wc-story__address wc-body-s rte">{{ section.settings.address }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank -%}
+          <a href="{{ section.settings.button_link | default: routes.root_url }}" class="wc-button">
+            {{- section.settings.button_label -}}
+          </a>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.closing != blank -%}
+        <div class="wc-story__closing wc-body-l rte">{{ section.settings.closing }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Brand story",
+  "tag": "div",
+  "class": "wc-story-section",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "lead",
+      "label": "Opening text",
+      "default": "<p>We started Wine Crush because the wine we wanted to drink was hard to find and harder to explain.</p>"
+    },
+    {
+      "type": "range",
+      "id": "lead_width",
+      "label": "Opening text width",
+      "min": 240,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 410
+    },
+    {
+      "type": "richtext",
+      "id": "closing",
+      "label": "Closing text",
+      "default": "<p>Everything here is tasted before it is listed.</p>"
+    },
+    {
+      "type": "range",
+      "id": "closing_width",
+      "label": "Closing text width",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 300
+    },
+    {
+      "type": "header",
+      "content": "Imagery"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Upload a PNG that already carries its own mask — the artwork's ellipse is tilted, which a CSS radius cannot reproduce."
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "Image width",
+      "min": 200,
+      "max": 700,
+      "step": 5,
+      "unit": "px",
+      "default": 355
+    },
+    {
+      "type": "range",
+      "id": "image_rotate",
+      "label": "Image rotation",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "default": -30
+    },
+    {
+      "type": "image_picker",
+      "id": "icon",
+      "label": "Brand mark"
+    },
+    {
+      "type": "header",
+      "content": "Location"
+    },
+    {
+      "type": "richtext",
+      "id": "address",
+      "label": "Address"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "get directions"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 156
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 144
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand story"
+    }
+  ]
+}
+{% endschema %}

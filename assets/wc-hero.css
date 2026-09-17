@@ -1,0 +1,119 @@
+/* --------------------------------------------------------------------------
+   Hero
+   Composed against the 1440 x 898 artboard. The lede, wordmark and band sit at
+   percentage offsets so the whole composition scales with the viewport instead
+   of drifting apart at intermediate widths.
+   -------------------------------------------------------------------------- */
+
+.wc-hero-section {
+  /* The header is sticky and in flow, so the hero is pulled up under it to get
+     the full-bleed media the design shows behind the transparent header. */
+  margin-top: calc(var(--header-height) * -1);
+}
+
+.wc-hero {
+  --hero-ratio: 1440 / 898;
+  --hero-lede-top: 38.42%;
+  --hero-wordmark-top: 73.72%;
+  --overlay-hero: rgba(0, 0, 0, 0.3);
+
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--hero-ratio);
+}
+
+.wc-hero--screen {
+  aspect-ratio: auto;
+  min-height: 100svh;
+}
+
+.wc-hero__media {
+  position: absolute;
+  inset: 0;
+}
+
+.wc-hero__media img,
+.wc-hero__media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wc-hero__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--overlay-hero);
+}
+
+.wc-hero__lede {
+  position: absolute;
+  top: var(--hero-lede-top);
+  left: 50%;
+  z-index: 2;
+  width: min(449px, 78%);
+  transform: translateX(-50%);
+  text-align: center;
+  text-wrap: balance;
+  color: var(--color-text);
+}
+
+.wc-hero__lede > :first-child {
+  margin-top: 0;
+}
+
+.wc-hero__lede > :last-child {
+  margin-bottom: 0;
+}
+
+/* Sits above the band so the wordmark straddles the band edge, as designed. */
+.wc-hero__wordmark {
+  position: absolute;
+  top: var(--hero-wordmark-top);
+  left: 50%;
+  z-index: 3;
+  width: min(var(--wordmark-width), 88%);
+  transform: translateX(-50%);
+}
+
+.wc-hero__wordmark img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* A pseudo-element, not a div: Dawn's base.css hides every empty div. */
+.wc-hero::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  height: var(--band-overlap);
+  background-color: var(--color-claret);
+  border-start-start-radius: var(--radius-band);
+  border-start-end-radius: var(--radius-band);
+}
+
+/* Tablet and below: no artboard exists, so the frame is made taller to keep the
+   media readable and the composition is spaced out again to match. */
+@media screen and (max-width: 989px) {
+  .wc-hero {
+    --hero-ratio: 3 / 4;
+    --hero-lede-top: 36%;
+    --hero-wordmark-top: 68%;
+  }
+
+  .wc-hero__wordmark {
+    width: min(calc(var(--wordmark-width) * 1.6), 78%);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .wc-hero {
+    --hero-ratio: 375 / 560;
+    --hero-lede-top: 34%;
+    --hero-wordmark-top: 64%;
+  }
+}

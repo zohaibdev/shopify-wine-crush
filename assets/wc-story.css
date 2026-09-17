@@ -1,0 +1,123 @@
+/* --------------------------------------------------------------------------
+   Brand story
+   Three stacked rows inside a frame narrower than the container: the opening
+   line and the brand mark at opposite top corners, the masked photograph on the
+   page's centre line, then the address and the closing line facing each other.
+   -------------------------------------------------------------------------- */
+
+.wc-story {
+  padding-block: var(--story-padding-top) var(--story-padding-bottom);
+}
+
+.wc-story__inner {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The artboard's text rails run 58..1377: 40px inside the container on the left
+   the address and button share, 45px on the right where the mark and the
+   closing line both end. The photograph is not on those rails — it sits on the
+   page's own centre line — so the inset belongs to the two text rows, not to
+   the column that holds all three. */
+.wc-story__head,
+.wc-story__foot {
+  padding-inline: 40px 45px;
+}
+
+.wc-story__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-xl);
+}
+
+.wc-story__lead {
+  width: min(var(--story-lead-width), 100%);
+}
+
+.wc-story__icon {
+  flex: none;
+  width: 44px;
+}
+
+.wc-story__icon img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The photograph carries its own tilted-ellipse mask, so no radius here: a
+   border-radius would clip the four points where that ellipse meets its box. */
+.wc-story__media {
+  width: min(var(--story-media-width), 70%);
+  margin: 88px auto 0;
+  transform: rotate(var(--story-media-rotate));
+}
+
+.wc-story__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wc-story__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  margin-top: 61px;
+}
+
+.wc-story__place {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+}
+
+.wc-story__closing {
+  width: min(var(--story-closing-width), 100%);
+  text-align: right;
+}
+
+/* The address is the artboard's 14px contact size on a flat pitch, held to the
+   25 monospace cells that break it after the street name. */
+.wc-story__address {
+  max-width: 25ch;
+  font-size: var(--text-contact);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-story__lead p,
+.wc-story__closing p,
+.wc-story__address p {
+  margin: 0;
+}
+
+@media screen and (max-width: 989px) {
+  .wc-story {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .wc-story__head,
+  .wc-story__foot {
+    padding-inline: 0;
+  }
+
+  .wc-story__media {
+    width: min(var(--story-media-width), 80%);
+    margin-top: var(--space-4xl);
+  }
+
+  .wc-story__foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xl);
+    margin-top: var(--space-4xl);
+  }
+
+  .wc-story__closing {
+    text-align: left;
+  }
+}

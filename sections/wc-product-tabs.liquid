@@ -1,0 +1,246 @@
+{{ 'wc-product-tabs.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'wc-product-tabs.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+
+<wc-product-tabs class="wc-product-tabs" style="--tabs-padding-top: {{ section.settings.padding_top }}px; --tabs-padding-bottom: {{ section.settings.padding_bottom }}px;">
+  {%- if section.blocks.size > 0 -%}
+    <div class="wc-product-tabs__tablist wc-container" role="tablist" aria-label="{{ section.settings.tablist_label | escape }}">
+      {%- for block in section.blocks -%}
+        <button
+          class="wc-product-tabs__tab wc-label"
+          type="button"
+          role="tab"
+          id="WcTab-{{ block.id }}"
+          aria-controls="WcPanel-{{ block.id }}"
+          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          {{- block.settings.label -}}
+        </button>
+      {%- endfor -%}
+    </div>
+
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign products = null
+        assign matched = 0
+        if block.settings.source == 'tag' and block.settings.tag != blank
+          assign tab_tag = block.settings.tag | downcase
+          for product in collections.all.products
+            if product.tags contains tab_tag
+              assign matched = matched | plus: 1
+              if matched >= section.settings.products_to_show
+                break
+              endif
+            endif
+          endfor
+        else
+          assign products = collections[block.settings.collection].products
+          assign matched = products.size
+        endif
+      -%}
+
+      <div
+        class="wc-product-tabs__panel"
+        id="WcPanel-{{ block.id }}"
+        role="tabpanel"
+        aria-labelledby="WcTab-{{ block.id }}"
+        tabindex="0"
+        {% unless forloop.first %}hidden{% endunless %}
+      >
+        <div class="wc-product-slider wc-container" data-wc-slider>
+          <ul class="wc-product-slider__track" role="list" data-wc-slider-track>
+            {%- if matched == 0 -%}
+              {%- comment -%}
+                An empty catalog would collapse the slider to nothing, hiding the
+                card design in the theme editor and on a fresh install.
+              {%- endcomment -%}
+              {%- for i in (1..5) -%}
+                <li class="wc-product-slider__slide">
+                  {%- render 'wc-product-card', placeholder: true, index: i -%}
+                </li>
+              {%- endfor -%}
+            {%- elsif products -%}
+              {%- for product in products limit: section.settings.products_to_show -%}
+                <li class="wc-product-slider__slide">
+                  {%- render 'wc-product-card',
+                    product: product,
+                    section_id: section.id,
+                    add_label: section.settings.add_label
+                  -%}
+                </li>
+              {%- endfor -%}
+            {%- else -%}
+              {%- comment -%}
+                Tag mode: Shopify cannot filter a collection by tag server-side
+                outside a collection template, so the storefront's product list
+                is walked and matched here.
+              {%- endcomment -%}
+              {%- assign shown = 0 -%}
+              {%- for product in collections.all.products -%}
+                {%- if product.tags contains tab_tag -%}
+                  <li class="wc-product-slider__slide">
+                    {%- render 'wc-product-card',
+                      product: product,
+                      section_id: section.id,
+                      add_label: section.settings.add_label
+                    -%}
+                  </li>
+                  {%- assign shown = shown | plus: 1 -%}
+                  {%- if shown >= section.settings.products_to_show -%}
+                    {%- break -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          </ul>
+
+          <button
+            class="wc-product-slider__arrow wc-product-slider__arrow--prev"
+            type="button"
+            data-wc-slider-prev
+            aria-label="{{ 'general.slider.previous_slide' | t }}"
+          >
+            {{- 'icon-wc-arrow.svg' | inline_asset_content -}}
+          </button>
+          <button
+            class="wc-product-slider__arrow wc-product-slider__arrow--next"
+            type="button"
+            data-wc-slider-next
+            aria-label="{{ 'general.slider.next_slide' | t }}"
+          >
+            {{- 'icon-wc-arrow.svg' | inline_asset_content -}}
+          </button>
+        </div>
+      </div>
+    {%- endfor -%}
+  {%- endif -%}
+
+  {%- if section.settings.button_label != blank -%}
+    <div class="wc-product-tabs__footer">
+      <a
+        href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+        class="wc-button"
+      >
+        {{- section.settings.button_label -}}
+      </a>
+    </div>
+  {%- endif -%}
+</wc-product-tabs>
+
+{% schema %}
+{
+  "name": "Product tabs",
+  "tag": "div",
+  "class": "wc-product-tabs-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products per tab",
+      "min": 4,
+      "max": 16,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "text",
+      "id": "add_label",
+      "label": "Add to cart label",
+      "default": "add"
+    },
+    {
+      "type": "text",
+      "id": "tablist_label",
+      "label": "Tab list description",
+      "info": "Read out by screen readers to describe what the tabs filter.",
+      "default": "Product categories"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Label",
+      "default": "explore all"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 84
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 84
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "new arrivals"
+        },
+        {
+          "type": "select",
+          "id": "source",
+          "label": "Products from",
+          "options": [
+            { "value": "collection", "label": "Collection" },
+            { "value": "tag", "label": "Product tag" }
+          ],
+          "default": "collection"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Product tag"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product tabs",
+      "blocks": [
+        { "type": "tab", "settings": { "label": "new arrivals" } },
+        { "type": "tab", "settings": { "label": "staples" } },
+        { "type": "tab", "settings": { "label": "bestsellers" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,33 @@
+{%- comment -%}
+  Renders one item in the desktop header nav.
+
+  Accepts:
+  - block: {Object} a wc-header section block
+
+  Mega menu blocks render as a disclosure button controlling their panel.
+  Plain links render as an anchor.
+{%- endcomment -%}
+
+{%- case block.type -%}
+  {%- when 'shop_mega_menu', 'info_mega_menu' -%}
+    <button
+      class="wc-header__link wc-header__trigger{% if block.type == 'shop_mega_menu' %} wc-button wc-button--nav{% endif %}"
+      type="button"
+      aria-expanded="false"
+      aria-controls="WcMega-{{ block.id }}"
+      data-wc-megamenu-trigger="WcMega-{{ block.id }}"
+      {{ block.shopify_attributes }}
+    >
+      {{ block.settings.label }}
+      <span class="wc-header__trigger-plus" aria-hidden="true">+</span>
+    </button>
+
+  {%- when 'link' -%}
+    <a
+      href="{{ block.settings.url | default: routes.root_url }}"
+      class="wc-header__link"
+      {{ block.shopify_attributes }}
+    >
+      {{- block.settings.label -}}
+    </a>
+{%- endcase -%}

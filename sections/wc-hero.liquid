@@ -1,0 +1,149 @@
+{{ 'wc-hero.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign has_video = false
+  if section.settings.video != blank
+    assign has_video = true
+  endif
+-%}
+
+<section
+  class="wc-hero wc-hero--{{ section.settings.desktop_height }}"
+  style="--overlay-hero: rgba(0, 0, 0, {{ section.settings.overlay_opacity | divided_by: 100.0 }});"
+>
+  <div class="wc-hero__media">
+    {%- if has_video -%}
+      {{
+        section.settings.video
+        | video_tag:
+          image_size: '1920x',
+          autoplay: true,
+          loop: true,
+          muted: true,
+          controls: false,
+          poster: section.settings.image
+      }}
+    {%- elsif section.settings.image != blank -%}
+      {{
+        section.settings.image
+        | image_url: width: 3000
+        | image_tag: widths: '750, 1100, 1440, 1920, 2400, 3000', fetchpriority: 'high', sizes: '100vw', alt: ''
+      }}
+    {%- else -%}
+      <img
+        src="{{ 'wine-crush-hero.jpg' | asset_url }}"
+        alt=""
+        width="1440"
+        height="898"
+        fetchpriority="high"
+      >
+    {%- endif -%}
+  </div>
+
+  {%- if section.settings.lede != blank -%}
+    <div class="wc-hero__lede wc-lede">{{ section.settings.lede }}</div>
+  {%- endif -%}
+
+  {%- comment -%}
+    The setting is authored in pixels against the 1440 artboard but emitted as a
+    share of the hero width, so the wordmark keeps its proportions at any size.
+  {%- endcomment -%}
+  {%- assign wordmark_share = section.settings.wordmark_width | times: 100.0 | divided_by: 1440.0 -%}
+  <div class="wc-hero__wordmark" style="--wordmark-width: {{ wordmark_share }}%;">
+    {%- if section.settings.wordmark != blank -%}
+      {{
+        section.settings.wordmark
+        | image_url: width: 1412
+        | image_tag: widths: '353, 706, 1059, 1412', alt: shop.name, loading: 'eager'
+      }}
+    {%- else -%}
+      <img
+        src="{{ 'wine-crush-logo.svg' | asset_url }}"
+        alt="{{ shop.name }}"
+        width="706"
+        height="174"
+      >
+    {%- endif -%}
+  </div>
+
+  {%- comment -%}
+    The claret band rises over the bottom of the image and carries the page
+    surface up behind the wordmark. Drawn as a pseudo-element on the section.
+  {%- endcomment -%}
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "div",
+  "class": "wc-hero-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Also used as the video poster and as the fallback when no video is set."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video",
+      "info": "Plays muted and looped with no controls. Takes priority over the image."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "select",
+      "id": "desktop_height",
+      "label": "Height",
+      "options": [
+        { "value": "ratio", "label": "Design ratio" },
+        { "value": "screen", "label": "Full screen" }
+      ],
+      "default": "ratio"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "lede",
+      "label": "Intro text",
+      "default": "<p>Natural wine, chosen by people who drink it.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "wordmark",
+      "label": "Wordmark"
+    },
+    {
+      "type": "range",
+      "id": "wordmark_width",
+      "label": "Wordmark width",
+      "min": 600,
+      "max": 800,
+      "step": 2,
+      "unit": "px",
+      "default": 706
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero"
+    }
+  ]
+}
+{% endschema %}

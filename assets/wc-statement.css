@@ -1,0 +1,77 @@
+/* --------------------------------------------------------------------------
+   Statement
+   A single centred display line with an optional body and CTA. Used for the
+   hero statement and any other full-width editorial break.
+   -------------------------------------------------------------------------- */
+
+.wc-statement {
+  padding-block: var(--statement-padding-top) var(--statement-padding-bottom);
+}
+
+.wc-statement--accent {
+  color: var(--color-accent);
+}
+
+.wc-statement__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.wc-statement__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  width: min(var(--statement-width), 100%);
+}
+
+.wc-statement--center .wc-statement__inner {
+  align-items: center;
+  text-align: center;
+}
+
+/* The left-aligned variant is a different layout, not just a different
+   text-align: the artboard puts the copy on the container's left edge and
+   parks the CTA on its right edge, baselined with the last line. */
+.wc-statement--start .wc-statement__inner {
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4xl);
+}
+
+.wc-statement__heading p,
+.wc-statement__body p {
+  margin: 0;
+}
+
+.wc-statement__heading p + p {
+  margin-top: var(--space-md);
+}
+
+/* The design leaves a much larger gap above the CTA than between the text
+   blocks, so it opts out of the shared flex gap. */
+.wc-statement--center .wc-statement__cta {
+  margin-top: calc(var(--space-3xl) - var(--space-xl));
+}
+
+.wc-statement--start .wc-statement__cta {
+  flex: none;
+}
+
+/* The design's top padding is measured off the 1440 artboard; below it the
+   shared graduated section rhythm takes over. */
+@media screen and (max-width: 989px) {
+  .wc-statement {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .wc-statement--center .wc-statement__cta {
+    margin-top: 0;
+  }
+
+  .wc-statement--start .wc-statement__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,107 @@
+/* --------------------------------------------------------------------------
+   Bundle band
+   A full-bleed colour band with a centred column of copy and loose imagery
+   scattered behind it.
+   -------------------------------------------------------------------------- */
+
+.wc-bundle {
+  position: relative;
+  padding-block: var(--bundle-padding-top) var(--bundle-padding-bottom);
+  overflow: hidden;
+}
+
+.wc-bundle__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wc-bundle__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  margin: 0 0 26px;
+}
+
+.wc-bundle__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.wc-bundle__heading {
+  margin: 0;
+  color: var(--color-heading-on-light);
+}
+
+/* 477px is the artboard's own measure for this paragraph, and it is what sets
+   the three-line break. */
+.wc-bundle__body {
+  width: min(477px, 100%);
+  margin-top: var(--space-4xl);
+}
+
+.wc-bundle__body p {
+  margin: 0;
+}
+
+.wc-bundle__cta {
+  margin-top: 26px;
+}
+
+/* --- Scatter --- */
+
+.wc-bundle__scatter {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Sizes and positions are percentages of the band so the scatter stays in the
+   margins it was placed in as the band narrows. A fixed pixel width would keep
+   its 1440 size while the band shrank around it, growing into the copy column
+   and clipping on the band edges. */
+.wc-bundle__figure {
+  position: absolute;
+  top: var(--figure-y);
+  left: var(--figure-x);
+  width: var(--figure-width);
+  transform: rotate(var(--figure-rotate));
+}
+
+.wc-bundle__figure img,
+.wc-bundle__figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-card);
+}
+
+/* The section padding is authored against the 1440 artboard; below it the shared
+   graduated rhythm takes over. */
+@media screen and (max-width: 989px) {
+  .wc-bundle {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .wc-bundle__body {
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-bundle__cta {
+    margin-top: var(--space-xl);
+  }
+}
+
+/* On phones the copy column fills the band, so there is no margin left for the
+   scatter to sit in and it has to read as texture behind the text instead. */
+@media screen and (max-width: 749px) {
+  .wc-bundle__figure {
+    opacity: 0.35;
+  }
+}
