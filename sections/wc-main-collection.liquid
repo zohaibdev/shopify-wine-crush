@@ -1,0 +1,194 @@
+{%- comment -%}
+  Collection grid + filters — Figma 10008:35.
+
+  Products are rendered by Liquid from `collection.products` inside Shopify's
+  `paginate` (server-side; pagination links are ordinary page loads). Only
+  filtering is dynamic: Dawn's assets/facets.js re-requests this section with
+  ?section_id=…&filter.… and swaps #ProductGridContainer, the filter groups,
+  the active filters and #ProductCount, pushing Shopify's native filter URL.
+
+  Layout at 1440: an 18px gutter, a 204px filter column (content inset to x34,
+  the header's gutter), a 15px gap, then 4 × 285 cards 15px apart (x237…x1422).
+{%- endcomment -%}
+
+{{ 'wc-product-card.css' | asset_url | stylesheet_tag }}
+{{ 'wc-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+{%- if section.settings.enable_filtering -%}
+  <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- paginate collection.products by section.settings.products_per_page -%}
+  {%- liquid
+    assign show_filters = false
+    if section.settings.enable_filtering and collection.filters != empty
+      assign show_filters = true
+    endif
+  -%}
+
+  <div
+    class="wc-collection{% unless show_filters %} wc-collection--no-filters{% endunless %}"
+    style="--collection-padding-bottom: {{ section.settings.padding_bottom }}px;"
+  >
+    <div class="wc-collection__layout">
+      {%- if show_filters -%}
+        <aside class="wc-collection__filters" aria-label="{{ 'products.facets.filter_button' | t | escape }}">
+          {%- render 'wc-facets', results: collection, section_id: section.id -%}
+        </aside>
+      {%- endif -%}
+
+      <div class="wc-collection__results">
+        {%- comment -%}
+          Not drawn in Figma, so visually hidden; it is the live region that
+          tells screen-reader users the results changed. facets.js requires it.
+        {%- endcomment -%}
+        <p
+          id="ProductCount"
+          class="wc-visually-hidden"
+          role="status"
+          data-product-count="{{ collection.products_count }}"
+          data-total-count="{{ collection.all_products_count }}"
+        >
+          {%- if collection.products_count == collection.all_products_count -%}
+            {{ 'products.facets.product_count_simple' | t: count: collection.products_count }}
+          {%- else -%}
+            {{ 'products.facets.product_count' | t: product_count: collection.products_count, count: collection.all_products_count }}
+          {%- endif -%}
+        </p>
+
+        <div id="ProductGridContainer">
+          {%- if collection.products.size == 0 -%}
+            {%- comment -%} facets.js needs #product-grid and .collection even when empty. {%- endcomment -%}
+            <div class="collection wc-collection__empty" id="product-grid" data-id="{{ section.id }}">
+              <h2 class="wc-collection__empty-title wc-display-m">
+                {{- 'sections.collection_template.empty' | t -}}
+              </h2>
+              {%- if collection.all_products_count > 0 -%}
+                <facet-remove>
+                  <a href="{{ collection.url }}" class="wc-button js-facet-remove">
+                    {{- 'products.facets.clear_all' | t -}}
+                  </a>
+                </facet-remove>
+              {%- endif -%}
+            </div>
+          {%- else -%}
+            <div class="collection">
+              <ul id="product-grid" data-id="{{ section.id }}" class="wc-collection__grid" role="list">
+                {%- for product in collection.products -%}
+                  <li class="wc-collection__item">
+                    {%- render 'wc-product-card',
+                      product: product,
+                      section_id: section.id,
+                      add_label: section.settings.add_label,
+                      layout: 'grid'
+                    -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              {%- if paginate.pages > 1 -%}
+                <nav class="wc-pagination" aria-label="{{ 'general.pagination.label' | t | escape }}">
+                  <ul class="wc-pagination__list" role="list">
+                    {%- if paginate.previous -%}
+                      <li>
+                        <a
+                          href="{{ paginate.previous.url }}"
+                          class="wc-pagination__step wc-pagination__step--prev"
+                          aria-label="{{ 'general.pagination.previous' | t | escape }}"
+                        >
+                          {{- 'icon-wc-arrow.svg' | inline_asset_content -}}
+                        </a>
+                      </li>
+                    {%- endif -%}
+
+                    {%- for part in paginate.parts -%}
+                      <li>
+                        {%- if part.is_link -%}
+                          <a
+                            href="{{ part.url }}"
+                            class="wc-pagination__page"
+                            aria-label="{{ 'general.pagination.page' | t: number: part.title | escape }}"
+                          >
+                            {{- part.title -}}
+                          </a>
+                        {%- elsif part.title == paginate.current_page -%}
+                          <span
+                            class="wc-pagination__page is-current"
+                            aria-current="page"
+                            aria-label="{{ 'general.pagination.page' | t: number: part.title | escape }}"
+                          >
+                            {{- part.title -}}
+                          </span>
+                        {%- else -%}
+                          <span class="wc-pagination__gap" aria-hidden="true">{{ part.title }}</span>
+                        {%- endif -%}
+                      </li>
+                    {%- endfor -%}
+
+                    {%- if paginate.next -%}
+                      <li>
+                        <a
+                          href="{{ paginate.next.url }}"
+                          class="wc-pagination__step"
+                          aria-label="{{ 'general.pagination.next' | t | escape }}"
+                        >
+                          {{- 'icon-wc-arrow.svg' | inline_asset_content -}}
+                        </a>
+                      </li>
+                    {%- endif -%}
+                  </ul>
+                </nav>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Collection grid",
+  "tag": "div",
+  "class": "wc-main-collection-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 16
+    },
+    {
+      "type": "text",
+      "id": "add_label",
+      "label": "Add button label",
+      "default": "add"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "Show filters",
+      "info": "Filters come from Shopify Search & Discovery.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}

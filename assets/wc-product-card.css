@@ -1,0 +1,265 @@
+/* --------------------------------------------------------------------------
+   Product card (snippets/wc-product-card.liquid)
+   Shared by the home product slider (wc-product-tabs) and the collection grid
+   (wc-main-collection); each section loads this file once. The base rules are
+   the home slider card; `.wc-product-card--grid` is the collection card.
+   -------------------------------------------------------------------------- */
+
+/* --- Card --- */
+
+/* Figma 10033:… home card: 331 × 434, the 324 × 485 bottle box overhanging
+   the top by 101px, price 16px above the box's foot, title and add pill below.
+
+   The bottle's space is reserved in the flow rather than left to overlap:
+   padding-top is where the bottle box ends (1.1602 × the card width — the box
+   is 0.9789w wide at 324:485, lifted 0.3051w) less the design's 16px of price
+   over its transparent foot. Percentage padding resolves against the slide's
+   width, so this scales with the card. The 331:434 ratio is a minimum: on a
+   desktop card the copy still sits on the floor exactly as drawn; on a narrow
+   card with a three-line title the card grows instead of the copy climbing
+   into the bottle. */
+.wc-product-card {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-end;
+  aspect-ratio: 331 / 434;
+  /* The artboard's own asymmetry: copy sits 17px in from the left, the add pill
+     15px in from the right, both 12px up from the card floor. */
+  padding: calc(116.02% - 16px) 15px 12px 17px;
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface-card);
+}
+
+/* An <a> on real products (the image links to the product), a <div> on
+   onboarding placeholders. */
+/* A fixed 324:485 box whatever the photograph's ratio; the 101px overhang is
+   0.3051w, i.e. 20.82% of the box's own height (1.4653w), so it scales too. */
+.wc-product-card__media {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 0;
+  width: 97.89%;
+  aspect-ratio: 324 / 485;
+  transform: translate(-50%, -20.82%);
+}
+
+/* Contained and stood on the box's foot, so a square pack shot and a tall
+   bottle share the same baseline and neither can reach the copy. */
+.wc-product-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 100%;
+}
+
+.wc-product-card__info {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ivory at 75% on every card — sampled off both artboards (the slider card
+   in 10053:93 and the grid card in 10072:1173). */
+.wc-product-card__price {
+  display: flex;
+  gap: var(--space-2xs);
+  margin: 0 0 6px;
+  color: var(--color-muted-strong);
+}
+
+.wc-product-card__was {
+  color: var(--color-muted);
+}
+
+.wc-product-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2xs);
+}
+
+.wc-product-card__title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: var(--tracking-caps);
+  color: var(--color-text);
+}
+
+.wc-product-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Widens the title's hit area across the info block (price + row). The bottle
+   above it links through its own anchor; the add button sits above both. */
+.wc-product-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.wc-product-card product-form {
+  position: relative;
+  z-index: 2;
+  display: block;
+}
+
+.wc-product-card__form {
+  margin: 0;
+}
+
+.wc-product-card__add {
+  position: relative;
+  min-width: 68px;
+}
+
+/* Dawn's product-form.js adds .loading and unhides the spinner while the AJAX
+   add is in flight; the label keeps its box so the pill doesn't resize. */
+.wc-product-card__add.loading > span {
+  visibility: hidden;
+}
+
+.wc-product-card__add .loading__spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+}
+
+.wc-product-card__add .spinner {
+  width: 14px;
+  height: 14px;
+}
+
+.wc-product-card__add .path {
+  stroke: currentColor;
+}
+
+/* Cart errors (e.g. stock ran out after page load) float above the pill so the
+   card's fixed geometry is untouched. */
+.wc-product-card__error {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-2xs));
+  width: max-content;
+  max-width: 220px;
+  margin: 0;
+  text-align: right;
+  color: var(--color-text);
+}
+
+.wc-product-card__soldout {
+  color: var(--color-muted);
+}
+
+/* --- Collection grid card (Figma 10033:680) ---
+   285 × 434 Crimson card, r10. The photograph is inset 11 / 6 / 14 / 7 (a
+   272 × 409 cover frame) and everything else sits over it: the title top-left
+   on a 180px measure, the price bottom-left, the 61 × 26 "add +" bottom-right.
+   Padding is the artboard's own asymmetry: 18 top, 14 right and bottom, 17 left. */
+
+.wc-product-card--grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'title title'
+    '. .'
+    'price add';
+  justify-content: stretch;
+  aspect-ratio: 285 / 434;
+  padding: 18px 14px 14px 17px;
+  /* Own stacking context, so the photograph can sit at z-index -1: above the
+     Crimson fill, below the text, without positioning the text (which would
+     shrink the title link's card-wide hit area to the title). */
+  isolation: isolate;
+}
+
+/* The info block and its row only group content for the slider card; here
+   their children are placed straight onto the card's grid. */
+.wc-product-card--grid .wc-product-card__info,
+.wc-product-card--grid .wc-product-card__row {
+  display: contents;
+}
+
+.wc-product-card--grid .wc-product-card__media {
+  inset: 2.53% 2.11% 3.23% 2.46%;
+  z-index: -1;
+  width: auto;
+  aspect-ratio: auto;
+  transform: none;
+  overflow: hidden;
+}
+
+.wc-product-card--grid .wc-product-card__media img {
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.wc-product-card--grid .wc-product-card__title {
+  grid-area: title;
+  max-width: 180px;
+  align-self: start;
+}
+
+.wc-product-card--grid .wc-product-card__price {
+  grid-area: price;
+  align-self: end;
+  margin: 0;
+}
+
+.wc-product-card--grid .wc-product-card__add {
+  min-width: 0;
+}
+
+.wc-product-card--grid product-form,
+.wc-product-card--grid .wc-product-card__soldout,
+/* Select mode has no form: the toggle itself takes the add cell. */
+.wc-product-card--grid [data-bundle-toggle] {
+  grid-area: add;
+  align-self: end;
+  justify-self: end;
+}
+
+/* The overlay above needs room: at the artboard's 285px the title is two
+   lines on a 180px measure and clears the bottle's cap. On narrower cards
+   (1366 and below, and every phone) the title wraps to three lines while the
+   photograph shrinks, and the two collide. So the card — not the viewport —
+   decides: below 280px wide the photograph leaves the overlay and takes its
+   own row between the title and the price, contained and stood on its foot.
+   The grid's items are the container (see wc-collection.css). */
+@container wc-card (max-width: 279px) {
+  .wc-product-card--grid {
+    grid-template-areas:
+      'title title'
+      'media media'
+      'price add';
+    row-gap: var(--space-2xs);
+  }
+
+  .wc-product-card--grid .wc-product-card__media {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    grid-area: media;
+    min-height: 0;
+  }
+
+  .wc-product-card--grid .wc-product-card__media img {
+    object-fit: contain;
+    object-position: 50% 100%;
+  }
+}
+
+/* With the info block as display: contents, the title link's ::after resolves
+   against the card itself, so the whole card opens the product (as well as the
+   photo's own link); the add pill's form sits above it at z-index 2. */

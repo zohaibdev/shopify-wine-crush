@@ -193,7 +193,8 @@ class WcDrawer {
     if (opener) opener.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
     this.showRoot();
-    focusFirst(this.panel);
+    // The first menu row, not the head (which now starts with the logo link).
+    focusFirst(this.rootLevel);
   }
 
   close() {

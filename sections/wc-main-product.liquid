@@ -1,0 +1,442 @@
+{%- comment -%}
+  Product page — Figma 10050:30 ("Product Template").
+
+  Info column left (x56), photograph right (607 wide, 34px from the edge).
+  Built on Dawn's own product architecture so variant switching, price and
+  button updates and add-to-cart are Dawn's, not a second system:
+  - <product-info> (assets/product-info.js) — re-renders this section for the
+    chosen option values and swaps #price-…, the submit button and
+    <variant-selects> by id; publishes `variantChange`
+  - Dawn's product-variant-picker snippet (this section is passed as its
+    `block`, so picker_type / swatch_shape are section settings)
+  - <product-form> (assets/product-form.js) — AJAX add, cart drawer
+  - <quantity-input> (assets/global.js)
+{%- endcomment -%}
+
+{{ 'wc-product.css' | asset_url | stylesheet_tag }}
+{{ 'component-product-variant-picker.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'wc-product-gallery.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_form_id = 'product-form-' | append: section.id
+
+  # custom.varieties / custom.profile — list.metaobject_reference;
+  # custom.region — metaobject_reference. The display text lives in each
+  # metaobject's single field (variety_item / profile_item / region_item).
+  # An entry whose field is empty falls back to its handle unless that
+  # handle is Shopify's auto-generated "<type>-xxxxxxxx".
+  assign varieties = ''
+  for entry in product.metafields.custom.varieties.value
+    assign entry_label = entry.variety_item.value | default: entry.variety_item
+    if entry_label == blank
+      assign auto_prefix = entry.system.type | append: '-'
+      unless entry.system.handle contains auto_prefix
+        assign entry_label = entry.system.handle | replace: '-', ' '
+      endunless
+    endif
+    if entry_label != blank
+      assign varieties = varieties | append: entry_label | append: '|'
+    endif
+  endfor
+  assign varieties = varieties | split: '|'
+
+  assign profiles = ''
+  for entry in product.metafields.custom.profile.value
+    assign entry_label = entry.profile_item.value | default: entry.profile_item
+    if entry_label == blank
+      assign auto_prefix = entry.system.type | append: '-'
+      unless entry.system.handle contains auto_prefix
+        assign entry_label = entry.system.handle | replace: '-', ' '
+      endunless
+    endif
+    if entry_label != blank
+      assign profiles = profiles | append: entry_label | append: '|'
+    endif
+  endfor
+  assign profiles = profiles | split: '|'
+
+  assign region_entry = product.metafields.custom.region.value
+  assign region = region_entry.region_item.value | default: region_entry.region_item
+  if region == blank and region_entry != blank
+    assign auto_prefix = region_entry.system.type | append: '-'
+    unless region_entry.system.handle contains auto_prefix
+      assign region = region_entry.system.handle | replace: '-', ' '
+    endunless
+  endif
+
+  # "size": the value of a Size / Volume option when the product has one.
+  assign size_value = ''
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name == 'size' or option_name == 'volume' or option_name == 'bottle size'
+      assign size_value = option.selected_value
+    endif
+  endfor
+-%}
+
+<product-info
+  id="ProductInfo-{{ section.id }}"
+  class="wc-product"
+  data-section="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-update-url="true"
+  data-url="{{ product.url }}"
+  style="--product-padding-top: {{ section.settings.padding_top }}px;"
+>
+  <div class="wc-product__layout">
+    <div class="wc-product__info">
+      {%- if varieties.size > 0 or region != blank -%}
+        <ul class="wc-product__tags" role="list">
+          {%- for variety in varieties -%}
+            <li class="wc-product__tag">{{ variety | escape }}</li>
+          {%- endfor -%}
+          {%- if region != blank -%}
+            <li class="wc-product__tag">{{ region | escape }}</li>
+          {%- endif -%}
+        </ul>
+      {%- endif -%}
+
+      <h1 class="wc-product__title">{{ product.title | escape }}</h1>
+
+      <div id="price-{{ section.id }}" class="wc-product__price" role="status">
+        {%- liquid
+          assign price_variant = current_variant
+        -%}
+        <span class="wc-product__price-current">{{ price_variant.price | money }}</span>
+        {%- if price_variant.compare_at_price > price_variant.price -%}
+          <s class="wc-product__price-was">
+            <span class="wc-visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+            {{- price_variant.compare_at_price | money -}}
+          </s>
+        {%- endif -%}
+        {%- if price_variant.unit_price_measurement -%}
+          <span class="wc-product__unit-price">{{- price_variant.unit_price | money }}/
+            {%- if price_variant.unit_price_measurement.reference_value != 1 -%}
+              {{- price_variant.unit_price_measurement.reference_value -}}
+            {%- endif -%}
+            {{ price_variant.unit_price_measurement.reference_unit }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- unless product.has_only_default_variant -%}
+        <div class="wc-product__variants">
+          {%- render 'product-variant-picker', product: product, block: section, product_form_id: product_form_id -%}
+        </div>
+      {%- endunless -%}
+
+      <div class="wc-product__buy">
+        <product-form class="wc-product__form" data-section-id="{{ section.id }}">
+          {%- form 'product',
+            product,
+            id: product_form_id,
+            class: 'wc-product__form-inner',
+            novalidate: 'novalidate',
+            data-type: 'add-to-cart-form'
+          -%}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ current_variant.id }}"
+              {% if current_variant.available == false or current_variant == null %}
+                disabled
+              {% endif %}
+              class="product-variant-id"
+            >
+            <button
+              id="ProductSubmitButton-{{ section.id }}"
+              type="submit"
+              name="add"
+              class="wc-button wc-button--lg wc-product__add"
+              {% if current_variant.available == false or current_variant == null %}
+                disabled
+              {% endif %}
+            >
+              {%- comment -%} product-form.js swaps this first span's text for Dawn's variant strings. {%- endcomment -%}
+              <span>
+                {%- if current_variant == null -%}
+                  {{ 'products.product.unavailable' | t }}
+                {%- elsif current_variant.available -%}
+                  {{ 'products.product.add_to_cart' | t }}
+                {%- else -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- endif -%}
+              </span>
+              <span class="wc-product__add-plus" aria-hidden="true">+</span>
+              {%- render 'loading-spinner' -%}
+            </button>
+          {%- endform -%}
+          <p class="product-form__error-message-wrapper wc-product__error wc-body-s" role="alert" hidden>
+            <span class="product-form__error-message"></span>
+          </p>
+        </product-form>
+
+        {%- if section.settings.show_quantity -%}
+          {%- comment -%}
+            Dawn's <quantity-input> drives the stepper (it needs .quantity__button).
+            The input is deliberately not .quantity__input: that class makes
+            product-info.js attach Dawn's cart-rules refresh, which expects
+            quantity-rules markup this design doesn't have.
+          {%- endcomment -%}
+          <quantity-input class="wc-quantity">
+            <button class="wc-quantity__button quantity__button" name="minus" type="button">
+              <span class="wc-visually-hidden">{{ 'products.product.quantity.decrease' | t: product: product.title | escape }}</span>
+              <span aria-hidden="true">−</span>
+            </button>
+            <input
+              class="wc-quantity__input"
+              type="number"
+              name="quantity"
+              id="Quantity-{{ section.id }}"
+              form="{{ product_form_id }}"
+              min="{{ current_variant.quantity_rule.min }}"
+              {% if current_variant.quantity_rule.max != null %}
+                max="{{ current_variant.quantity_rule.max }}"
+              {% endif %}
+              step="{{ current_variant.quantity_rule.increment }}"
+              value="{{ current_variant.quantity_rule.min }}"
+              aria-label="{{ 'products.product.quantity.input_label' | t: product: product.title | escape }}"
+            >
+            <button class="wc-quantity__button quantity__button" name="plus" type="button">
+              <span class="wc-visually-hidden">{{ 'products.product.quantity.increase' | t: product: product.title | escape }}</span>
+              <span aria-hidden="true">+</span>
+            </button>
+          </quantity-input>
+        {%- endif -%}
+      </div>
+
+      {%- if product.description != blank -%}
+        <div class="wc-product__story">
+          {%- if section.settings.story_heading != blank -%}
+            <h2 class="wc-product__story-heading">{{ section.settings.story_heading }}</h2>
+          {%- endif -%}
+          <div class="wc-product__description rte">{{ product.description }}</div>
+        </div>
+      {%- endif -%}
+
+      {%- liquid
+        assign has_specs = false
+        if profiles.size > 0 or size_value != blank or region != blank or varieties.size > 0 or section.settings.show_rating
+          assign has_specs = true
+        endif
+      -%}
+      {%- if has_specs -%}
+        <dl class="wc-product__specs">
+          {%- if profiles.size > 0 -%}
+            <div class="wc-product__spec">
+              <dt>{{ section.settings.label_profile }}</dt>
+              <dd>{{ profiles | join: ', ' | escape }}</dd>
+            </div>
+          {%- endif -%}
+          {%- if size_value != blank -%}
+            <div class="wc-product__spec">
+              <dt>{{ section.settings.label_size }}</dt>
+              <dd>{{ size_value | escape }}</dd>
+            </div>
+          {%- endif -%}
+          {%- if region != blank -%}
+            <div class="wc-product__spec">
+              <dt>{{ section.settings.label_region }}</dt>
+              <dd>{{ region | escape }}</dd>
+            </div>
+          {%- endif -%}
+          {%- if varieties.size > 0 -%}
+            <div class="wc-product__spec">
+              <dt>{{ section.settings.label_varieties }}</dt>
+              <dd>{{ varieties | join: ', ' | escape }}</dd>
+            </div>
+          {%- endif -%}
+          {%- if section.settings.show_rating -%}
+            <div class="wc-product__spec">
+              <dt>{{ section.settings.label_rating }}</dt>
+              <dd>{%- render 'wc-rating', value: section.settings.rating_value -%}</dd>
+            </div>
+          {%- endif -%}
+        </dl>
+      {%- endif -%}
+    </div>
+
+    <wc-product-gallery class="wc-product__media" data-section="{{ section.id }}">
+      {%- assign featured = current_variant.featured_media | default: product.featured_media -%}
+      <div class="wc-product__viewer">
+        {%- for media in product.media -%}
+          {%- if media.media_type == 'image' -%}
+            <div
+              class="wc-product__slide{% if media.id == featured.id %} is-active{% endif %}"
+              data-media-id="{{ media.id }}"
+              {% unless media.id == featured.id %}
+                hidden
+              {% endunless %}
+            >
+              {{
+                media.preview_image
+                | image_url: width: 1400
+                | image_tag:
+                  widths: '400, 607, 800, 1000, 1214, 1400',
+                  sizes: '(min-width: 990px) 42vw, 100vw',
+                  alt: media.alt,
+                  loading: 'eager',
+                  fetchpriority: 'high'
+              }}
+            </div>
+          {%- endif -%}
+        {%- else -%}
+          <div class="wc-product__slide is-active">
+            {{ 'product-apparel-1' | placeholder_svg_tag: 'wc-product__placeholder' }}
+          </div>
+        {%- endfor -%}
+      </div>
+
+      {%- liquid
+        assign image_count = 0
+        for media in product.media
+          if media.media_type == 'image'
+            assign image_count = image_count | plus: 1
+          endif
+        endfor
+      -%}
+      {%- if image_count > 1 -%}
+        <ul class="wc-product__thumbs" role="list">
+          {%- for media in product.media -%}
+            {%- if media.media_type == 'image' -%}
+              <li>
+                <button
+                  type="button"
+                  class="wc-product__thumb"
+                  data-media-id="{{ media.id }}"
+                  aria-label="{{ 'products.product.media.load_image' | t: index: forloop.index }}"
+                  {% if media.id == featured.id %}
+                    aria-current="true"
+                  {% endif %}
+                >
+                  {{ media.preview_image | image_url: width: 120 | image_tag: alt: '', loading: 'lazy' }}
+                </button>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </wc-product-gallery>
+  </div>
+</product-info>
+
+{% schema %}
+{
+  "name": "Product",
+  "tag": "section",
+  "class": "wc-main-product-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "story_heading",
+      "label": "Description heading",
+      "default": "Why we love it:"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "Show quantity selector",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Details table"
+    },
+    {
+      "type": "paragraph",
+      "content": "Profile, region and varieties come from the product metafields custom.profile, custom.region and custom.varieties. Size comes from a Size or Volume option. Rows without data are hidden."
+    },
+    {
+      "type": "text",
+      "id": "label_profile",
+      "label": "Profile label",
+      "default": "profile"
+    },
+    {
+      "type": "text",
+      "id": "label_size",
+      "label": "Size label",
+      "default": "size"
+    },
+    {
+      "type": "text",
+      "id": "label_region",
+      "label": "Region label",
+      "default": "region"
+    },
+    {
+      "type": "text",
+      "id": "label_varieties",
+      "label": "Varieties label",
+      "default": "varieties"
+    },
+    {
+      "type": "header",
+      "content": "Rating"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show rating",
+      "info": "A static rating until a reviews app is connected.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_rating",
+      "label": "Rating label",
+      "default": "customer rating"
+    },
+    {
+      "type": "range",
+      "id": "rating_value",
+      "label": "Rating",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "default": 4.5
+    },
+    {
+      "type": "header",
+      "content": "Variant picker"
+    },
+    {
+      "type": "select",
+      "id": "picker_type",
+      "label": "Style",
+      "options": [
+        { "value": "button", "label": "Buttons" },
+        { "value": "dropdown", "label": "Dropdown" }
+      ],
+      "default": "button"
+    },
+    {
+      "type": "select",
+      "id": "swatch_shape",
+      "label": "Swatch",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "square", "label": "Square" },
+        { "value": "none", "label": "None" }
+      ],
+      "default": "circle"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 1,
+      "max": 201,
+      "step": 2,
+      "unit": "px",
+      "default": 107
+    }
+  ]
+}
+{% endschema %}

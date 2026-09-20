@@ -1,0 +1,68 @@
+{%- comment -%}
+  Default page (Content › Pages). The page's own title and body, in the Wine
+  Crush editorial layout — the same `.wc-rte` treatment the Journal article
+  and the policy pages use (assets/wc-editorial.css). Content stays Shopify's.
+{%- endcomment -%}
+
+{{ 'wc-editorial.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-page"
+  style="
+    --page-padding-top: {{ section.settings.padding_top }}px;
+    --page-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container wc-page__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="wc-page__eyebrow wc-label">{{ section.settings.eyebrow | escape }}</p>
+    {%- endif -%}
+
+    <h1 class="wc-page__title">{{ page.title | escape }}</h1>
+
+    {%- if page.content != blank -%}
+      <div class="wc-page__content wc-rte">{{ page.content }}</div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Page",
+  "tag": "section",
+  "class": "wc-page-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "The title and body come from the page itself (Content › Pages)."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "info": "Optional line above the title."
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 102
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 300,
+      "step": 3,
+      "unit": "px",
+      "default": 162
+    }
+  ]
+}
+{% endschema %}
+

@@ -1,0 +1,178 @@
+{%- comment -%}
+  Multi-step newsletter sign-up (name → email → phone), shared by the Coming
+  Soon page and the 5% off membership panel. Figma: 10036:30, group 10068:411 —
+  a 181×30 pill with a centred placeholder and a 32×30 ↗ button, 11px apart.
+
+  Posts to Shopify's `customer` form endpoint (/contact), the same mechanism as
+  Dawn's newsletter section: the `newsletter` tag subscribes the email to
+  marketing and the second tag records where the sign-up came from. JS posts it
+  with fetch and only shows success once Shopify confirms; see
+  assets/wc-signup-form.js for why steps never fire a `submit` event.
+
+  Every step lives in the one <form>, so earlier values are never lost; the
+  wc-signup-form element only decides which step is showing. Without JS all three
+  fields show at once and the form posts natively.
+
+  Accepts:
+  - id: {String} unique suffix for element ids (usually section.id)
+  - config: {Object} the calling section's settings. Reads the shared `signup_*`
+    setting ids: signup_tag, signup_{name,email,phone}_placeholder,
+    signup_next_label, signup_submit_label, signup_success
+  - variant: {String} 'light' — the Coming Soon UI: Ivory strokes and text over
+    the photo (Figma 10036:30) | 'dark' — the same UI in Deep Claret, the ink of
+    the 5% off panel's own CTA (Figma 10055:493)
+
+  Usage:
+  {% render 'wc-signup-form', id: section.id, config: section.settings, variant: 'light' %}
+{%- endcomment -%}
+
+{%- liquid
+  assign form_id = 'WcSignup-' | append: id
+  assign source_tag = config.signup_tag | default: 'newsletter-signup' | handleize
+  assign form_variant = variant | default: 'light'
+-%}
+
+{%- capture success_markup -%}
+  <div class="wc-signup__success wc-lede rte" role="status" tabindex="-1" data-signup-success>
+    {%- if config.signup_success != blank -%}
+      {{- config.signup_success -}}
+    {%- else -%}
+      <p>{{ 'newsletter.success' | t }}</p>
+    {%- endif -%}
+  </div>
+{%- endcapture -%}
+
+{{ 'wc-signup-form.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'wc-signup-form.js' | asset_url }}" defer="defer"></script>
+
+<wc-signup-form
+  class="wc-signup wc-signup--{{ form_variant }}"
+  data-source="{{ source_tag }}"
+  data-error-generic="{{ 'newsletter.error_generic' | t | escape }}"
+  data-error-name="{{ 'newsletter.error_name' | t | escape }}"
+  data-error-email="{{ 'newsletter.error_email' | t | escape }}"
+  data-error-phone="{{ 'newsletter.error_phone' | t | escape }}"
+  data-step-template="{{ 'newsletter.step' | t | escape }}"
+  data-next-label="{{ config.signup_next_label | escape }}"
+  data-submit-label="{{ config.signup_submit_label | escape }}"
+>
+  {%- form 'customer',
+    id: form_id,
+    class: 'wc-signup__form',
+    novalidate: 'novalidate',
+    data-signup-form: '',
+    data-form-variant: form_variant,
+    data-form-source: source_tag
+  -%}
+    <input type="hidden" name="contact[tags]" value="newsletter,{{ source_tag }}">
+    {%- comment -%} Filled from the name field on submit (everything after the first word). {%- endcomment -%}
+    <input type="hidden" name="contact[last_name]" value="" data-signup-last-name>
+
+    {%- if form.posted_successfully? -%}
+      {{ success_markup }}
+    {%- else -%}
+      {%- comment -%}
+        Revealed by JS only once Shopify has confirmed the POST
+        (customer_posted=true, or this form re-rendered in its success state).
+      {%- endcomment -%}
+      <template data-signup-success-template>{{ success_markup }}</template>
+      {%- liquid
+        # Re-open the form on the step whose field the server rejected.
+        assign start_step = 0
+        assign server_error = ''
+        if form.errors
+          for field in form.errors
+            if field == 'phone'
+              assign start_step = 2
+            elsif field == 'email'
+              assign start_step = 1
+            endif
+            if field == 'form'
+              assign server_error = form.errors.messages[field]
+            else
+              assign server_error = form.errors.translated_fields[field] | capitalize | append: ' ' | append: form.errors.messages[field]
+            endif
+            break
+          endfor
+        endif
+      -%}
+
+      <p class="wc-visually-hidden" data-signup-progress aria-live="polite"></p>
+
+      <div class="wc-signup__row" data-signup-row data-start-step="{{ start_step }}">
+        <div class="wc-signup__steps">
+          <div class="wc-signup__step" data-signup-step="name">
+            <label class="wc-visually-hidden" for="{{ form_id }}-name">{{ config.signup_name_placeholder }}</label>
+            <input
+              class="wc-signup__input"
+              id="{{ form_id }}-name"
+              type="text"
+              name="contact[first_name]"
+              value="{{ form.first_name }}"
+              placeholder="{{ config.signup_name_placeholder | escape }}"
+              autocomplete="name"
+              autocapitalize="words"
+              maxlength="100"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="wc-signup__step" data-signup-step="email">
+            <label class="wc-visually-hidden" for="{{ form_id }}-email">{{ config.signup_email_placeholder }}</label>
+            <input
+              class="wc-signup__input"
+              id="{{ form_id }}-email"
+              type="email"
+              name="contact[email]"
+              value="{{ form.email }}"
+              placeholder="{{ config.signup_email_placeholder | escape }}"
+              autocomplete="email"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="wc-signup__step" data-signup-step="phone">
+            <label class="wc-visually-hidden" for="{{ form_id }}-phone">{{ config.signup_phone_placeholder }}</label>
+            <input
+              class="wc-signup__input"
+              id="{{ form_id }}-phone"
+              type="tel"
+              name="contact[phone]"
+              value="{{ form.phone }}"
+              placeholder="{{ config.signup_phone_placeholder | escape }}"
+              autocomplete="tel"
+              inputmode="tel"
+              maxlength="24"
+              required
+              aria-required="true"
+            >
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="wc-signup__submit"
+          aria-label="{{ config.signup_submit_label | escape }}"
+          data-signup-submit
+        >
+          {{- 'icon-wc-arrow-up-right.svg' | inline_asset_content -}}
+        </button>
+      </div>
+
+      <p
+        class="wc-signup__error wc-body-s"
+        id="{{ form_id }}-error"
+        role="alert"
+        data-signup-error
+        {% if server_error == blank %}hidden{% endif %}
+      >
+        {{- server_error -}}
+      </p>
+    {%- endif -%}
+  {%- endform -%}
+</wc-signup-form>

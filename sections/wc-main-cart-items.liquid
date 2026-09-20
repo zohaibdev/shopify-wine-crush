@@ -1,0 +1,161 @@
+{%- comment -%}
+  Cart page — items. The Wine Crush page language (Claret page, Crimson rows)
+  rather than Dawn's white table, but Dawn's cart.js contract is untouched:
+
+  - #main-cart-items[data-id] › .js-contents  (re-rendered after every change)
+  - <cart-items> › form#cart › .cart-item#CartItem-N
+  - <quantity-input> with #Quantity-N[data-index]
+  - <cart-remove-button id="Remove-N">, #Line-item-error-N .cart-item__error-text
+  - #cart-errors, #cart-live-region-text, #shopping-cart-line-item-status
+  - a .loading__spinner per row
+{%- endcomment -%}
+
+{{ 'wc-cart-page.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  cart.js is already loaded with the drawer (snippets/wc-cart-drawer.liquid);
+  loading it again here re-declares its classes and throws.
+{%- endcomment -%}
+{%- unless settings.cart_type == 'drawer' -%}
+  <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+{%- endunless -%}
+
+<section
+  class="wc-cart-page"
+  id="main-cart-items"
+  data-id="{{ section.id }}"
+  style="--cart-page-padding-top: {{ section.settings.padding_top }}px;"
+>
+  <div class="wc-container">
+    <header class="wc-cart-page__head">
+      <h1 class="wc-cart-page__title wc-display-m">{{ 'sections.cart.title' | t }}</h1>
+      <a href="{{ routes.all_products_collection_url }}" class="wc-cart-page__continue wc-caption">
+        {{- 'general.continue_shopping' | t -}}
+      </a>
+    </header>
+
+    <div class="js-contents">
+      {%- if cart == empty -%}
+        <div class="wc-cart-page__empty">
+          <p class="wc-cart-page__empty-text wc-body-m">{{ 'sections.cart.empty' | t }}</p>
+          <a href="{{ routes.all_products_collection_url }}" class="wc-button wc-button--lg">
+            {{- 'general.continue_shopping' | t -}}
+          </a>
+        </div>
+      {%- else -%}
+        <cart-items class="wc-cart-page__items">
+          <form action="{{ routes.cart_url }}" class="wc-cart-page__form" method="post" id="cart">
+            <ul class="wc-cart-page__list" role="list">
+              {%- for item in cart.items -%}
+                {%- assign line = forloop.index -%}
+                <li id="CartItem-{{ line }}" class="cart-item wc-cart-row">
+                  <a href="{{ item.url }}" class="wc-cart-row__media" tabindex="-1" aria-hidden="true">
+                    {%- if item.image -%}
+                      {{ item.image | image_url: width: 220 | image_tag: alt: '', loading: 'lazy', width: 110, height: 110 }}
+                    {%- endif -%}
+                  </a>
+
+                  <div class="wc-cart-row__details">
+                    <a href="{{ item.url }}" class="cart-item__name wc-cart-row__title">{{ item.product.title | escape }}</a>
+
+                    {%- unless item.product.has_only_default_variant -%}
+                      <p class="wc-cart-row__meta">{{ item.variant.title | escape }}</p>
+                    {%- endunless -%}
+                    {%- for property in item.properties -%}
+                      {%- assign first_char = property.first | slice: 0 -%}
+                      {%- if property.last != blank and first_char != '_' -%}
+                        <p class="wc-cart-row__meta">{{ property.first }}: {{ property.last }}</p>
+                      {%- endif -%}
+                    {%- endfor -%}
+                    {%- if item.selling_plan_allocation -%}
+                      <p class="wc-cart-row__meta">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                    {%- endif -%}
+
+                    {%- assign each_price = item.final_price | money -%}
+                    <p class="wc-cart-row__each">{{ 'wc_cart.each' | t: price: each_price }}</p>
+                  </div>
+
+                  <div class="wc-cart-row__controls">
+                    <quantity-input class="wc-cart-qty">
+                      <button class="quantity__button wc-cart-qty__button" name="minus" type="button">
+                        <span class="wc-visually-hidden">
+                          {{- 'products.product.quantity.decrease' | t: product: item.product.title | escape -}}
+                        </span>
+                        <span aria-hidden="true">−</span>
+                      </button>
+                      <input
+                        class="quantity__input wc-cart-qty__input"
+                        type="number"
+                        name="updates[]"
+                        value="{{ item.quantity }}"
+                        id="Quantity-{{ line }}"
+                        data-index="{{ line }}"
+                        data-quantity-variant-id="{{ item.variant.id }}"
+                        {% # theme-check-disable %}
+                        data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+                        min="0"
+                        data-min="{% if item.variant.quantity_rule.min > 1 %}{{ item.variant.quantity_rule.min }}{% else %}0{% endif %}"
+                        {% if item.variant.quantity_rule.max != null %}max="{{ item.variant.quantity_rule.max }}"{% endif %}
+                        step="{{ item.variant.quantity_rule.increment }}"
+                        {% # theme-check-enable %}
+                        aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                      >
+                      <button class="quantity__button wc-cart-qty__button" name="plus" type="button">
+                        <span class="wc-visually-hidden">
+                          {{- 'products.product.quantity.increase' | t: product: item.product.title | escape -}}
+                        </span>
+                        <span aria-hidden="true">+</span>
+                      </button>
+                    </quantity-input>
+
+                    {%- if item.variant.quantity_rule.min > 1 -%}
+                      <cart-remove-button id="Remove-{{ line }}" data-index="{{ line }}">
+                        <button type="button" class="wc-cart-row__remove" aria-label="{{ 'sections.cart.remove_title' | t: title: item.title | escape }}">
+                          {{- 'wc_cart.remove' | t -}}
+                        </button>
+                      </cart-remove-button>
+                    {%- endif -%}
+                  </div>
+
+                  <p class="wc-cart-row__total">{{ item.final_line_price | money }}</p>
+
+                  <div id="Line-item-error-{{ line }}" class="wc-cart-row__error" role="alert">
+                    <span class="cart-item__error-text"></span>
+                  </div>
+
+                  {%- render 'loading-spinner' -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </form>
+        </cart-items>
+      {%- endif -%}
+    </div>
+
+    <p class="wc-visually-hidden" id="cart-live-region-text" role="status"></p>
+    <p class="wc-visually-hidden" id="shopping-cart-line-item-status" aria-hidden="true" role="status">
+      {{ 'accessibility.loading' | t }}
+    </p>
+    <div id="cart-errors" class="wc-cart-page__errors" role="alert"></div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cart items",
+  "tag": "section",
+  "class": "wc-cart-items-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 84
+    }
+  ]
+}
+{% endschema %}
+

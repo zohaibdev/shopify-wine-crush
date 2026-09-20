@@ -282,7 +282,8 @@
     <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
 
     {%- if settings.cart_type == 'drawer' -%}
-      {{ 'component-cart-drawer.css' | asset_url | stylesheet_tag }}
+      {%- comment -%} Wine Crush drawer (snippets/wc-cart-drawer.liquid); Dawn's component-cart-drawer.css would restyle the same .drawer classes. {%- endcomment -%}
+      {{ 'wc-cart-drawer.css' | asset_url | stylesheet_tag }}
       {{ 'component-cart.css' | asset_url | stylesheet_tag }}
       {{ 'component-totals.css' | asset_url | stylesheet_tag }}
       {{ 'component-price.css' | asset_url | stylesheet_tag }}
@@ -290,6 +291,12 @@
     {%- endif -%}
 
     {{ 'style.css' | asset_url | stylesheet_tag }}
+    {%- comment -%}
+      Long-form type for every page whose body is Shopify's own HTML. The
+      policy pages are rendered by Shopify with no section to hook into, so
+      this has to be global rather than section-loaded.
+    {%- endcomment -%}
+    {{ 'wc-editorial.css' | asset_url | stylesheet_tag }}
 
     {%- comment -%}
       Asset CSS is static, so the customizer's Wine Crush settings are emitted
@@ -311,10 +318,22 @@
         {%- endcomment -%}
         --color-muted: {{ settings.wc_color_ivory | color_modify: 'alpha', 0.66 }};
         --color-muted-strong: {{ settings.wc_color_ivory | color_modify: 'alpha', 0.75 }};
+        --color-divider: {{ settings.wc_color_ivory | color_modify: 'alpha', 0.18 }};
+        --color-hairline: {{ settings.wc_color_sorbet | color_modify: 'alpha', 0.5 }};
+        --color-accent-muted: {{ settings.wc_color_sorbet | color_modify: 'alpha', 0.66 }};
 
         --page-gutter: {{ settings.wc_page_gutter }}px;
         --border-width: {{ settings.wc_button_border_width }}px;
+
+        {%- comment -%} Cart drawer (Theme settings › Wine Crush — Cart › Drawer style). {%- endcomment -%}
+        --color-cart-bg: {{ settings.wc_cart_color_background }};
+        --color-cart-text: {{ settings.wc_cart_color_text }};
+        --color-cart-muted: {{ settings.wc_cart_color_muted }};
+        --color-cart-progress: {{ settings.wc_cart_color_progress }};
+        --font-cart: {{ settings.wc_cart_font.family }}, {{ settings.wc_cart_font.fallback_families }};
       }
+
+      {{ settings.wc_cart_font | font_face: font_display: 'swap' }}
 
       @media screen and (max-width: 749px) {
         :root {
@@ -373,10 +392,23 @@
     </a>
 
     {%- if settings.cart_type == 'drawer' -%}
-      {%- render 'cart-drawer' -%}
+      {%- render 'wc-cart-drawer' -%}
     {%- endif -%}
 
-    {% sections 'header-group' %}
+    {%- comment -%}
+      The Coming Soon page is a standalone full-bleed frame in Figma (10036:30)
+      with no header or footer, so both groups are skipped on that template.
+    {%- endcomment -%}
+    {%- liquid
+      assign wc_standalone = false
+      if template.name == 'page' and template.suffix == 'coming-soon'
+        assign wc_standalone = true
+      endif
+    -%}
+
+    {%- unless wc_standalone -%}
+      {% sections 'header-group' %}
+    {%- endunless -%}
 
     <main
       id="MainContent"
@@ -388,7 +420,9 @@
       {{ content_for_layout }}
     </main>
 
-    {% sections 'footer-group' %}
+    {%- unless wc_standalone -%}
+      {% sections 'footer-group' %}
+    {%- endunless -%}
 
     <ul hidden>
       <li id="a11y-refresh-page-message">{{ 'accessibility.refresh_page' | t }}</li>
@@ -447,5 +481,18 @@
     {%- if settings.cart_type == 'drawer' -%}
       <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
+
+    {%- comment -%}
+      Age verification before checkout (assets/wc-cart.js). The guard runs on
+      every page so no route to checkout skips it; the gates themselves live in
+      the cart drawer and on the cart page.
+    {%- endcomment -%}
+    <script>
+      window.wcAgeGateConfig = {
+        enabled: {{ settings.wc_age_gate_enabled | json }},
+        minAge: {{ settings.wc_age_gate_min_age | json }}
+      };
+    </script>
+    <script src="{{ 'wc-cart.js' | asset_url }}" defer="defer"></script>
   </body>
 </html>

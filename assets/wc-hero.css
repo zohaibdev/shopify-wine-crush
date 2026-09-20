@@ -83,6 +83,44 @@
   height: auto;
 }
 
+/* Page heading layout: the title is the page's h1 and must be read without
+   scrolling. The frame keeps the artboard ratio, but never grows past the
+   viewport (the hero starts at 0, under the header), so on a 1440 × 800
+   laptop the band and title rise into view instead of sitting at y698–808
+   below the fold. 480px floor keeps the title clear of the header. */
+.wc-hero--heading {
+  aspect-ratio: auto;
+  height: min(calc(100vw / (var(--hero-ratio))), max(100svh, 480px));
+}
+
+/* Page heading layout (About Us, Figma 10058:642). The eyebrow sits 19px above
+   a single 110px line whose last 39px (0.355em) hang below the band's top
+   edge, so the block is anchored from the bottom in em and keeps that straddle
+   as the fluid size changes. Wraps and grows upwards on narrow screens. */
+.wc-hero__title {
+  position: absolute;
+  inset-inline: var(--page-gutter);
+  bottom: calc(var(--band-overlap) - 0.355 * var(--text-display-page));
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 19px;
+  text-align: center;
+}
+
+.wc-hero__eyebrow {
+  margin: 0;
+  color: var(--color-accent);
+}
+
+.wc-hero__heading {
+  margin: 0;
+  font-size: var(--text-display-page);
+  line-height: var(--leading-display);
+  text-wrap: balance;
+}
+
 /* A pseudo-element, not a div: Dawn's base.css hides every empty div. */
 .wc-hero::after {
   content: '';
@@ -98,22 +136,27 @@
 
 /* Tablet and below: no artboard exists, so the frame is made taller to keep the
    media readable and the composition is spaced out again to match. */
+/* Below the artboard the wordmark is 78vw wide (19.2vw tall) and anchored
+   from the bottom so it straddles the band edge exactly as drawn: 38.5% of its
+   height (67 of 174 at 1440) below the band's top, i.e. 7.4vw. */
 @media screen and (max-width: 989px) {
   .wc-hero {
     --hero-ratio: 3 / 4;
     --hero-lede-top: 36%;
-    --hero-wordmark-top: 68%;
   }
 
   .wc-hero__wordmark {
-    width: min(calc(var(--wordmark-width) * 1.6), 78%);
+    top: auto;
+    bottom: calc(var(--band-overlap) - 7.4vw);
+    width: 78vw;
   }
 }
 
+/* Phones: about 80% of the viewport, so the photograph reads as the
+   full-bleed opener it is at 1440 rather than a strip; lede upper-middle. */
 @media screen and (max-width: 749px) {
   .wc-hero {
-    --hero-ratio: 375 / 560;
-    --hero-lede-top: 34%;
-    --hero-wordmark-top: 64%;
+    --hero-ratio: 375 / 640;
+    --hero-lede-top: 30%;
   }
 }

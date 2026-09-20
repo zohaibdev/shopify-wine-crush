@@ -1,0 +1,301 @@
+/* --------------------------------------------------------------------------
+   Editorial — the one long-form treatment, shared by every page whose body
+   is written by the merchant:
+
+   - `.wc-rte`  Shopify's own HTML (article body, page content, policies)
+   - `.wc-page` the standard page layout: eyebrow, title, then the body
+   - `.shopify-policy__*` Shopify renders the policy pages itself, with no
+     section to hook into, so its own classes are mapped onto the same rules
+     rather than the content being rebuilt.
+
+   Type follows the article artboard (Figma 10053:93): 15 / 23 on a 551
+   measure, paragraphs one line apart, headings in Dahlia.
+   -------------------------------------------------------------------------- */
+
+.wc-page {
+  padding-block: var(--page-padding-top, var(--space-6xl)) var(--page-padding-bottom, var(--space-8xl));
+}
+
+.wc-page__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wc-page__eyebrow {
+  margin: 0 0 var(--space-xs);
+  color: var(--color-accent);
+}
+
+.wc-page__title {
+  width: min(680px, 100%);
+  margin: 0;
+  font-size: var(--text-display-m);
+  line-height: var(--leading-display);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.wc-page__content {
+  width: min(680px, 100%);
+  margin-top: var(--space-4xl);
+}
+
+/* --- The merchant's HTML --- */
+
+.wc-rte {
+  font-size: 15px;
+  line-height: 23px;
+  text-align: start;
+  /* Merchant copy carries addresses and URLs; they wrap rather than pushing
+     the page sideways (found at 320px on the privacy policy). */
+  overflow-wrap: anywhere;
+}
+
+.wc-rte > :first-child {
+  margin-top: 0;
+}
+
+.wc-rte > :last-child {
+  margin-bottom: 0;
+}
+
+.wc-rte p,
+.wc-rte ul,
+.wc-rte ol,
+.wc-rte table,
+.wc-rte figure,
+.wc-rte dl {
+  margin: 0 0 23px;
+}
+
+.wc-rte h1,
+.wc-rte h2,
+.wc-rte h3,
+.wc-rte h4,
+.wc-rte h5,
+.wc-rte h6 {
+  margin: 46px 0 23px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: var(--leading-display-tight);
+  color: var(--color-text);
+}
+
+.wc-rte h1,
+.wc-rte h2 {
+  font-size: var(--text-display-m);
+}
+
+.wc-rte h3 {
+  font-size: 32px;
+}
+
+.wc-rte h4,
+.wc-rte h5,
+.wc-rte h6 {
+  font-size: 24px;
+}
+
+.wc-rte ul,
+.wc-rte ol {
+  padding-inline-start: var(--space-md);
+}
+
+.wc-rte li {
+  margin-bottom: var(--space-2xs);
+}
+
+.wc-rte li::marker {
+  color: var(--color-accent);
+}
+
+.wc-rte a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wc-rte a:hover {
+  color: var(--color-accent);
+}
+
+.wc-rte a:focus-visible {
+  outline: 2px solid var(--color-border);
+  outline-offset: 2px;
+}
+
+.wc-rte strong,
+.wc-rte b {
+  font-weight: 600;
+}
+
+.wc-rte blockquote {
+  margin: 46px 0;
+  padding-inline-start: var(--space-md);
+  border-inline-start: var(--border-width) solid var(--color-border-accent);
+  color: var(--color-accent);
+}
+
+/* Editorial media keeps its own proportions; only the width is bounded. */
+.wc-rte img,
+.wc-rte video,
+.wc-rte iframe {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 46px auto;
+  border-radius: var(--radius-card);
+}
+
+.wc-rte iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.wc-rte hr {
+  margin: 46px 0;
+  border: 0;
+  border-top: var(--border-width) solid var(--color-hairline);
+}
+
+.wc-rte table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.wc-rte th,
+.wc-rte td {
+  padding: var(--space-2xs);
+  border-bottom: var(--border-width) solid var(--color-hairline);
+  text-align: start;
+}
+
+/* --------------------------------------------------------------------------
+   Shopify's policy pages
+   Rendered by Shopify with its own container, so the theme styles those
+   classes instead of the content being copied into a section. Policies are
+   long, so they get a wider measure than an article.
+   -------------------------------------------------------------------------- */
+
+.shopify-policy__container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(680px + 2 * var(--page-gutter));
+  margin: 0 auto;
+  padding: var(--space-6xl) var(--page-gutter) var(--space-8xl);
+}
+
+.shopify-policy__title {
+  margin-bottom: var(--space-4xl);
+  text-align: center;
+}
+
+.shopify-policy__title h1 {
+  margin: 0;
+  font-size: var(--text-display-m);
+  line-height: var(--leading-display);
+  text-wrap: balance;
+}
+
+/* The body is the same long-form treatment as `.wc-rte`. */
+.shopify-policy__body {
+  font-size: 15px;
+  line-height: 23px;
+  overflow-wrap: anywhere;
+}
+
+.shopify-policy__body > :first-child {
+  margin-top: 0;
+}
+
+.shopify-policy__body p,
+.shopify-policy__body ul,
+.shopify-policy__body ol,
+.shopify-policy__body table {
+  margin: 0 0 23px;
+}
+
+.shopify-policy__body h1,
+.shopify-policy__body h2,
+.shopify-policy__body h3,
+.shopify-policy__body h4,
+.shopify-policy__body h5,
+.shopify-policy__body h6 {
+  margin: 46px 0 23px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: var(--leading-display-tight);
+}
+
+.shopify-policy__body h1,
+.shopify-policy__body h2 {
+  font-size: var(--text-display-m);
+}
+
+.shopify-policy__body h3 {
+  font-size: 32px;
+}
+
+.shopify-policy__body h4,
+.shopify-policy__body h5,
+.shopify-policy__body h6 {
+  font-size: 24px;
+}
+
+.shopify-policy__body ul,
+.shopify-policy__body ol {
+  padding-inline-start: var(--space-md);
+}
+
+.shopify-policy__body li {
+  margin-bottom: var(--space-2xs);
+}
+
+.shopify-policy__body li::marker {
+  color: var(--color-accent);
+}
+
+.shopify-policy__body a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.shopify-policy__body a:hover {
+  color: var(--color-accent);
+}
+
+.shopify-policy__body strong {
+  font-weight: 600;
+}
+
+.shopify-policy__body table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shopify-policy__body th,
+.shopify-policy__body td {
+  padding: var(--space-2xs);
+  border-bottom: var(--border-width) solid var(--color-hairline);
+  text-align: start;
+}
+
+@media screen and (max-width: 989px) {
+  .wc-page {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .wc-page__content {
+    margin-top: var(--space-3xl);
+  }
+
+  .shopify-policy__container {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .shopify-policy__title {
+    margin-bottom: var(--space-3xl);
+  }
+}

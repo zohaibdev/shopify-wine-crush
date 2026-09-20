@@ -1,0 +1,296 @@
+/* --------------------------------------------------------------------------
+   Cart page — sections/wc-main-cart-items.liquid + wc-main-cart-footer.liquid
+
+   There is no cart-page artboard (only the drawer, Figma 10071:439), so the
+   page is the site's own language rather than the drawer's black panel:
+   Claret page, Crimson rows at r10, Ivory type, the site's pills. The rows
+   keep the drawer's geometry (103 × 126 media, 30px gutters) so the two read
+   as the same cart.
+   -------------------------------------------------------------------------- */
+
+.wc-cart-page {
+  padding-top: var(--cart-page-padding-top);
+}
+
+.wc-cart-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.wc-cart-page__title {
+  margin: 0;
+}
+
+.wc-cart-page__continue {
+  color: var(--color-muted);
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wc-cart-page__continue:hover {
+  color: var(--color-text);
+}
+
+.wc-cart-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xl);
+  margin-top: var(--space-4xl);
+}
+
+.wc-cart-page__empty-text {
+  margin: 0;
+}
+
+/* --- Rows --- */
+
+.wc-cart-page__list {
+  display: grid;
+  gap: var(--space-xs);
+  margin: var(--space-4xl) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-cart-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 103px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-xl);
+  padding: var(--space-xl);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface-card);
+}
+
+.wc-cart-row__media {
+  display: block;
+  width: 103px;
+  height: 126px;
+  overflow: hidden;
+  border-radius: var(--radius-menu-media);
+}
+
+.wc-cart-row__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wc-cart-row__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  min-width: 0;
+}
+
+.wc-cart-row__title {
+  color: var(--color-text);
+  font-size: var(--text-body-m);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.wc-cart-row__title:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wc-cart-row__meta,
+.wc-cart-row__each {
+  margin: 0;
+  color: var(--color-muted-strong);
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+}
+
+.wc-cart-row__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.wc-cart-row__remove {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.wc-cart-row__remove:hover {
+  color: var(--color-text);
+}
+
+.wc-cart-row__total {
+  margin: 0;
+  font-size: var(--text-body-m);
+  line-height: var(--leading-flat);
+  white-space: nowrap;
+}
+
+.wc-cart-row__error:empty,
+.wc-cart-row__error:has(.cart-item__error-text:empty) {
+  display: none;
+}
+
+.wc-cart-row__error {
+  grid-column: 1 / -1;
+  color: var(--color-accent);
+  font-size: var(--text-meta);
+}
+
+.wc-cart-row .loading__spinner {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  width: 16px;
+}
+
+.wc-cart-row .loading__spinner .path {
+  stroke: var(--color-text);
+}
+
+.wc-cart-page__errors:empty {
+  display: none;
+}
+
+.wc-cart-page__errors {
+  margin-top: var(--space-md);
+  color: var(--color-accent);
+  font-size: var(--text-meta);
+}
+
+/* --- Footer --- */
+
+.wc-cart-foot {
+  padding-bottom: var(--cart-page-padding-bottom);
+}
+
+.wc-cart-foot.is-empty .wc-cart-foot__inner {
+  display: none;
+}
+
+.wc-cart-foot__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-md);
+  width: min(472px, 100%);
+  margin: var(--space-3xl) 0 0 auto;
+  padding: var(--space-xl);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface-card);
+}
+
+.wc-cart-foot__totals {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  width: 100%;
+  margin: 0;
+}
+
+.wc-cart-foot__label {
+  margin: 0;
+  color: var(--color-muted);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+.wc-cart-foot__value {
+  margin: 0;
+  font-size: 22px;
+  line-height: var(--leading-flat);
+}
+
+.wc-cart-foot__discount {
+  margin: 0;
+  color: var(--color-accent);
+}
+
+/* The shared gift / notes and age-gate snippets fill the panel. */
+.wc-cart-foot__panel .wc-cart-extras,
+.wc-cart-foot__panel .wc-age-gate {
+  width: 100%;
+}
+
+.wc-cart-foot__taxes {
+  margin: 0;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+
+.wc-cart-foot__checkout {
+  width: 100%;
+  gap: var(--space-2xs);
+}
+
+.wc-cart-foot__arrow svg {
+  display: block;
+  width: 20px;
+  height: auto;
+}
+
+.wc-cart-foot__dynamic {
+  width: 100%;
+}
+
+/* --- Tablet and phones --- */
+
+@media screen and (max-width: 989px) {
+  .wc-cart-page {
+    padding-top: var(--space-4xl);
+  }
+
+  .wc-cart-foot {
+    padding-bottom: var(--section-spacing-desktop);
+  }
+
+  .wc-cart-page__list {
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-cart-foot__panel {
+    width: 100%;
+    margin-inline: 0;
+  }
+}
+
+/* The row folds: media beside the details, controls and total under them —
+   nothing is squeezed into a few pixels. */
+@media screen and (max-width: 749px) {
+  .wc-cart-row {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .wc-cart-row__media {
+    width: 82px;
+    height: 100px;
+  }
+
+  .wc-cart-row__controls {
+    grid-column: 2;
+    justify-content: space-between;
+  }
+
+  .wc-cart-row__total {
+    grid-column: 2;
+    text-align: end;
+  }
+}

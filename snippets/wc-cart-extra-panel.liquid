@@ -1,0 +1,45 @@
+{%- comment -%}
+  One gift-message / delivery-notes panel for snippets/wc-cart-extras.liquid.
+  Saved text shows as a card (the reference's "Gift Message: …" box); an
+  empty or edited value shows the textarea and confirm pill.
+
+  Accepts: key ('gift' | 'note'), value, placeholder, button, saved_label, field_label
+{%- endcomment -%}
+
+<div
+  id="CartExtras-{{ key }}"
+  class="wc-cart-extras__panel"
+  data-panel="{{ key }}"
+  {% if value == blank %}
+    hidden
+  {% endif %}
+>
+  <button
+    type="button"
+    class="wc-cart-extras__saved"
+    data-edit="{{ key }}"
+    {% if value == blank %}
+      hidden
+    {% endif %}
+  >
+    <span class="wc-cart-extras__saved-label">{{ saved_label }}</span>
+    <span class="wc-cart-extras__saved-text" data-saved-text>{{ value | escape | newline_to_br }}</span>
+    <span class="wc-visually-hidden">{{ 'wc_cart.edit' | t }}</span>
+  </button>
+
+  <div class="wc-cart-extras__editor" data-editor {% if value != blank %}hidden{% endif %}>
+    <label class="wc-visually-hidden" for="CartExtras-{{ key }}-field">{{ field_label }}</label>
+    <textarea
+      id="CartExtras-{{ key }}-field"
+      class="wc-cart-extras__field"
+      data-field="{{ key }}"
+      rows="3"
+      maxlength="500"
+      placeholder="{{ placeholder | escape }}"
+    >{{ value }}</textarea>
+    <button type="button" class="wc-button wc-cart-extras__confirm" data-save="{{ key }}">
+      {{- button -}}
+    </button>
+    <p class="wc-cart-extras__status wc-caption" data-status role="status"></p>
+  </div>
+</div>

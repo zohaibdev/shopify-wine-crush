@@ -1,0 +1,91 @@
+{%- comment -%}
+  Cart page — footer. Subtotal, the gift / delivery-note switches and the age
+  gate (the same snippets the drawer uses), then checkout.
+
+  Dawn's cart.js contract: #main-cart-footer[data-id] › .js-contents, the
+  subtotal in #Subtotal (class totals__subtotal-value), and the checkout
+  button #checkout[name=checkout][form=cart].
+{%- endcomment -%}
+
+{{ 'wc-cart-page.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-cart-foot{% if cart == empty %} is-empty{% endif %}"
+  id="main-cart-footer"
+  data-id="{{ section.id }}"
+  style="--cart-page-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="wc-container">
+    <div class="js-contents wc-cart-foot__inner">
+      {%- if cart != empty -%}
+        <div class="wc-cart-foot__panel">
+          <div class="wc-cart-foot__totals">
+            <p class="wc-cart-foot__label wc-caption">{{ 'wc_cart.subtotal' | t }}</p>
+            <p class="wc-cart-foot__value totals__subtotal-value" id="Subtotal">{{ cart.total_price | money }}</p>
+          </div>
+
+          {%- for discount in cart.cart_level_discount_applications -%}
+            <p class="wc-cart-foot__discount wc-caption">
+              {{ discount.title | escape }} (−{{ discount.total_allocated_amount | money }})
+            </p>
+          {%- endfor -%}
+
+          {%- if settings.wc_cart_gift_enabled or settings.show_cart_note -%}
+            {%- render 'wc-cart-extras' -%}
+          {%- endif -%}
+
+          {%- if settings.wc_age_gate_enabled -%}
+            {%- render 'wc-age-gate', id: 'page', checkout_id: 'checkout' -%}
+          {%- endif -%}
+
+          <p class="wc-cart-foot__taxes wc-caption">{{ 'wc_cart.taxes' | t }}</p>
+
+          <button
+            type="submit"
+            id="checkout"
+            class="wc-button wc-button--lg wc-cart-foot__checkout"
+            name="checkout"
+            form="cart"
+            {% if cart == empty %}
+              disabled
+            {% endif %}
+          >
+            <span>{{ 'sections.cart.checkout' | t }}</span>
+            <span class="wc-cart-foot__arrow" aria-hidden="true">{{- 'icon-wc-arrow.svg' | inline_asset_content -}}</span>
+          </button>
+
+          {%- comment -%}
+            Express checkout bypasses the theme, so it is only offered when
+            the age gate is off (decision #54).
+          {%- endcomment -%}
+          {%- if settings.wc_age_gate_enabled == false and additional_checkout_buttons -%}
+            <div class="wc-cart-foot__dynamic additional-checkout-buttons">
+              {{ content_for_additional_checkout_buttons }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cart footer",
+  "tag": "section",
+  "class": "wc-cart-footer-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 300,
+      "step": 3,
+      "unit": "px",
+      "default": 162
+    }
+  ]
+}
+{% endschema %}
+

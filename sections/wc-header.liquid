@@ -9,7 +9,7 @@
 -%}
 
 <wc-header
-  class="wc-header{% if is_home %} wc-header--transparent{% endif %}"
+  class="wc-header{% if is_home %} wc-header--transparent{% else %} wc-header--page{% endif %}"
   role="banner"
 >
   <div class="wc-header__scrim" aria-hidden="true"></div>
@@ -254,6 +254,28 @@
         <span aria-hidden="true">&larr;</span>
         {{ 'accessibility.back' | t }}
       </button>
+      {%- comment -%}
+        The header's own wordmark (same source, same 24px mobile size), centred
+        where the header bar shows it, so opening the drawer doesn't move it.
+      {%- endcomment -%}
+      <a href="{{ routes.root_url }}" class="wc-drawer__logo" aria-label="{{ shop.name | escape }}">
+        {%- if settings.logo != blank -%}
+          {{
+            settings.logo
+            | image_url: width: 400
+            | image_tag: widths: '122, 244, 400', alt: '', class: 'wc-drawer__logo-img', loading: 'lazy'
+          }}
+        {%- else -%}
+          <img
+            src="{{ 'wine-crush-logo.svg' | asset_url }}"
+            alt=""
+            class="wc-drawer__logo-img"
+            width="122"
+            height="30"
+            loading="lazy"
+          >
+        {%- endif -%}
+      </a>
       <button
         class="wc-drawer__close"
         type="button"
@@ -334,7 +356,7 @@
           {%- when 'info_mega_menu' -%}
             <div class="wc-drawer__level" data-wc-drawer-level="WcLevel-{{ block.id }}" hidden>
               <p class="wc-drawer__level-title">{{ block.settings.label }}</p>
-              <ul class="wc-drawer__sublist" role="list">
+              <ul class="wc-drawer__list" role="list">
                 {%- for i in (1..3) -%}
                   {%- liquid
                     case i

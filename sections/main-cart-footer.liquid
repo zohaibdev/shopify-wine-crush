@@ -104,6 +104,10 @@
                 </small>
               </div>
             {%- else -%}
+              {%- if settings.wc_age_gate_enabled and cart != empty -%}
+                {{ 'wc-cart-drawer.css' | asset_url | stylesheet_tag }}
+                {%- render 'wc-age-gate', id: 'page', checkout_id: 'checkout' -%}
+              {%- endif -%}
               <div class="cart__ctas" {{ block.shopify_attributes }}>
                 <button
                   type="submit"
@@ -119,7 +123,8 @@
                 </button>
               </div>
 
-              {%- if additional_checkout_buttons -%}
+              {%- comment -%} Express checkout would skip the age gate, so it only shows when the gate is off. {%- endcomment -%}
+              {%- if additional_checkout_buttons and settings.wc_age_gate_enabled == false -%}
                 <div class="cart__dynamic-checkout-buttons additional-checkout-buttons">
                   {{ content_for_additional_checkout_buttons }}
                 </div>

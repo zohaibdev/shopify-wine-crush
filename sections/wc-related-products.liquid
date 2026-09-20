@@ -1,0 +1,118 @@
+{%- comment -%}
+  "You may also like:" — Figma 10050:30 (10066:104 heading, 10066:75… cards).
+  The home page's product slider, fed by Shopify's product recommendations:
+  Dawn's <product-recommendations> element (assets/global.js) requests this
+  section with the product id once it nears the viewport and swaps its content
+  in. The slider inside is a <wc-product-tabs> with a single panel, so its
+  arrows, scroll-snap and card add-to-cart are exactly the home page's.
+{%- endcomment -%}
+
+{{ 'wc-product-card.css' | asset_url | stylesheet_tag }}
+{{ 'wc-product-tabs.css' | asset_url | stylesheet_tag }}
+{{ 'wc-related-products.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'wc-product-tabs.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+
+<product-recommendations
+  class="wc-related"
+  data-url="{{ routes.product_recommendations_url }}?limit={{ section.settings.products_to_show }}&intent=related"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  style="--related-padding-top: {{ section.settings.padding_top }}px; --related-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    {%- if section.settings.heading != blank -%}
+      <h2 class="wc-related__heading wc-label">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <wc-product-tabs class="wc-related__rail">
+      <div class="wc-product-tabs__panel">
+        <div class="wc-product-slider wc-container" data-wc-slider>
+          <ul class="wc-product-slider__track" role="list" data-wc-slider-track>
+            {%- for recommendation in recommendations.products -%}
+              <li class="wc-product-slider__slide">
+                {%- render 'wc-product-card',
+                  product: recommendation,
+                  section_id: section.id,
+                  add_label: section.settings.add_label
+                -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          <button
+            class="wc-product-slider__arrow wc-product-slider__arrow--prev"
+            type="button"
+            data-wc-slider-prev
+            aria-label="{{ 'general.slider.previous_slide' | t }}"
+          >
+            {{- 'icon-wc-arrow.svg' | inline_asset_content -}}
+          </button>
+          <button
+            class="wc-product-slider__arrow wc-product-slider__arrow--next"
+            type="button"
+            data-wc-slider-next
+            aria-label="{{ 'general.slider.next_slide' | t }}"
+          >
+            {{- 'icon-wc-arrow.svg' | inline_asset_content -}}
+          </button>
+        </div>
+      </div>
+    </wc-product-tabs>
+  {%- endif -%}
+</product-recommendations>
+
+{% schema %}
+{
+  "name": "Related products",
+  "tag": "section",
+  "class": "wc-related-products-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "you may also like:"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "text",
+      "id": "add_label",
+      "label": "Add button label",
+      "default": "add"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 38
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,93 @@
+{%- comment -%}
+  Age verification before checkout — the Reserve Cellar pattern the design
+  asks for (Figma 10071:439): date of birth (day / month / year) plus an
+  explicit "recipient and I are over 18" confirmation, "Required field" under
+  anything missing. assets/wc-cart.js <wc-age-gate> validates it, saves it on
+  the cart as the attributes "Date of birth" and "Age confirmed" (so it is on
+  the order and survives reloads and drawer re-renders), and blocks the
+  associated checkout until it passes.
+
+  Accepts:
+  - id: {String} unique suffix
+  - checkout_id: {String} id of the checkout button this gate guards
+{%- endcomment -%}
+
+{%- liquid
+  assign gate_id = 'AgeGate-' | append: id
+  assign saved_dob = cart.attributes['Date of birth'] | split: '-'
+  assign saved_year = saved_dob[0] | plus: 0
+  assign saved_month = saved_dob[1] | plus: 0
+  assign saved_day = saved_dob[2] | plus: 0
+  assign this_year = 'now' | date: '%Y' | plus: 0
+  assign oldest_year = this_year | minus: 100
+  assign confirmed = false
+  if cart.attributes['Age confirmed'] == 'yes'
+    assign confirmed = true
+  endif
+-%}
+
+<wc-age-gate
+  class="wc-age-gate"
+  data-min-age="{{ settings.wc_age_gate_min_age }}"
+  data-checkout="{{ checkout_id }}"
+  data-msg-required="{{ settings.wc_age_gate_required | escape }}"
+  data-msg-underage="{{ settings.wc_age_gate_underage | escape }}"
+>
+  <fieldset class="wc-age-gate__dob" aria-describedby="{{ gate_id }}-dob-error">
+    <legend class="wc-age-gate__legend">{{ settings.wc_age_gate_dob_label }}</legend>
+    <div class="wc-age-gate__selects">
+      <div class="wc-age-gate__select">
+        <label class="wc-visually-hidden" for="{{ gate_id }}-day">{{ 'wc_cart.dob_day' | t }}</label>
+        <select id="{{ gate_id }}-day" data-dob="day" autocomplete="bday-day">
+          <option value="">{{ 'wc_cart.dob_day_placeholder' | t }}</option>
+          {%- for d in (1..31) -%}
+            <option value="{{ d }}"{% if d == saved_day %} selected{% endif %}>{{ d }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+      <div class="wc-age-gate__select">
+        <label class="wc-visually-hidden" for="{{ gate_id }}-month">{{ 'wc_cart.dob_month' | t }}</label>
+        <select id="{{ gate_id }}-month" data-dob="month" autocomplete="bday-month">
+          <option value="">{{ 'wc_cart.dob_month_placeholder' | t }}</option>
+          {%- for m in (1..12) -%}
+            {%- liquid
+              assign month_date = '2000-' | append: m | append: '-15'
+              if m < 10
+                assign month_date = '2000-0' | append: m | append: '-15'
+              endif
+            -%}
+            <option value="{{ m }}"{% if m == saved_month %} selected{% endif %}>{{ month_date | date: '%B' }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+      <div class="wc-age-gate__select">
+        <label class="wc-visually-hidden" for="{{ gate_id }}-year">{{ 'wc_cart.dob_year' | t }}</label>
+        <select id="{{ gate_id }}-year" data-dob="year" autocomplete="bday-year">
+          <option value="">{{ 'wc_cart.dob_year_placeholder' | t }}</option>
+          {%- for i in (oldest_year..this_year) -%}
+            {%- assign y = this_year | minus: i | plus: oldest_year -%}
+            <option value="{{ y }}"{% if y == saved_year %} selected{% endif %}>{{ y }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+    </div>
+    <p class="wc-age-gate__error" id="{{ gate_id }}-dob-error" data-error="dob" role="alert" hidden></p>
+  </fieldset>
+
+  <div class="wc-age-gate__confirm">
+    <input
+      type="checkbox"
+      id="{{ gate_id }}-confirm"
+      class="wc-age-gate__checkbox"
+      data-confirm
+      aria-describedby="{{ gate_id }}-confirm-error"
+      {% if confirmed %}
+        checked
+      {% endif %}
+    >
+    <label for="{{ gate_id }}-confirm" class="wc-age-gate__confirm-label rte">
+      {{- settings.wc_age_gate_confirm_text | remove: '<p>' | remove: '</p>' -}}
+    </label>
+  </div>
+  <p class="wc-age-gate__error" id="{{ gate_id }}-confirm-error" data-error="confirm" role="alert" hidden></p>
+</wc-age-gate>

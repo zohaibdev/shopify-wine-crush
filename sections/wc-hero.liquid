@@ -1,6 +1,7 @@
 {{ 'wc-hero.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
+  assign layout = section.settings.layout | default: 'wordmark'
   assign has_video = false
   if section.settings.video != blank
     assign has_video = true
@@ -8,7 +9,7 @@
 -%}
 
 <section
-  class="wc-hero wc-hero--{{ section.settings.desktop_height }}"
+  class="wc-hero wc-hero--{{ section.settings.desktop_height }} wc-hero--{{ layout }}"
   style="--overlay-hero: rgba(0, 0, 0, {{ section.settings.overlay_opacity | divided_by: 100.0 }});"
 >
   <div class="wc-hero__media">
@@ -30,8 +31,13 @@
         | image_tag: widths: '750, 1100, 1440, 1920, 2400, 3000', fetchpriority: 'high', sizes: '100vw', alt: ''
       }}
     {%- else -%}
+      {%- comment -%} Each layout ships with the art it was drawn with. {%- endcomment -%}
+      {%- assign fallback_art = 'wine-crush-hero.jpg' -%}
+      {%- if layout == 'heading' -%}
+        {%- assign fallback_art = 'wine-crush-about-hero.jpg' -%}
+      {%- endif -%}
       <img
-        src="{{ 'wine-crush-hero.jpg' | asset_url }}"
+        src="{{ fallback_art | asset_url }}"
         alt=""
         width="1440"
         height="898"
@@ -44,27 +50,40 @@
     <div class="wc-hero__lede wc-lede">{{ section.settings.lede }}</div>
   {%- endif -%}
 
-  {%- comment -%}
-    The setting is authored in pixels against the 1440 artboard but emitted as a
-    share of the hero width, so the wordmark keeps its proportions at any size.
-  {%- endcomment -%}
-  {%- assign wordmark_share = section.settings.wordmark_width | times: 100.0 | divided_by: 1440.0 -%}
-  <div class="wc-hero__wordmark" style="--wordmark-width: {{ wordmark_share }}%;">
-    {%- if section.settings.wordmark != blank -%}
-      {{
-        section.settings.wordmark
-        | image_url: width: 1412
-        | image_tag: widths: '353, 706, 1059, 1412', alt: shop.name, loading: 'eager'
-      }}
-    {%- else -%}
-      <img
-        src="{{ 'wine-crush-logo.svg' | asset_url }}"
-        alt="{{ shop.name }}"
-        width="706"
-        height="174"
-      >
-    {%- endif -%}
-  </div>
+  {%- if layout == 'heading' -%}
+    {%- comment -%}
+      Page variant (About Us, Figma 10058:642): an eyebrow and the page's h1 in
+      place of the wordmark, straddling the band edge the same way.
+    {%- endcomment -%}
+    <div class="wc-hero__title">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="wc-hero__eyebrow wc-label">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="wc-hero__heading">{{ section.settings.heading | default: page.title | escape }}</h1>
+    </div>
+  {%- else -%}
+    {%- comment -%}
+      The setting is authored in pixels against the 1440 artboard but emitted as a
+      share of the hero width, so the wordmark keeps its proportions at any size.
+    {%- endcomment -%}
+    {%- assign wordmark_share = section.settings.wordmark_width | times: 100.0 | divided_by: 1440.0 -%}
+    <div class="wc-hero__wordmark" style="--wordmark-width: {{ wordmark_share }}%;">
+      {%- if section.settings.wordmark != blank -%}
+        {{
+          section.settings.wordmark
+          | image_url: width: 1412
+          | image_tag: widths: '353, 706, 1059, 1412', alt: shop.name, loading: 'eager'
+        }}
+      {%- else -%}
+        <img
+          src="{{ 'wine-crush-logo.svg' | asset_url }}"
+          alt="{{ shop.name }}"
+          width="706"
+          height="174"
+        >
+      {%- endif -%}
+    </div>
+  {%- endif -%}
 
   {%- comment -%}
     The claret band rises over the bottom of the image and carries the page
@@ -117,6 +136,31 @@
     {
       "type": "header",
       "content": "Content"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "wordmark", "label": "Wordmark (home)" },
+        { "value": "heading", "label": "Page heading" }
+      ],
+      "default": "wordmark",
+      "info": "Page heading swaps the wordmark for an eyebrow and the page title. Each layout has its own placeholder image until one is chosen."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "info": "Page heading layout only.",
+      "default": "about wine crush"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Page heading layout only. Leave blank to use the page title.",
+      "default": "A different kind of bottle shop."
     },
     {
       "type": "richtext",

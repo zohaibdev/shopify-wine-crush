@@ -1,0 +1,417 @@
+{%- comment -%}
+  Bundle builder — "Build your bundle." (Figma 10072:1173), the product
+  template for the Bundle Packs product (handle `bundle-packs`).
+
+  All of it comes from the product:
+  - the pack options are the product's own variants; each one's bottle count is
+    its `custom.bundle_bottles_quantity` metafield (never the variant title)
+    and its price is the variant price;
+  - the bottles on offer are the product's `custom.bundle_products` list.
+
+  The customer picks a pack, then picks that many bottles. Adding to cart adds
+  the *bundle variant* through Dawn's own <product-form> (so the AJAX add, the
+  error handling and the cart drawer are the theme's), with the chosen bottles
+  attached as line-item properties written into the form by
+  assets/wc-bundle-builder.js.
+{%- endcomment -%}
+
+{{ 'wc-product-card.css' | asset_url | stylesheet_tag }}
+{{ 'wc-bundle-builder.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'wc-bundle-builder.js' | asset_url }}" defer="defer"></script>
+{%- comment -%} [count] / [total] / [title] are filled in by the script. {%- endcomment -%}
+<script>
+  window.wcBundleStrings = {
+    counter: {{ 'wc_bundle.counter' | t | json }},
+    select_more_one: {{ 'wc_bundle.select_more_one' | t | json }},
+    select_more_other: {{ 'wc_bundle.select_more_other' | t | json }},
+    remove_extra_one: {{ 'wc_bundle.remove_extra_one' | t | json }},
+    remove_extra_other: {{ 'wc_bundle.remove_extra_other' | t | json }},
+    full: {{ 'wc_bundle.full' | t | json }},
+    slot_empty: {{ 'wc_bundle.slot_empty' | t | json }},
+    add_to_bundle: {{ 'wc_bundle.add_to_bundle_js' | t | json }},
+    remove_from_bundle: {{ 'wc_bundle.remove_from_bundle_js' | t | json }},
+    unavailable_product: {{ 'wc_bundle.unavailable_product' | t | json }},
+    unavailable_selection: {{ 'wc_bundle.unavailable_selection' | t | json }},
+    pack_unconfigured: {{ 'wc_bundle.pack_unconfigured' | t | json }}
+  };
+</script>
+
+{%- liquid
+  assign bundle_products = product.metafields.custom.bundle_products.value
+
+  comment
+    Only variants that carry a bottle count can drive the builder: that count
+    is what every selection is validated against, so it is never guessed from
+    the variant title.
+  endcomment
+  assign first_pack = null
+  for variant in product.variants
+    assign bottles = variant.metafields.custom.bundle_bottles_quantity.value | plus: 0
+    if bottles > 0 and variant.available and first_pack == null
+      assign first_pack = variant
+      assign first_bottles = bottles
+    endif
+  endfor
+
+  assign has_products = false
+  if bundle_products != blank and bundle_products.size > 0
+    assign has_products = true
+  endif
+
+  assign form_id = 'WcBundleForm-' | append: section.id
+-%}
+
+<section
+  class="wc-bundle-builder"
+  style="
+    --bundle-padding-top: {{ section.settings.padding_top }}px;
+    --bundle-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container">
+    <header class="wc-bundle-builder__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="wc-bundle-builder__eyebrow wc-label">
+          {%- assign eyebrow_parts = section.settings.eyebrow | split: '|' -%}
+          {%- for part in eyebrow_parts -%}
+            <span class="wc-bundle-builder__dot" aria-hidden="true"></span>
+            <span>{{ part | strip }}</span>
+          {%- endfor -%}
+          <span class="wc-bundle-builder__dot" aria-hidden="true"></span>
+        </p>
+      {%- endif -%}
+
+      <h1 class="wc-bundle-builder__heading wc-display-xl">
+        {{- section.settings.heading | default: product.title | escape -}}
+      </h1>
+
+      {%- if section.settings.show_arrow -%}
+        <span class="wc-bundle-builder__arrow" aria-hidden="true">
+          {{- 'icon-wc-arrow.svg' | inline_asset_content -}}
+        </span>
+      {%- endif -%}
+    </header>
+
+    {%- if has_products == false or first_pack == null -%}
+      {%- comment -%}
+        Nothing to build with. Rather than a broken builder, say what is
+        missing — the storefront copy stays neutral, the detail is in the log.
+      {%- endcomment -%}
+      <div class="wc-bundle-builder__notice">
+        <p>{{ 'wc_bundle.unavailable' | t }}</p>
+      </div>
+      <script>
+        console.warn(
+          '[wc-bundle-builder] Not rendered.',
+          {%- if has_products == false -%}
+            'The product metafield custom.bundle_products has no products.'
+          {%- else -%}
+            'No available variant has a custom.bundle_bottles_quantity value.'
+          {%- endif -%}
+        );
+      </script>
+    {%- else -%}
+      <wc-bundle-builder
+        class="wc-bundle-builder__layout{% if section.settings.sticky_panel %} wc-bundle-builder__layout--sticky{% endif %}{% if section.settings.sticky_bar %} wc-bundle-builder__layout--bar{% endif %}"
+        data-section-id="{{ section.id }}"
+        data-property-prefix="{{ section.settings.property_prefix | escape }}"
+        data-added-label="{{ section.settings.card_added_label | escape }}"
+        data-add-label="{{ section.settings.card_add_label | escape }}"
+      >
+        <div class="wc-bundle-builder__grid">
+          <ul class="wc-bundle-builder__items" role="list">
+            {%- for bundle_product in bundle_products -%}
+              {%- liquid
+                assign bundle_variant = bundle_product.selected_or_first_available_variant
+                assign is_available = false
+                if bundle_product.available and bundle_variant.available
+                  assign is_available = true
+                endif
+                assign thumb = ''
+                if bundle_product.featured_image != blank
+                  assign thumb = bundle_product.featured_image | image_url: width: 138
+                endif
+              -%}
+              <li
+                class="wc-bundle-builder__item"
+                data-bundle-item
+                data-product-id="{{ bundle_product.id }}"
+                data-title="{{ bundle_product.title | escape }}"
+                data-thumb="{{ thumb }}"
+                {% unless is_available %}
+                  data-unavailable
+                {% endunless %}
+              >
+                {%- render 'wc-product-card',
+                  product: bundle_product,
+                  section_id: section.id,
+                  layout: 'grid',
+                  mode: 'select',
+                  add_label: section.settings.card_add_label
+                -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+
+        <aside class="wc-bundle-builder__panel" aria-labelledby="BundlePanelTitle-{{ section.id }}">
+          <h2 id="BundlePanelTitle-{{ section.id }}" class="wc-bundle-builder__panel-title">
+            {{- section.settings.panel_title -}}
+          </h2>
+
+          {%- if section.settings.price_hint != blank -%}
+            <p class="wc-bundle-builder__hint">{{ section.settings.price_hint }}</p>
+          {%- endif -%}
+
+          <fieldset class="wc-bundle-builder__packs">
+            <legend class="wc-visually-hidden">{{ 'wc_bundle.pack_legend' | t }}</legend>
+            {%- for variant in product.variants -%}
+              {%- liquid
+                assign bottles = variant.metafields.custom.bundle_bottles_quantity.value | plus: 0
+                if bottles == 0 or variant.available == false
+                  continue
+                endif
+                assign pack_price = variant.price | money
+              -%}
+              <label class="wc-bundle-builder__pack">
+                <input
+                  type="radio"
+                  class="wc-bundle-builder__pack-input wc-visually-hidden"
+                  name="BundlePack-{{ section.id }}"
+                  value="{{ variant.id }}"
+                  data-bundle-pack
+                  data-bottles="{{ bottles }}"
+                  data-price="{{ pack_price | escape }}"
+                  {% if variant.id == first_pack.id %}
+                    checked
+                  {% endif %}
+                >
+                <span class="wc-bundle-builder__pack-face">
+                  <span class="wc-bundle-builder__pack-count wc-label">
+                    {{- 'wc_bundle.pack_count' | t: count: bottles -}}
+                  </span>
+                  <span class="wc-bundle-builder__pack-price">{{ pack_price }}</span>
+                </span>
+              </label>
+            {%- endfor -%}
+          </fieldset>
+
+          {%- if section.settings.pick_hint != blank -%}
+            <p class="wc-bundle-builder__hint">{{ section.settings.pick_hint }}</p>
+          {%- endif -%}
+
+          {%- comment -%}
+            Server-rendered slots for the first pack, so the panel is complete
+            before the script runs; it re-renders them on every change.
+          {%- endcomment -%}
+          <ol class="wc-bundle-builder__slots" data-bundle-slots>
+            {%- for i in (1..first_bottles) -%}
+              <li class="wc-bundle-builder__slot">
+                <span class="wc-bundle-builder__slot-index">{{ i }}</span>
+                <span class="wc-bundle-builder__slot-label">{{ 'wc_bundle.slot_empty' | t }}</span>
+              </li>
+            {%- endfor -%}
+          </ol>
+
+          <p class="wc-bundle-builder__status" data-bundle-status role="status"></p>
+
+          <div class="wc-bundle-builder__foot">
+            <p class="wc-bundle-builder__subtotal">
+              <span>{{ section.settings.subtotal_label }}</span>
+              <span data-bundle-subtotal>{{ first_pack.price | money }}</span>
+            </p>
+
+            <product-form class="wc-bundle-builder__form-wrap" data-section-id="{{ section.id }}">
+              {%- form 'product',
+                product,
+                id: form_id,
+                class: 'wc-bundle-builder__form',
+                novalidate: 'novalidate',
+                data-type: 'add-to-cart-form'
+              -%}
+                <input
+                  type="hidden"
+                  name="id"
+                  value="{{ first_pack.id }}"
+                  class="product-variant-id"
+                  data-bundle-variant-id
+                >
+                {%- comment -%} The script writes properties[…] inputs here. {%- endcomment -%}
+                <div data-bundle-properties hidden></div>
+
+                <button
+                  type="submit"
+                  name="add"
+                  class="wc-button wc-button--lg wc-bundle-builder__cta"
+                  data-bundle-submit
+                >
+                  <span>{{ section.settings.cta_label }}</span>
+                  {%- comment -%} product-form.js toggles this and throws without it. {%- endcomment -%}
+                  {%- render 'loading-spinner' -%}
+                </button>
+              {%- endform -%}
+              <p
+                class="product-form__error-message-wrapper wc-bundle-builder__error wc-caption"
+                role="alert"
+                hidden
+              >
+                <span class="product-form__error-message"></span>
+              </p>
+            </product-form>
+          </div>
+        </aside>
+
+        {%- if section.settings.sticky_bar -%}
+          {%- comment -%}
+            Phones only (see the CSS): the same form, submitted from a button
+            that follows the customer while the panel is scrolled away.
+          {%- endcomment -%}
+          <div class="wc-bundle-builder__bar" data-bundle-bar>
+            <p class="wc-bundle-builder__bar-count">
+              <b data-bundle-bar-count>0</b>
+              <span data-bundle-bar-total>/ {{ first_bottles }}</span>
+            </p>
+            <button
+              type="submit"
+              form="{{ form_id }}"
+              class="wc-button wc-bundle-builder__bar-cta"
+              data-bundle-submit
+            >
+              {{- section.settings.cta_label -}}
+            </button>
+          </div>
+        {%- endif -%}
+      </wc-bundle-builder>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Bundle builder",
+  "tag": "div",
+  "class": "wc-bundle-builder-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Packs come from this product's variants (bottle count: the variant metafield custom.bundle_bottles_quantity). The bottles on offer come from the product metafield custom.bundle_products."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "info": "Separate items with | to get the dot separators.",
+      "default": "pick your six | pick your price"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave blank to use the product title.",
+      "default": "Build your bundle."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrow",
+      "label": "Show the arrow under the heading",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Panel"
+    },
+    {
+      "type": "text",
+      "id": "panel_title",
+      "label": "Title",
+      "default": "Your Bundle:"
+    },
+    {
+      "type": "text",
+      "id": "price_hint",
+      "label": "Pack hint",
+      "default": "First things first, choose your price point:"
+    },
+    {
+      "type": "text",
+      "id": "pick_hint",
+      "label": "Bottles hint",
+      "default": "Now pick the bottles that belong in your six:"
+    },
+    {
+      "type": "text",
+      "id": "subtotal_label",
+      "label": "Subtotal label",
+      "default": "subtotal:"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Add to cart label",
+      "default": "add bundle to cart +"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_panel",
+      "label": "Keep the panel in view while scrolling (desktop)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_bar",
+      "label": "Show a summary bar at the foot of small screens",
+      "info": "Not drawn in Figma (there is no mobile artboard): on phones the panel scrolls away, so the count and the add button stay reachable.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Cards"
+    },
+    {
+      "type": "text",
+      "id": "card_add_label",
+      "label": "Add label",
+      "default": "add"
+    },
+    {
+      "type": "text",
+      "id": "card_added_label",
+      "label": "Selected label",
+      "default": "added"
+    },
+    {
+      "type": "text",
+      "id": "property_prefix",
+      "label": "Line-item property name",
+      "info": "Each chosen bottle is saved on the cart line as \"<name> 1\", \"<name> 2\", and so on.",
+      "default": "Bottle"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 142
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 248
+    }
+  ]
+}
+{% endschema %}

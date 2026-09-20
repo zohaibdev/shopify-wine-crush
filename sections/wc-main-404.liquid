@@ -1,0 +1,56 @@
+{%- comment -%}
+  404. The site's own language: caption, display heading, one pill back to the
+  shop. Nothing Dawn.
+{%- endcomment -%}
+
+{{ 'wc-editorial.css' | asset_url | stylesheet_tag }}
+
+<section class="wc-page wc-404">
+  <div class="wc-container wc-page__inner">
+    <p class="wc-page__eyebrow wc-label">{{ 'templates.404.subtext' | t }}</p>
+    <h1 class="wc-page__title">{{ section.settings.heading | escape }}</h1>
+    {%- if section.settings.body != blank -%}
+      <div class="wc-404__body wc-body-m rte">{{ section.settings.body }}</div>
+    {%- endif -%}
+    <a
+      href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+      class="wc-button wc-button--lg wc-404__cta"
+    >
+      {{- section.settings.button_label | escape -}}
+    </a>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "404",
+  "tag": "section",
+  "class": "wc-404-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "That bottle is not on the shelf."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Text",
+      "default": "<p>The page you were after has moved or never existed. The collection is a good place to start again.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "shop the collection"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    }
+  ]
+}
+{% endschema %}
+

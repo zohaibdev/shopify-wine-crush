@@ -1,0 +1,73 @@
+{%- comment -%}
+  "This is a gift" / "Add delivery notes" — the Reserve Cellar cart pattern
+  (Figma 10071:439 reference). A switch reveals a textarea and a confirm pill;
+  once confirmed the text shows as a saved card that opens again for editing.
+  - Gift message → cart attribute "Gift message" (Theme settings ›
+    Wine Crush — Cart)
+  - Delivery notes → the order note, i.e. Dawn's cart note (Theme settings ›
+    Cart › "Enable cart note")
+  Saving is assets/wc-cart.js <wc-cart-extras> → /cart/update.js.
+{%- endcomment -%}
+
+{%- liquid
+  assign gift_value = cart.attributes['Gift message']
+  assign note_value = cart.note
+-%}
+
+<wc-cart-extras class="wc-cart-extras">
+  <div class="wc-cart-extras__toggles">
+    {%- if settings.wc_cart_gift_enabled -%}
+      <label class="wc-switch">
+        <input
+          type="checkbox"
+          role="switch"
+          class="wc-switch__input"
+          data-toggle="gift"
+          aria-controls="CartExtras-gift"
+          {% if gift_value != blank %}
+            checked
+          {% endif %}
+        >
+        <span class="wc-switch__track" aria-hidden="true"></span>
+        <span class="wc-switch__label">{{ settings.wc_cart_gift_label }}</span>
+      </label>
+    {%- endif -%}
+    {%- if settings.show_cart_note -%}
+      <label class="wc-switch">
+        <input
+          type="checkbox"
+          role="switch"
+          class="wc-switch__input"
+          data-toggle="note"
+          aria-controls="CartExtras-note"
+          {% if note_value != blank %}
+            checked
+          {% endif %}
+        >
+        <span class="wc-switch__track" aria-hidden="true"></span>
+        <span class="wc-switch__label">{{ settings.wc_cart_note_label }}</span>
+      </label>
+    {%- endif -%}
+  </div>
+
+  {%- if settings.wc_cart_gift_enabled -%}
+    {%- render 'wc-cart-extra-panel',
+      key: 'gift',
+      value: gift_value,
+      placeholder: settings.wc_cart_gift_placeholder,
+      button: settings.wc_cart_gift_button,
+      saved_label: settings.wc_cart_gift_saved,
+      field_label: settings.wc_cart_gift_label
+    -%}
+  {%- endif -%}
+  {%- if settings.show_cart_note -%}
+    {%- render 'wc-cart-extra-panel',
+      key: 'note',
+      value: note_value,
+      placeholder: settings.wc_cart_note_placeholder,
+      button: settings.wc_cart_note_button,
+      saved_label: settings.wc_cart_note_saved,
+      field_label: settings.wc_cart_note_label
+    -%}
+  {%- endif -%}
+</wc-cart-extras>

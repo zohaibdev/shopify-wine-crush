@@ -1,15 +1,47 @@
 {{ 'wc-statement.css' | asset_url | stylesheet_tag }}
 
+{%- liquid
+  assign has_background = false
+  if section.settings.background == 'image'
+    assign has_background = true
+  endif
+-%}
+
 <section
-  class="wc-statement wc-statement--{{ section.settings.alignment }} wc-statement--{{ section.settings.tone }}"
+  class="wc-statement wc-statement--{{ section.settings.alignment }} wc-statement--{{ section.settings.tone }}{% if has_background %} wc-statement--image{% if section.settings.tuck_under %} wc-statement--tucked{% endif %}{% endif %}"
   style="
     --statement-width: {{ section.settings.max_width }}px;
+    --overlay-statement: rgba(0, 0, 0, {{ section.settings.overlay_opacity | default: 25 | divided_by: 100.0 }});
     --statement-padding-top: {{ section.settings.padding_top }}px;
     --statement-padding-bottom: {{ section.settings.padding_bottom }}px;
   "
 >
+  {%- if has_background -%}
+    {%- comment -%}
+      Image band (About Us closing, Figma 10067:363): a full-bleed photograph
+      under the statement. Ships with the art it was drawn with.
+    {%- endcomment -%}
+    <div class="wc-statement__media">
+      {%- if section.settings.background_image != blank -%}
+        {{
+          section.settings.background_image
+          | image_url: width: 2400
+          | image_tag: widths: '750, 1100, 1440, 1920, 2400', sizes: '100vw', alt: '', loading: 'lazy'
+        }}
+      {%- else -%}
+        <img src="{{ 'wine-crush-about-closing.jpg' | asset_url }}" alt="" width="2400" height="1340" loading="lazy">
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
   <div class="wc-container">
     <div class="wc-statement__inner">
+      {%- if section.settings.icon != blank -%}
+        <div class="wc-statement__icon" aria-hidden="true">
+          {{ section.settings.icon | image_url: width: 132 | image_tag: widths: '44, 88, 132', alt: '' }}
+        </div>
+      {%- endif -%}
+
       <div class="wc-statement__text">
         {%- if section.settings.heading != blank -%}
           <div class="wc-statement__heading wc-display-{{ section.settings.heading_size }}">
@@ -93,6 +125,49 @@
       "default": 600
     },
     {
+      "type": "image_picker",
+      "id": "icon",
+      "label": "Icon",
+      "info": "Shown 44px wide above the heading."
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "select",
+      "id": "background",
+      "label": "Background",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "image", "label": "Image" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Image",
+      "info": "A placeholder photograph is used until one is chosen."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 25
+    },
+    {
+      "type": "checkbox",
+      "id": "tuck_under",
+      "label": "Let the next section overlap the image",
+      "info": "The next band (e.g. the footer) rises 129px over the foot of the photograph, as on About Us.",
+      "default": false
+    },
+    {
       "type": "header",
       "content": "Button"
     },
@@ -114,6 +189,7 @@
       "type": "range",
       "id": "padding_top",
       "label": "Top padding",
+      "info": "With an image background this is the space above the image.",
       "min": 0,
       "max": 200,
       "step": 2,
@@ -124,6 +200,7 @@
       "type": "range",
       "id": "padding_bottom",
       "label": "Bottom padding",
+      "info": "With an image background this lifts the text above the image's centre.",
       "min": 0,
       "max": 200,
       "step": 2,

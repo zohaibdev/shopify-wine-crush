@@ -1,0 +1,147 @@
+{%- comment -%}
+  Journal article (Figma 10053:93). Everything is Shopify's `article`: the
+  date, the title, the featured image and the body the merchant writes in
+  Content › Blog posts. The body is rendered as-is and styled through
+  `.wc-article__content` so headings, lists, quotes, links and inline images
+  all keep working.
+{%- endcomment -%}
+
+{{ 'wc-editorial.css' | asset_url | stylesheet_tag }}
+{{ 'wc-journal.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-article"
+  style="
+    --article-padding-top: {{ section.settings.padding_top }}px;
+    --article-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container">
+    {%- if section.settings.show_back -%}
+      <a class="wc-article__back wc-caption" href="{{ blog.url }}">
+        <span class="wc-article__back-arrow" aria-hidden="true"></span>
+        {{ section.settings.back_label | default: blog.title | escape }}
+      </a>
+    {%- endif -%}
+
+    <article class="wc-article__inner">
+      <header class="wc-article__head">
+        {%- if section.settings.show_date -%}
+          <p class="wc-article__pill wc-caption">
+            <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+              {{- article.published_at | date: "%b ‘%y" -}}
+            </time>
+          </p>
+        {%- endif -%}
+
+        <h1 class="wc-article__title">{{ article.title | escape }}</h1>
+
+        {%- if section.settings.show_author and article.author != blank -%}
+          <p class="wc-article__author wc-caption">{{ article.author }}</p>
+        {%- endif -%}
+      </header>
+
+      {%- if article.image != blank -%}
+        <figure class="wc-article__figure">
+          {{
+            article.image
+            | image_url: width: 1016
+            | image_tag:
+              widths: '254, 508, 762, 1016',
+              sizes: '(min-width: 750px) 254px, 60vw',
+              alt: article.image.alt | default: article.title,
+              loading: 'eager',
+              fetchpriority: 'high'
+          }}
+        </figure>
+      {%- endif -%}
+
+      <div class="wc-article__content wc-rte">
+        {{ article.content }}
+      </div>
+
+      {%- if section.settings.show_tags and article.tags.size > 0 -%}
+        <ul class="wc-article__tags" role="list">
+          {%- for tag in article.tags -%}
+            <li>
+              <a class="wc-article__tag wc-caption" href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </article>
+
+    {%- if blog.comments_enabled? -%}
+      {%- comment -%}
+        Comments are off on this blog; Dawn's own article section still holds
+        the full comment implementation if the merchant turns them on.
+      {%- endcomment -%}
+      <p class="wc-article__comments-note wc-caption">{{ 'wc_journal.comments_elsewhere' | t }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Journal article",
+  "tag": "article",
+  "class": "wc-article-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_back",
+      "label": "Show the \"back to journal\" link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "back_label",
+      "label": "Back link label",
+      "info": "Leave blank to use the blog title.",
+      "default": "back to journal"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show the date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show the author",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show the tags",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 58
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 152
+    }
+  ]
+}
+{% endschema %}

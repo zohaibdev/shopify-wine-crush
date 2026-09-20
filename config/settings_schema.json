@@ -99,6 +99,183 @@
     ]
   },
   {
+    "name": "Wine Crush — Cart",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Drawer style",
+        "info": "The cart drawer follows the Reserve Cellar reference in Figma (10071:439): its own palette and a grotesk sans, independent of the page. Inter is the closest library match to the reference face (same line breaks)."
+      },
+      {
+        "type": "font_picker",
+        "id": "wc_cart_font",
+        "label": "Font",
+        "default": "inter_n4"
+      },
+      {
+        "type": "color",
+        "id": "wc_cart_color_background",
+        "label": "Background",
+        "default": "#000000"
+      },
+      {
+        "type": "color",
+        "id": "wc_cart_color_text",
+        "label": "Text",
+        "info": "Rules, panels and switch tracks are tints of this over the background.",
+        "default": "#F2F2EB"
+      },
+      {
+        "type": "color",
+        "id": "wc_cart_color_muted",
+        "label": "Secondary text",
+        "info": "Labels, links and switch knobs.",
+        "default": "#B4B3A0"
+      },
+      {
+        "type": "color",
+        "id": "wc_cart_color_progress",
+        "label": "Delivery progress",
+        "default": "#8A2224"
+      },
+      {
+        "type": "header",
+        "content": "Delivery message"
+      },
+      {
+        "type": "richtext",
+        "id": "wc_cart_message",
+        "label": "Message",
+        "info": "Shown at the top of the cart drawer. [threshold] is replaced by the free-delivery amount.",
+        "default": "<p><a href=\"/account/login\" title=\"Log in\">Log in</a> or <a href=\"/account/register\" title=\"Join now\">join now</a> for free delivery on orders over [threshold].</p>"
+      },
+      {
+        "type": "range",
+        "id": "wc_cart_free_shipping_threshold",
+        "label": "Free-delivery threshold",
+        "info": "Drives the progress bar. 0 hides it.",
+        "min": 0,
+        "max": 500,
+        "step": 5,
+        "unit": "$",
+        "default": 200
+      },
+      {
+        "type": "header",
+        "content": "Gift message"
+      },
+      {
+        "type": "checkbox",
+        "id": "wc_cart_gift_enabled",
+        "label": "Show \"This is a gift\"",
+        "info": "Saved on the order as the cart attribute \"Gift message\".",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_gift_label",
+        "label": "Toggle label",
+        "default": "This is a gift"
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_gift_placeholder",
+        "label": "Placeholder",
+        "default": "Enter your gift message..."
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_gift_button",
+        "label": "Button label",
+        "default": "confirm message"
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_gift_saved",
+        "label": "Saved heading",
+        "default": "Gift message:"
+      },
+      {
+        "type": "header",
+        "content": "Delivery notes"
+      },
+      {
+        "type": "paragraph",
+        "content": "Turn delivery notes on with Cart › \"Enable cart note\". They are saved as the order note."
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_note_label",
+        "label": "Toggle label",
+        "default": "Add delivery notes"
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_note_placeholder",
+        "label": "Placeholder",
+        "default": "Enter delivery instructions..."
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_note_button",
+        "label": "Button label",
+        "default": "confirm notes"
+      },
+      {
+        "type": "text",
+        "id": "wc_cart_note_saved",
+        "label": "Saved heading",
+        "default": "Delivery notes:"
+      },
+      {
+        "type": "header",
+        "content": "Age verification"
+      },
+      {
+        "type": "checkbox",
+        "id": "wc_age_gate_enabled",
+        "label": "Require age verification before checkout",
+        "info": "Checkout stays blocked until a date of birth over the minimum age is entered and the confirmation is ticked. Both are saved on the order as cart attributes.",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "wc_age_gate_min_age",
+        "label": "Minimum age",
+        "min": 18,
+        "max": 25,
+        "step": 1,
+        "unit": "yrs",
+        "default": 18
+      },
+      {
+        "type": "text",
+        "id": "wc_age_gate_dob_label",
+        "label": "Date of birth label",
+        "default": "Date of Birth"
+      },
+      {
+        "type": "richtext",
+        "id": "wc_age_gate_confirm_text",
+        "label": "Confirmation text",
+        "info": "Link your conditions of sale page here.",
+        "default": "<p>I confirm that the recipient and I are over the age of 18 and agree to the <a href=\"/policies/terms-of-service\" title=\"Conditions of Sale\">Conditions of Sale</a></p>"
+      },
+      {
+        "type": "text",
+        "id": "wc_age_gate_required",
+        "label": "Required-field message",
+        "default": "Required field"
+      },
+      {
+        "type": "text",
+        "id": "wc_age_gate_underage",
+        "label": "Under-age message",
+        "default": "You must be over the minimum age to purchase."
+      }
+    ]
+  },
+  {
     "name": "t:settings_schema.logo.name",
     "settings": [
       {

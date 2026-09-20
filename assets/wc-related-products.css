@@ -1,0 +1,29 @@
+/* --------------------------------------------------------------------------
+   Related products — Figma 10050:30. The home slider (wc-product-tabs.css,
+   wc-product-card.css) under an 18px caps heading, centred at y947 (38px
+   below the product section). The bottles start at y960, i.e. they rise
+   alongside the heading, so the rail follows it with no gap.
+   -------------------------------------------------------------------------- */
+
+.wc-related {
+  display: block;
+  padding-block: var(--related-padding-top) var(--related-padding-bottom);
+}
+
+.wc-related__heading {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--color-text);
+  text-align: center;
+}
+
+@media screen and (max-width: 989px) {
+  .wc-related {
+    padding-top: var(--space-3xl);
+  }
+
+  .wc-related__heading {
+    margin-bottom: var(--space-lg);
+  }
+}

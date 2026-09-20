@@ -29,6 +29,13 @@
   transition: background-color var(--transition-header);
 }
 
+/* Every other page: a solid Coral bar. The rule is an inset shadow, not a
+   border, so the bar stays --header-height tall. */
+.wc-header--page {
+  background-color: var(--color-header-bg-page);
+  box-shadow: inset 0 -0.7px 0 var(--color-header-rule-page);
+}
+
 /* Home only: the header floats over the hero until the page scrolls or a
    mega menu opens, at which point it resolves into a solid surface. */
 .wc-header--transparent:not(.wc-header--scrolled):not(.wc-header--menu-open) {
@@ -494,10 +501,12 @@
   transform: translateX(0);
 }
 
+/* Back · logo · close — the header bar's own grid, so the wordmark lands
+   exactly where the header shows it. */
 .wc-drawer__head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-md);
   min-height: var(--header-height);
   padding-block: var(--header-padding-block);
@@ -520,12 +529,35 @@
   cursor: pointer;
 }
 
+.wc-drawer__back {
+  grid-column: 1;
+  justify-self: start;
+}
+
 .wc-drawer__back[hidden] {
   display: none;
 }
 
+.wc-drawer__logo {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+}
+
+.wc-drawer__logo-img {
+  display: block;
+  width: auto;
+  height: 24px;
+}
+
+.wc-drawer__logo:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 4px;
+}
+
 .wc-drawer__close {
-  margin-inline-start: auto;
+  grid-column: 3;
+  justify-self: end;
   font-size: 15px;
   line-height: 1;
 }
@@ -571,15 +603,19 @@
   text-transform: uppercase;
 }
 
+/* One row rule for every equivalent drawer row, button or link: both axes of
+   padding are set (a bare padding-block left buttons with the UA's inline
+   padding, so "shop" and "info" sat 6px right of "journal"). */
 .wc-drawer__item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
   width: 100%;
-  padding-block: var(--space-xs);
+  margin: 0;
+  padding: var(--space-xs) 0;
   border: 0;
-  border-bottom: var(--border-width) solid rgba(244, 231, 212, 0.18);
+  border-bottom: var(--border-width) solid var(--color-divider);
   background: none;
   color: inherit;
   font-family: var(--font-body);
@@ -601,6 +637,14 @@
 
 .wc-drawer__accordion[open] .wc-drawer__item--summary {
   color: var(--color-accent);
+}
+
+/* Rows of links on a level (Info) — the same rhythm as the root level. The
+   sublist below is only for the links inside a Shop accordion. */
+.wc-drawer__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .wc-drawer__sublist {
@@ -682,9 +726,11 @@
     display: inline-flex;
   }
 
+  /* Below 990 the bar is burger · logo · cart. Every nav link (mega triggers,
+     link blocks such as "journal", account) lives in the drawer instead;
+     hiding the triggers and account only let plain link blocks through. */
   .wc-header__nav--left,
-  .wc-header__account,
-  .wc-header__trigger {
+  .wc-header__nav .wc-header__link {
     display: none;
   }
 

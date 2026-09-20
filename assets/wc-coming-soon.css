@@ -1,0 +1,155 @@
+/* --------------------------------------------------------------------------
+   Coming soon (sections/wc-coming-soon.liquid) — Figma 10036:30, 1440×884.
+
+   Vertical: a 1fr / auto / 1fr grid holds the masthead on the viewport's
+   midline, which is where the artboard puts the logo (342 + 199/2 = 441.5 of
+   884). The copy and form hang in the lower track.
+   Horizontal: the masthead is 1fr / logo / 1fr with a 65px gap, so "coming"
+   ends 65px left of the logo and "soon" starts 65px right of it
+   (589 − 524 and 916 − 851), whatever the text lengths.
+   -------------------------------------------------------------------------- */
+
+.wc-coming-soon {
+  --coming-soon-flank-gap: 65px;
+
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: var(--space-xl) var(--page-gutter);
+  /* Under the photo in the artboard; shows only while it loads. */
+  background-color: var(--color-crimson);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+.wc-coming-soon__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.wc-coming-soon__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The bundled photo, cropped as the artboard crops it: at 1440 the point under
+   the logo is 48% across the image, which lands at 31.5% object-position once
+   cover scales it to 1609px. Merchant images use their own focal point. */
+.wc-coming-soon__media .wc-coming-soon__default-image {
+  object-position: 31.5% 0;
+}
+
+/* A pseudo-element rather than a div: Dawn's base.css hides every empty div. */
+.wc-coming-soon__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / var(--coming-soon-overlay));
+}
+
+.wc-coming-soon__masthead {
+  position: relative;
+  z-index: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: var(--coming-soon-flank-gap);
+  margin: 0;
+  color: var(--color-text);
+}
+
+/* IBM Plex Mono SemiBold 18px caps, leading normal (23px box). --text-tab is
+   the same 18px → 14px clamp the product tabs use. */
+.wc-coming-soon__flank {
+  font-family: var(--font-body);
+  font-size: var(--text-tab);
+  font-weight: 600;
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.wc-coming-soon__flank--start {
+  grid-column: 1;
+  justify-self: end;
+}
+
+.wc-coming-soon__flank--end {
+  grid-column: 3;
+  justify-self: start;
+}
+
+.wc-coming-soon__logo {
+  grid-column: 2;
+  display: block;
+  width: var(--coming-soon-logo-width);
+}
+
+.wc-coming-soon__logo svg,
+.wc-coming-soon__logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wc-coming-soon__body {
+  position: relative;
+  z-index: 1;
+  grid-row: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* 665 − 541: the copy starts 124px under the logo, on a 435px measure — which
+   is what breaks the default copy after "BEYOND," and "OPENING". */
+.wc-coming-soon__description {
+  max-width: 435px;
+  margin-top: 124px;
+}
+
+.wc-coming-soon__description p {
+  margin: 0;
+}
+
+/* 744 − 719 */
+.wc-coming-soon__form {
+  width: 100%;
+  margin-top: 25px;
+}
+
+.wc-coming-soon__body > .wc-coming-soon__form:first-child {
+  margin-top: 124px;
+}
+
+/* Mobile: the flanks and logo still share one row (that row *is* the design),
+   so the logo gives up width to keep "coming" and "soon" on it. */
+@media screen and (max-width: 749px) {
+  .wc-coming-soon {
+    --coming-soon-flank-gap: var(--space-sm);
+  }
+
+  /* On a narrow screen cover barely crops, so the same 48% point sits at 48%. */
+  .wc-coming-soon__media .wc-coming-soon__default-image {
+    object-position: 48% 0;
+  }
+
+  .wc-coming-soon__logo {
+    width: min(var(--coming-soon-logo-width), 46vw);
+  }
+
+  .wc-coming-soon__description {
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-coming-soon__body > .wc-coming-soon__form:first-child {
+    margin-top: var(--space-3xl);
+  }
+}

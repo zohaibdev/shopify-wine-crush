@@ -7,11 +7,31 @@
   - add_label: {String} visible label on the add button
   - placeholder: {Boolean} render sample content instead of a product
   - index: {Number} placeholder only — picks which bottle image to use
+  - layout: {String} optional. 'grid' = the collection card (Figma 10033:680):
+    image inset in the card, title top-left, price and a 26px "add +" at the
+    foot. Omitted = the home slider card, bottle overhanging the card top.
+  - mode: {String} optional. 'select' = the bundle builder's picker (Figma
+    10072:1173): the same grid card, but "add +" toggles the product in and
+    out of the bundle instead of the cart, and nothing on the card navigates
+    away — the whole card is the control (assets/wc-bundle-builder.js).
+  - added_label: {String} select mode — the label once the card is picked.
 {%- endcomment -%}
+
+{%- liquid
+  if layout == 'grid'
+    assign card_modifier = ' wc-product-card--grid'
+    assign add_size = 'wc-button--card'
+    assign image_sizes = '(min-width: 1200px) calc((100vw - 267px) / 4), (min-width: 990px) calc((100vw - 252px) / 3), (min-width: 750px) calc((100vw - 66px) / 3), calc((100vw - 51px) / 2)'
+  else
+    assign card_modifier = ''
+    assign add_size = 'wc-button--compact'
+    assign image_sizes = '(min-width: 990px) 324px, 60vw'
+  endif
+-%}
 
 {%- if placeholder -%}
   {%- assign bottle = index | modulo: 4 | plus: 1 -%}
-  <div class="wc-product-card">
+  <div class="wc-product-card{{ card_modifier }}">
     <div class="wc-product-card__media">
       <img
         src="{{ 'wine-crush-bottle-' | append: bottle | append: '.png' | asset_url }}"
@@ -27,7 +47,7 @@
 
       <div class="wc-product-card__row">
         <h3 class="wc-product-card__title wc-meta">{{ 'onboarding.product_title' | t }}</h3>
-        <span class="wc-button wc-button--compact wc-product-card__add">
+        <span class="wc-button {{ add_size }} wc-product-card__add">
           <span>{{ add_label | default: 'add' }}</span>
           <span class="wc-product-card__plus">+</span>
         </span>
@@ -41,18 +61,41 @@
   assign form_id = 'WcAdd-' | append: section_id | append: '-' | append: product.id
 -%}
 
-<div class="wc-product-card">
-  <div class="wc-product-card__media">
+<div class="wc-product-card{{ card_modifier }}{% if mode == 'select' %} wc-product-card--select{% endif %}">
+  {%- comment -%}
+    The bottle overhangs the card top, so it carries its own link rather than
+    relying on the title's overlay (which is scoped to the info block). It is
+    out of the tab order because the title link already reaches the same URL.
+  {%- endcomment -%}
+  {%- comment -%}
+    In select mode the card is a picker, so the media is a plain element: a
+    link here would take the customer off the bundle page mid-selection.
+  {%- endcomment -%}
+  {%- if mode == 'select' -%}
+    <div class="wc-product-card__media">
+  {%- else -%}
+  <a
+    href="{{ product.url }}"
+    class="wc-product-card__media"
+    tabindex="-1"
+    aria-label="{{ product.title | escape }}"
+    draggable="false"
+  >
+  {%- endif -%}
     {%- if product.featured_image != blank -%}
       {{
         product.featured_image
         | image_url: width: 648
-        | image_tag: widths: '324, 486, 648', sizes: '(min-width: 990px) 324px, 60vw', alt: product.featured_image.alt
+        | image_tag: widths: '324, 486, 648', sizes: image_sizes, alt: '', draggable: 'false', loading: 'lazy'
       }}
     {%- else -%}
-      <img src="{{ 'wine-crush-bottle-1.png' | asset_url }}" alt="" width="324" height="485" loading="lazy">
+      <img src="{{ 'wine-crush-bottle-1.png' | asset_url }}" alt="" width="324" height="485" loading="lazy" draggable="false">
     {%- endif -%}
-  </div>
+  {%- if mode == 'select' -%}
+    </div>
+  {%- else -%}
+  </a>
+  {%- endif -%}
 
   <div class="wc-product-card__info">
     <p class="wc-product-card__price wc-meta">
@@ -64,10 +107,31 @@
 
     <div class="wc-product-card__row">
       <h3 class="wc-product-card__title wc-meta">
-        <a href="{{ product.url }}" class="wc-product-card__link">{{ product.title }}</a>
+        {%- if mode == 'select' -%}
+          {{ product.title }}
+        {%- else -%}
+          <a href="{{ product.url }}" class="wc-product-card__link">{{ product.title }}</a>
+        {%- endif -%}
       </h3>
 
-      {%- if product.available -%}
+      {%- if mode == 'select' -%}
+        {%- if product.available and variant.available -%}
+          <button
+            type="button"
+            class="wc-button {{ add_size }} wc-product-card__add"
+            data-bundle-toggle
+            aria-pressed="false"
+          >
+            <span class="wc-visually-hidden" data-bundle-toggle-a11y>
+              {{- 'wc_bundle.add_to_bundle' | t: title: product.title -}}
+            </span>
+            <span aria-hidden="true" data-bundle-toggle-label>{{ add_label | default: 'add' }}</span>
+            <span class="wc-product-card__plus" aria-hidden="true" data-bundle-toggle-mark>+</span>
+          </button>
+        {%- else -%}
+          <span class="wc-product-card__soldout wc-caption">{{ 'products.product.sold_out' | t }}</span>
+        {%- endif -%}
+      {%- elsif product.available and variant.available -%}
         <product-form data-section-id="{{ section_id }}">
           {%- form 'product', product, id: form_id, class: 'wc-product-card__form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
             <input type="hidden" name="id" value="{{ variant.id }}" class="product-variant-id">
@@ -75,14 +139,19 @@
               id="{{ form_id }}-submit"
               type="submit"
               name="add"
-              class="wc-button wc-button--compact wc-product-card__add"
+              class="wc-button {{ add_size }} wc-product-card__add"
               aria-live="polite"
               aria-label="{{ 'products.product.add_to_cart' | t }}: {{ product.title | escape }}"
             >
               <span aria-hidden="true">{{ add_label | default: 'add' }}</span>
               <span class="wc-product-card__plus" aria-hidden="true">+</span>
+              {%- comment -%} product-form.js toggles this spinner and throws without it. {%- endcomment -%}
+              {%- render 'loading-spinner' -%}
             </button>
           {%- endform -%}
+          <p class="product-form__error-message-wrapper wc-product-card__error wc-caption" role="alert" hidden>
+            <span class="product-form__error-message"></span>
+          </p>
         </product-form>
       {%- else -%}
         <span class="wc-product-card__soldout wc-caption">{{ 'products.product.sold_out' | t }}</span>

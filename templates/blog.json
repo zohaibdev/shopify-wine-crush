@@ -1,28 +1,38 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "main": {
-      "type": "main-blog",
+      "type": "wc-main-blog",
       "settings": {
-        "layout": "collage",
-        "show_image": true,
-        "image_height": "medium",
+        "pill": "journal",
+        "eyebrow": "for the curious. not the connoisseur.",
+        "heading": "A place for good bottles, easy recommendations and a few things worth knowing.",
         "show_date": true,
-        "show_author": false,
-        "padding_top": 36,
-        "padding_bottom": 36
+        "show_sort": true,
+        "batch_size": 12,
+        "page_size": 50,
+        "more_label": "see more",
+        "padding_top": 128,
+        "padding_bottom": 192
+      }
+    },
+    "membership": {
+      "type": "wc-membership",
+      "settings": {
+        "heading": "5% off for life",
+        "body": "<p>Become a Wine Crush member and get 5% off for life, both online and in-store, across most wine and selected products. One simple sign-up, ongoing savings whenever you shop with us.</p>",
+        "body_width": 346,
+        "signup_tag": "five-percent-off",
+        "signup_name_placeholder": "name",
+        "signup_email_placeholder": "email",
+        "signup_phone_placeholder": "phone",
+        "signup_next_label": "Next",
+        "signup_submit_label": "Join the crush",
+        "signup_success": "<p>You're in. Welcome to the crush — your 5% off is on its way.</p>",
+        "padding_top": 0,
+        "padding_bottom": 162
       }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main", "membership"]
 }
+

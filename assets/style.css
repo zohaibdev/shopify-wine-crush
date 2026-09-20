@@ -31,6 +31,15 @@
   font-display: swap;
 }
 
+/* SemiBold is used only by the Coming Soon page's "coming" / "soon" flank. */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('IBMPlexMono-SemiBold.woff2') format('woff2'), url('IBMPlexMono-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'IBM Plex Mono';
   src: url('IBMPlexMono-Bold.woff2') format('woff2'), url('IBMPlexMono-Bold.woff') format('woff');
@@ -55,9 +64,15 @@
   --text-display-xl: clamp(56px, 10.42vw, 150px);
   --text-display-l: clamp(52px, 8.34vw, 120px);
   --text-display-m: clamp(32px, 4.31vw, 62px);
+  /* Product title (Figma 10060:39): Dahlia 80px at 1440. */
+  --text-display-product: clamp(44px, 5.56vw, 80px);
+  /* Page hero title (About Us, Figma 10067:244): Dahlia 110px at 1440. */
+  --text-display-page: clamp(44px, 7.64vw, 110px);
 
   /* --- Typography: body scale --- */
   --text-body-l: clamp(15px, 1.25vw, 18px);
+  /* Long-form 16px copy (About Us intro, Figma 10067:250). */
+  --text-body-m: clamp(14px, 1.12vw, 16px);
   --text-tab: clamp(14px, 1.25vw, 18px);
   --text-blog-title: clamp(14px, 1.12vw, 16px);
   --text-button: clamp(13px, 0.98vw, 14px);
@@ -119,6 +134,12 @@
 
   --color-muted: rgba(244, 231, 212, 0.66);
   --color-muted-strong: rgba(244, 231, 212, 0.75);
+  /* Dividers inside the nav drawer's lists: Ivory at 18%. */
+  --color-divider: rgba(244, 231, 212, 0.18);
+  /* Rules on Claret (FAQ accordion, Figma 10066:204): Sorbet at 50%. */
+  --color-hairline: rgba(248, 204, 138, 0.5);
+  /* Quieter Sorbet for supporting lines (bundle panel hints, 10074:1559). */
+  --color-accent-muted: rgba(248, 204, 138, 0.66);
   --color-fine-print: var(--color-ochre);
 
   --color-border: var(--color-ivory);
@@ -130,6 +151,10 @@
   /* --- Colours: header & mega menu surfaces --- */
   --color-header-bg: transparent;
   --color-header-bg-active: var(--color-claret);
+  /* Every page but home: the bar is Coral with a 0.7px Ivory rule
+     (Figma 10008:339 Shop, 10075:1873 About Us). */
+  --color-header-bg-page: var(--color-coral);
+  --color-header-rule-page: var(--color-ivory);
   --color-megamenu-bg: var(--color-coral);
 
   /* --- Overlays --- */
@@ -175,7 +200,11 @@
   --section-spacing-desktop: var(--space-8xl);
   --section-spacing-mobile: var(--space-4xl);
   --section-padding-block: var(--space-5xl);
-  --band-overlap: var(--space-7xl);
+  /* The rounded claret cap that closes the hero and every capped band: 129px
+     at 1440 (8.96vw = 129.02 so the cap binds there), easing to 48px on
+     phones in proportion to the 24px mobile band radius. A fixed 129 swallowed
+     the last 129px of every short mobile band. */
+  --band-overlap: clamp(48px, 8.96vw, 129px);
 
   /* --- Radii --- */
   --radius-band: 39px;
@@ -191,6 +220,15 @@
   --button-height-xs: 19px;
   --button-height-sm: 25px;
   --button-height-nav: 27px;
+  /* The collection card's "add +" pill (Figma 10033:517): 61 × 26, 13px label. */
+  --button-height-card: 26px;
+  /* The product page's "add to cart +" (Figma 10060:44): 153 × 31, 16px label
+     sitting 14px in from the pill's edge (13 + the 1px stroke). */
+  --button-height-lg: 31px;
+  --button-padding-inline-lg: 13px;
+  --text-button-lg: 16px;
+  /* 458 − 447: the label sits 11px in, i.e. 10px inside the 1px stroke. */
+  --button-padding-inline-card: 10px;
   /* 18 + the 1px border is the 19px the artboard leaves between a button's edge
      and its label. The artboard's button widths themselves disagree by a pixel
      or two, so the inset is the stable measure to match. */
@@ -290,6 +328,11 @@ h6,
 .wc-body-l {
   font-size: var(--text-body-l);
   line-height: var(--leading-body-loose);
+}
+
+.wc-body-m {
+  font-size: var(--text-body-m);
+  line-height: var(--leading-body);
 }
 
 .wc-body-s {
@@ -438,6 +481,18 @@ h6,
 
 .wc-button--compact {
   padding-inline: var(--button-padding-inline-compact);
+}
+
+.wc-button--lg {
+  min-height: var(--button-height-lg);
+  padding-inline: var(--button-padding-inline-lg);
+  font-size: var(--text-button-lg);
+}
+
+.wc-button--card {
+  min-height: var(--button-height-card);
+  padding-inline: var(--button-padding-inline-card);
+  font-size: var(--text-nav);
 }
 
 /* Colour variants — each swaps the single --color-border hook the primitive

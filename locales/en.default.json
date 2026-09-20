@@ -66,10 +66,57 @@
       "name": "Slider"
     }
   },
+  "wc_journal": {
+    "sort_by": "sort by",
+    "sort_label": "Sort articles",
+    "sort_newest": "Newest first",
+    "sort_oldest": "Oldest first",
+    "empty": "The journal is empty just now. Check back soon.",
+    "comments_elsewhere": "Comments are open on this post."
+  },
+  "wc_bundle": {
+    "pack_legend": "Bundle size",
+    "pack_count": "{{ count }} for",
+    "slot_empty": "select to add",
+    "counter": "[count] of [total] selected",
+    "select_more_one": "Select 1 more bottle to complete your [total]-bottle pack.",
+    "select_more_other": "Select [count] more bottles to complete your [total]-bottle pack.",
+    "remove_extra_one": "Remove 1 bottle to fit the [total]-bottle pack.",
+    "remove_extra_other": "Remove [count] bottles to fit the [total]-bottle pack.",
+    "full": "That is all [total] bottles. Remove one to swap it for another.",
+    "add_to_bundle": "Add {{ title }} to your bundle",
+    "add_to_bundle_js": "Add [title] to your bundle",
+    "remove_from_bundle_js": "Remove [title] from your bundle",
+    "unavailable_product": "[title] is sold out just now.",
+    "unavailable_selection": "One of your bottles has sold out. Remove it and pick another.",
+    "pack_unconfigured": "This pack is not available just now.",
+    "unavailable": "The bundle builder is not available just now. Please check back soon."
+  },
+  "wc_cart": {
+    "close": "close cart",
+    "checkout": "checkout",
+    "subtotal": "subtotal",
+    "each": "{{ price }} each",
+    "remove": "remove",
+    "edit": "Edit",
+    "free_delivery_progress": "Progress towards free delivery over {{ threshold }}",
+    "taxes": "Taxes and shipping calculated at checkout.",
+    "dob_day": "Day",
+    "dob_day_placeholder": "Day",
+    "dob_month": "Month",
+    "dob_month_placeholder": "Month",
+    "dob_year": "Year",
+    "dob_year_placeholder": "Year"
+  },
   "newsletter": {
     "label": "Email",
     "success": "Thanks for subscribing",
-    "button_label": "Subscribe"
+    "button_label": "Subscribe",
+    "step": "Step [current] of [total]",
+    "error_name": "Please enter your name.",
+    "error_email": "Please enter a valid email address.",
+    "error_phone": "Please enter a valid phone number, e.g. 0412 345 678 or +61 412 345 678.",
+    "error_generic": "Sorry, we could not sign you up just now. Please try again."
   },
   "accessibility": {
     "skip_to_text": "Skip to content",

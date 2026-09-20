@@ -23,14 +23,15 @@
             </div>
           {%- endif -%}
 
-          {%- if section.settings.button_label != blank -%}
-            <a
-              href="{{ section.settings.button_link | default: routes.root_url }}"
-              class="wc-button wc-button--on-light wc-membership__cta"
-            >
-              {{- section.settings.button_label -}}
-            </a>
-          {%- endif -%}
+          {%- comment -%}
+            The sign-up replaces the old "join the crush" link: the same
+            component as the Coming Soon page (Figma 10036:30) in its dark
+            variant — Deep Claret, the ink of the link it replaces (10055:493).
+            Tagged separately from the Coming Soon page via signup_tag.
+          {%- endcomment -%}
+          <div class="wc-membership__cta">
+            {%- render 'wc-signup-form', id: section.id, config: section.settings, variant: 'dark' -%}
+          </div>
         </div>
 
         <div class="wc-membership__media">
@@ -84,18 +85,52 @@
     },
     {
       "type": "header",
-      "content": "Button"
+      "content": "Sign-up form"
     },
     {
       "type": "text",
-      "id": "button_label",
-      "label": "Label",
-      "default": "become a member"
+      "id": "signup_tag",
+      "label": "Customer tag",
+      "info": "Added to every customer who signs up here, alongside \"newsletter\", so these sign-ups can be told apart from the Coming Soon page.",
+      "default": "five-percent-off"
     },
     {
-      "type": "url",
-      "id": "button_link",
-      "label": "Link"
+      "type": "text",
+      "id": "signup_name_placeholder",
+      "label": "Step 1 placeholder",
+      "default": "name"
+    },
+    {
+      "type": "text",
+      "id": "signup_email_placeholder",
+      "label": "Step 2 placeholder",
+      "default": "email"
+    },
+    {
+      "type": "text",
+      "id": "signup_phone_placeholder",
+      "label": "Step 3 placeholder",
+      "default": "phone"
+    },
+    {
+      "type": "text",
+      "id": "signup_next_label",
+      "label": "Next button label",
+      "info": "The button shows an arrow; this label is read by screen readers.",
+      "default": "Next"
+    },
+    {
+      "type": "text",
+      "id": "signup_submit_label",
+      "label": "Submit button label",
+      "info": "Read by screen readers on the last step.",
+      "default": "Join the crush"
+    },
+    {
+      "type": "richtext",
+      "id": "signup_success",
+      "label": "Success message",
+      "default": "<p>You're in. Welcome to the crush — your 5% off is on its way.</p>"
     },
     {
       "type": "header",

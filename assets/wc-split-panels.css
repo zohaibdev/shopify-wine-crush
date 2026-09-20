@@ -1,0 +1,141 @@
+/* --------------------------------------------------------------------------
+   Split panels
+   "How to shop." (About Us, Figma 10067:258–10067:276). At 1440: a 120px
+   Dahlia heading at x40 whose last 5px overlap the panels; two 702 × 717
+   photographic panels (overlays 60% / 40%) sharing one 1404px row with 20px
+   outer radii and a 0.7px Ivory hairline; content centred in each — 62px
+   title, 23px, 12/1.42 copy on a 346px measure, 23px, a 30px pill.
+   -------------------------------------------------------------------------- */
+
+.wc-split {
+  padding-block: var(--split-padding-top) var(--split-padding-bottom);
+}
+
+/* x40 on the artboard is 22px inside the 18px gutter; kept proportional. */
+.wc-split__heading {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 -0.042em;
+  padding-inline-start: 1.53vw;
+  font-size: var(--text-display-l);
+  line-height: var(--leading-display-tight);
+}
+
+.wc-split__panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-split__panel {
+  --panel-border: 0.7px solid var(--color-border);
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 702 / 717;
+  overflow: hidden;
+  border: var(--panel-border);
+}
+
+.wc-split__panel:first-child {
+  border-start-start-radius: var(--radius-panel);
+  border-end-start-radius: var(--radius-panel);
+}
+
+.wc-split__panel:last-child {
+  border-start-end-radius: var(--radius-panel);
+  border-end-end-radius: var(--radius-panel);
+}
+
+/* The two panels share the hairline between them. */
+.wc-split__panel + .wc-split__panel {
+  border-inline-start: 0;
+}
+
+.wc-split__media {
+  position: absolute;
+  inset: 0;
+}
+
+.wc-split__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wc-split__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--overlay-panel);
+}
+
+.wc-split__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 23px;
+  box-sizing: border-box;
+  width: min(346px + 2 * var(--page-gutter), 100%);
+  padding: var(--space-3xl) var(--page-gutter);
+  text-align: center;
+}
+
+.wc-split__title {
+  margin: 0;
+}
+
+.wc-split__text p {
+  margin: 0;
+}
+
+/* Tablet: the 2-up row stays, but at half of 768 a 717/702 frame is too short
+   for the copy, so each panel grows to its content. */
+@media screen and (max-width: 989px) {
+  .wc-split {
+    padding-block: 0 var(--section-spacing-desktop);
+  }
+
+  .wc-split__heading {
+    padding-inline-start: 0;
+  }
+
+  .wc-split__panel {
+    aspect-ratio: auto;
+    min-height: 60vw;
+  }
+}
+
+/* Phones: the panels stack; the outer radii move to the top and bottom. */
+@media screen and (max-width: 749px) {
+  .wc-split__panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wc-split__panel {
+    min-height: 118vw;
+  }
+
+  .wc-split__panel:first-child {
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  }
+
+  .wc-split__panel:last-child {
+    border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+  }
+
+  .wc-split__panel:only-child {
+    border-radius: var(--radius-panel);
+  }
+
+  .wc-split__panel + .wc-split__panel {
+    border-inline-start: var(--panel-border);
+    border-block-start: 0;
+  }
+}

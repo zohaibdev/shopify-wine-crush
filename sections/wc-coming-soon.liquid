@@ -1,0 +1,195 @@
+{%- comment -%}
+  Coming Soon page — Figma 10036:30 (1440×884, no header/footer; layout/theme.liquid
+  skips both groups on this template). A full-bleed photograph under a 37% black
+  overlay; the stacked "secondary" wordmark sits on the viewport's vertical
+  midline, flanked by "coming" / "soon", with the copy and sign-up below it.
+{%- endcomment -%}
+
+{{ 'wc-coming-soon.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading_label = shop.name | append: ' — ' | append: section.settings.left_text | append: ' ' | append: section.settings.right_text | strip
+  if section.settings.background_image != blank
+    assign background_style = 'object-position: ' | append: section.settings.background_image.presentation.focal_point | append: ';'
+  endif
+-%}
+
+<section
+  class="wc-coming-soon"
+  style="--coming-soon-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }}; --coming-soon-logo-width: {{ section.settings.logo_width }}px;"
+>
+  <div class="wc-coming-soon__media">
+    {%- if section.settings.background_image != blank -%}
+      {{
+        section.settings.background_image
+        | image_url: width: 2880
+        | image_tag:
+          widths: '750, 1100, 1500, 2200, 2880',
+          sizes: '100vw',
+          alt: '',
+          loading: 'eager',
+          fetchpriority: 'high',
+          style: background_style
+      }}
+    {%- else -%}
+      <img
+        class="wc-coming-soon__default-image"
+        src="{{ 'wine-crush-coming-soon.jpg' | asset_url }}"
+        alt=""
+        width="2200"
+        height="1228"
+        fetchpriority="high"
+      >
+    {%- endif -%}
+  </div>
+
+  <h1 class="wc-coming-soon__masthead" aria-label="{{ heading_label | escape }}">
+    {%- if section.settings.left_text != blank -%}
+      <span class="wc-coming-soon__flank wc-coming-soon__flank--start" aria-hidden="true">{{ section.settings.left_text }}</span>
+    {%- endif -%}
+
+    <span class="wc-coming-soon__logo" aria-hidden="true">
+      {%- if section.settings.logo != blank -%}
+        {{
+          section.settings.logo
+          | image_url: width: 800
+          | image_tag: widths: '262, 400, 524, 800', sizes: '(min-width: 750px) 262px, 46vw', alt: ''
+        }}
+      {%- else -%}
+        {{- 'wine-crush-logo-secondary.svg' | inline_asset_content -}}
+      {%- endif -%}
+    </span>
+
+    {%- if section.settings.right_text != blank -%}
+      <span class="wc-coming-soon__flank wc-coming-soon__flank--end" aria-hidden="true">{{ section.settings.right_text }}</span>
+    {%- endif -%}
+  </h1>
+
+  <div class="wc-coming-soon__body">
+    {%- if section.settings.description != blank -%}
+      <div class="wc-coming-soon__description wc-lede rte">{{ section.settings.description }}</div>
+    {%- endif -%}
+
+    <div class="wc-coming-soon__form">
+      {%- render 'wc-signup-form', id: section.id, config: section.settings, variant: 'light' -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Coming soon",
+  "tag": "div",
+  "class": "wc-coming-soon-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "Defaults to the Wine Crush bottle photograph. Set a focal point on the image to control the crop."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Background overlay",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "unit": "%",
+      "default": 37
+    },
+    {
+      "type": "header",
+      "content": "Masthead"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo",
+      "info": "Defaults to the stacked Wine Crush wordmark in Ivory."
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 160,
+      "max": 360,
+      "step": 2,
+      "unit": "px",
+      "default": 262
+    },
+    {
+      "type": "text",
+      "id": "left_text",
+      "label": "Text left of logo",
+      "default": "coming"
+    },
+    {
+      "type": "text",
+      "id": "right_text",
+      "label": "Text right of logo",
+      "default": "soon"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>A considered selection of wine, beer and beyond, without the fuss. Join the list for opening updates, new arrivals and first pours.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Sign-up form"
+    },
+    {
+      "type": "text",
+      "id": "signup_tag",
+      "label": "Customer tag",
+      "info": "Added to every customer who signs up here, alongside \"newsletter\", so these sign-ups can be told apart from the 5% off section.",
+      "default": "coming-soon-page"
+    },
+    {
+      "type": "text",
+      "id": "signup_name_placeholder",
+      "label": "Step 1 placeholder",
+      "default": "name"
+    },
+    {
+      "type": "text",
+      "id": "signup_email_placeholder",
+      "label": "Step 2 placeholder",
+      "default": "email"
+    },
+    {
+      "type": "text",
+      "id": "signup_phone_placeholder",
+      "label": "Step 3 placeholder",
+      "default": "phone"
+    },
+    {
+      "type": "text",
+      "id": "signup_next_label",
+      "label": "Next button label",
+      "info": "The button shows an arrow; this label is read by screen readers.",
+      "default": "Next"
+    },
+    {
+      "type": "text",
+      "id": "signup_submit_label",
+      "label": "Submit button label",
+      "info": "Read by screen readers on the last step.",
+      "default": "Join the list"
+    },
+    {
+      "type": "richtext",
+      "id": "signup_success",
+      "label": "Success message",
+      "default": "<p>Thanks — you're on the list. We'll be in touch when we open.</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Coming soon"
+    }
+  ]
+}
+{% endschema %}

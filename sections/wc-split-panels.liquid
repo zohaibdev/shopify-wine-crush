@@ -1,0 +1,180 @@
+{%- comment -%}
+  Split panels — "How to shop." on About Us (Figma 10067:258–10067:276).
+  A large display heading that tucks over the top edge of a 1404px row of two
+  photographic panels, each with a centred title, short copy and a pill link.
+{%- endcomment -%}
+
+{{ 'wc-split-panels.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-split"
+  style="
+    --split-padding-top: {{ section.settings.padding_top }}px;
+    --split-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="wc-split__heading">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="wc-split__panels" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            comment
+              Until an image is chosen each panel shows the art it was drawn
+              with: the first the doorstep delivery, the second the shop.
+            endcomment
+            assign fallback_art = 'wine-crush-about-shop-online.jpg'
+            if forloop.index == 2
+              assign fallback_art = 'wine-crush-about-shop-in-store.jpg'
+            endif
+          -%}
+          <li
+            class="wc-split__panel"
+            style="--overlay-panel: rgba(0, 0, 0, {{ block.settings.overlay_opacity | divided_by: 100.0 }});"
+            {{ block.shopify_attributes }}
+          >
+            <div class="wc-split__media">
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 1404
+                  | image_tag:
+                    widths: '375, 750, 1100, 1404',
+                    sizes: '(min-width: 750px) 50vw, 100vw',
+                    alt: '',
+                    loading: 'lazy'
+                }}
+              {%- else -%}
+                <img src="{{ fallback_art | asset_url }}" alt="" width="735" height="913" loading="lazy">
+              {%- endif -%}
+            </div>
+
+            <div class="wc-split__content">
+              {%- if block.settings.title != blank -%}
+                <h3 class="wc-split__title wc-display-m">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <div class="wc-split__text wc-body-s rte">{{ block.settings.text }}</div>
+              {%- endif -%}
+              {%- if block.settings.button_label != blank -%}
+                <a
+                  href="{{ block.settings.button_link | default: routes.all_products_collection_url }}"
+                  class="wc-button wc-split__cta"
+                >
+                  {{- block.settings.button_label | escape -}}
+                </a>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Split panels",
+  "tag": "div",
+  "class": "wc-split-section",
+  "max_blocks": 2,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "How to shop."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 300,
+      "step": 4,
+      "unit": "px",
+      "default": 220
+    }
+  ],
+  "blocks": [
+    {
+      "type": "panel",
+      "name": "Panel",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "unit": "%",
+          "default": 40
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Direct to Doorstep"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Shop online and have wine, beer and beyond delivered straight to your door.</p>"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "shop our collection +"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Split panels",
+      "blocks": [
+        { "type": "panel", "settings": { "overlay_opacity": 60 } },
+        {
+          "type": "panel",
+          "settings": {
+            "overlay_opacity": 40,
+            "title": "Around the Corner",
+            "text": "<p>Pop in-store and browse the collection in person.</p>",
+            "button_label": "get directions +"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

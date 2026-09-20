@@ -10,107 +10,53 @@
 {
   "sections": {
     "main": {
-      "type": "main-product",
-      "blocks": {
-        "vendor": {
-          "type": "text",
-          "settings": {
-            "text": "{{ product.vendor }}",
-            "text_style": "uppercase"
-          }
-        },
-        "title": {
-          "type": "title",
-          "settings": {}
-        },
-        "price": {
-          "type": "price",
-          "settings": {}
-        },
-        "variant_picker": {
-          "type": "variant_picker",
-          "settings": {
-            "picker_type": "button",
-            "swatch_shape": "circle"
-          }
-        },
-        "quantity_selector": {
-          "type": "quantity_selector",
-          "settings": {}
-        },
-        "buy_buttons": {
-          "type": "buy_buttons",
-          "settings": {
-            "show_dynamic_checkout": true,
-            "show_gift_card_recipient": true
-          }
-        },
-        "description": {
-          "type": "description",
-          "settings": {}
-        },
-        "share": {
-          "type": "share",
-          "settings": {
-            "share_label": "Share"
-          }
-        }
-      },
-      "block_order": [
-        "vendor",
-        "title",
-        "price",
-        "variant_picker",
-        "quantity_selector",
-        "buy_buttons",
-        "description",
-        "share"
-      ],
+      "type": "wc-main-product",
       "settings": {
-        "enable_sticky_info": true,
-        "color_scheme": "scheme-1",
-        "media_size": "large",
-        "constrain_to_viewport": true,
-        "media_fit": "contain",
-        "gallery_layout": "stacked",
-        "mobile_thumbnails": "hide",
-        "media_position": "left",
-        "image_zoom": "lightbox",
-        "hide_variants": true,
-        "enable_video_looping": false,
-        "padding_top": 36,
-        "padding_bottom": 12
+        "story_heading": "Why we love it:",
+        "show_quantity": true,
+        "label_profile": "profile",
+        "label_size": "size",
+        "label_region": "region",
+        "label_varieties": "varieties",
+        "show_rating": true,
+        "label_rating": "customer rating",
+        "rating_value": 4.5,
+        "picker_type": "button",
+        "swatch_shape": "circle",
+        "padding_top": 107
       }
     },
-    "disclosures": {
-      "type": "disclosures",
+    "related": {
+      "type": "wc-related-products",
       "settings": {
-        "padding_top": 36,
-        "padding_bottom": 0
+        "heading": "you may also like:",
+        "products_to_show": 8,
+        "add_label": "add",
+        "padding_top": 38,
+        "padding_bottom": 18
       }
     },
-    "related-products": {
-      "type": "related-products",
+    "membership": {
+      "type": "wc-membership",
       "settings": {
-        "heading": "You may also like",
-        "heading_size": "h2",
-        "products_to_show": 4,
-        "columns_desktop": 4,
-        "columns_mobile": "2",
-        "color_scheme": "scheme-1",
-        "image_ratio": "square",
-        "image_shape": "default",
-        "show_secondary_image": true,
-        "show_vendor": false,
-        "show_rating": false,
-        "padding_top": 36,
-        "padding_bottom": 28
+        "heading": "5% off for life",
+        "body": "<p>Become a Wine Crush member and get 5% off for life, both online and in-store, across most wine and selected products. One simple sign-up, ongoing savings whenever you shop with us.</p>",
+        "body_width": 346,
+        "signup_tag": "five-percent-off",
+        "signup_name_placeholder": "name",
+        "signup_email_placeholder": "email",
+        "signup_phone_placeholder": "phone",
+        "signup_next_label": "Next",
+        "signup_submit_label": "Join the crush",
+        "signup_success": "<p>You're in. Welcome to the crush — your 5% off is on its way.</p>",
+        "padding_top": 188,
+        "padding_bottom": 162
       }
     }
   },
   "order": [
     "main",
-    "disclosures",
-    "related-products"
+    "related",
+    "membership"
   ]
 }

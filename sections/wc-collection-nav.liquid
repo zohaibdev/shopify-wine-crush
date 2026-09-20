@@ -1,0 +1,140 @@
+{%- comment -%}
+  Collection navigation — Figma 10008:35, group 10075:2520: "Shop All · Whites ·
+  Reds · Beer · Beyond" in Dahlia 62px, centred, 76px apart. Each item is a real
+  link to a Shopify collection (block setting), never a JS tab. The current
+  collection is underlined; the rest sit at 66% Ivory.
+{%- endcomment -%}
+
+{{ 'wc-collection.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="wc-collection-nav"
+  style="--collection-nav-padding-top: {{ section.settings.padding_top }}px; --collection-nav-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  {%- comment -%} The nav is the page's visual heading; the h1 names the collection for assistive tech. {%- endcomment -%}
+  <h1 class="wc-visually-hidden">{{ collection.title | default: page_title }}</h1>
+
+  {%- if section.blocks.size > 0 -%}
+    <nav class="wc-collection-nav__nav" aria-label="{{ section.settings.nav_label | escape }}">
+      <ul class="wc-collection-nav__list" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            if block.type == 'all'
+              assign item_url = routes.all_products_collection_url
+              assign item_handle = 'all'
+              assign item_label = block.settings.label
+            else
+              assign item_collection = block.settings.collection
+              assign item_url = item_collection.url
+              assign item_handle = item_collection.handle
+              assign item_label = block.settings.label | default: item_collection.title
+            endif
+            assign is_current = false
+            if collection.handle == item_handle
+              assign is_current = true
+            endif
+          -%}
+          {%- comment -%} A collection block with nothing picked yet renders nothing. {%- endcomment -%}
+          {%- if item_url == blank -%}{%- continue -%}{%- endif -%}
+          <li class="wc-collection-nav__item" {{ block.shopify_attributes }}>
+            <a
+              href="{{ item_url }}"
+              class="wc-collection-nav__link wc-display-m{% if is_current %} is-current{% endif %}"
+              {% if is_current %}
+                aria-current="page"
+              {% endif %}
+            >
+              {{- item_label -}}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Collection navigation",
+  "tag": "div",
+  "class": "wc-collection-nav-section",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "text",
+      "id": "nav_label",
+      "label": "Navigation label",
+      "info": "Read by screen readers.",
+      "default": "Collections"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 116
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 164
+    }
+  ],
+  "blocks": [
+    {
+      "type": "all",
+      "name": "All products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Shop All"
+        }
+      ]
+    },
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "info": "Leave blank to use the collection title."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection navigation",
+      "blocks": [
+        { "type": "all" },
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    }
+  ]
+}
+{% endschema %}

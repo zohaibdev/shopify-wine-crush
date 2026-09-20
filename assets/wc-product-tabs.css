@@ -10,6 +10,19 @@
   padding-block: var(--tabs-padding-top) var(--tabs-padding-bottom);
 }
 
+/* The Journal article's heading in place of the tab strip: Dahlia 120 in
+   Coral, centred (Figma 10053:93 → 10055:266). */
+.wc-product-tabs__heading {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-size: var(--text-display-l);
+  font-weight: 500;
+  line-height: var(--leading-display-tight);
+  color: var(--color-surface-accent);
+  text-align: center;
+  text-transform: none;
+}
+
 /* --- Tabs --- */
 
 .wc-product-tabs__tablist {
@@ -93,7 +106,9 @@
    would resolve against the 1404px track. The slide width is factored out so
    both the basis and the bottle overhang derive from the same figure. */
 .wc-product-slider__slide {
+  display: flex;
   flex: 0 0 var(--slide-width);
+  flex-direction: column;
   padding-top: calc(var(--slide-width) * 0.3051);
   scroll-snap-align: start;
 }
@@ -149,95 +164,6 @@
 .wc-product-slider__arrow[disabled] {
   opacity: 0;
   pointer-events: none;
-}
-
-/* --- Card --- */
-
-.wc-product-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  aspect-ratio: 331 / 434;
-  /* The artboard's own asymmetry: copy sits 17px in from the left, the add pill
-     15px in from the right, both 12px up from the card floor. */
-  padding: 0 15px 12px 17px;
-  border-radius: var(--radius-card);
-  background-color: var(--color-surface-card);
-}
-
-.wc-product-card__media {
-  position: absolute;
-  top: -23.27%;
-  left: 50%;
-  z-index: 0;
-  width: 97.89%;
-  transform: translateX(-50%);
-}
-
-.wc-product-card__media img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.wc-product-card__info {
-  position: relative;
-  z-index: 1;
-}
-
-.wc-product-card__price {
-  display: flex;
-  gap: var(--space-2xs);
-  margin: 0 0 6px;
-  color: var(--color-text);
-}
-
-.wc-product-card__was {
-  color: var(--color-muted);
-}
-
-.wc-product-card__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2xs);
-}
-
-.wc-product-card__title {
-  margin: 0;
-  font-family: var(--font-body);
-  font-weight: 400;
-  letter-spacing: var(--tracking-caps);
-  color: var(--color-text);
-}
-
-.wc-product-card__link {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* The whole card is the click target for the product; the add button sits
-   above it so it keeps its own hit area. */
-.wc-product-card__link::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-}
-
-.wc-product-card__form {
-  position: relative;
-  z-index: 2;
-  margin: 0;
-}
-
-.wc-product-card__add {
-  min-width: 68px;
-}
-
-.wc-product-card__soldout {
-  color: var(--color-muted);
 }
 
 @media screen and (max-width: 989px) {

@@ -1,0 +1,92 @@
+{
+  "sections": {
+    "faq": {
+      "type": "wc-faq",
+      "blocks": {
+        "deliver": {
+          "type": "question",
+          "settings": {
+            "question": "Where do you deliver?",
+            "answer": "<p>[Add the states and areas you deliver to, and any you cannot ship to.]</p>"
+          }
+        },
+        "shipping_cost": {
+          "type": "question",
+          "settings": {
+            "question": "How much is shipping?",
+            "answer": "<p>[Add your shipping rates.] Delivery is free on orders over $200.</p>"
+          }
+        },
+        "how_long": {
+          "type": "question",
+          "settings": {
+            "question": "How long will my order take?",
+            "answer": "<p>[Add your dispatch time and delivery estimates by area.]</p>"
+          }
+        },
+        "click_collect": {
+          "type": "question",
+          "settings": {
+            "question": "Can I click and collect?",
+            "answer": "<p>[Confirm whether orders can be collected from Shop 5/327 Honour Avenue, Graceville, and how long orders are held.]</p>"
+          }
+        },
+        "gift": {
+          "type": "question",
+          "settings": {
+            "question": "Can I send an order as a gift?",
+            "answer": "<p>Yes. Switch on \"This is a gift\" in your cart and add a message, and we'll include it with the order. The recipient must also be over 18.</p>"
+          }
+        },
+        "damaged": {
+          "type": "question",
+          "settings": {
+            "question": "What happens if something arrives damaged?",
+            "answer": "<p>Send us a photo at [email address] within [number] days of delivery and we'll arrange a replacement or refund.</p>"
+          }
+        },
+        "returns": {
+          "type": "question",
+          "settings": {
+            "question": "Can I return or exchange alcohol?",
+            "answer": "<p>[Add your returns policy for alcohol, including faulty or corked bottles.]</p>"
+          }
+        },
+        "change_order": {
+          "type": "question",
+          "settings": {
+            "question": "Can I change or cancel my order?",
+            "answer": "<p>Get in touch at [email address] as soon as you can. [Add the cut-off — orders that have already been dispatched cannot be changed.]</p>"
+          }
+        },
+        "membership": {
+          "type": "question",
+          "settings": {
+            "question": "How does Wine Crush membership work?",
+            "answer": "<p>Sign up once and you get 5% off for life, online and in-store, across most wine and selected products. [Add any exclusions.]</p>"
+          }
+        }
+      },
+      "block_order": [
+        "deliver",
+        "shipping_cost",
+        "how_long",
+        "click_collect",
+        "gift",
+        "damaged",
+        "returns",
+        "change_order",
+        "membership"
+      ],
+      "settings": {
+        "eyebrow": "the finer details",
+        "heading": "Shipping & Frequently Asked Questions",
+        "footnote": "<p>Still have a question? Send us a message at [email address] and we'll point you in the right direction.</p>",
+        "image": "shopify://shop_images/Rectangle_104.png",
+        "padding_top": 177,
+        "padding_bottom": 164
+      }
+    }
+  },
+  "order": ["faq"]
+}

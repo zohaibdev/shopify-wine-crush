@@ -34,8 +34,14 @@
 }
 
 .wc-bundle__heading {
+  width: min(var(--bundle-heading-width, 100%), 100%);
   margin: 0;
   color: var(--color-heading-on-light);
+}
+
+/* On the claret band (About Us intro, Figma 10067:248) the heading is Ivory. */
+.wc-band--claret .wc-bundle__heading {
+  color: var(--color-heading);
 }
 
 /* 477px is the artboard's own measure for this paragraph, and it is what sets
@@ -47,6 +53,22 @@
 
 .wc-bundle__body p {
   margin: 0;
+}
+
+/* The About Us intro separates its paragraphs by one blank line. */
+.wc-bundle__body p + p {
+  margin-top: calc(var(--leading-body) * 1em);
+}
+
+/* Medium copy: 16/1.42 on the artboard's 595px measure, 67px under a
+   two-line 62px heading (Figma 10067:248 → 10067:250). Figma fits 62 mono
+   cells (595.2px) in that box; 62ch is the same wrap, at any fluid size. */
+.wc-bundle--body-m .wc-bundle__body {
+  width: min(62ch, 100%);
+}
+
+.wc-bundle__heading--m + .wc-bundle__body {
+  margin-top: 67px;
 }
 
 .wc-bundle__cta {
@@ -84,12 +106,20 @@
 
 /* The section padding is authored against the 1440 artboard; below it the shared
    graduated rhythm takes over. */
+/* The rhythm collapses to the shared token below 990, but the bottom still has
+   to clear the claret cap drawn over the band's foot — on desktop the 392px
+   padding already includes its 129px. */
 @media screen and (max-width: 989px) {
   .wc-bundle {
     padding-block: var(--section-spacing-desktop);
   }
 
-  .wc-bundle__body {
+  .wc-bundle.wc-band--capped {
+    padding-bottom: calc(var(--section-spacing-desktop) + var(--band-overlap));
+  }
+
+  .wc-bundle__body,
+  .wc-bundle__heading--m + .wc-bundle__body {
     margin-top: var(--space-3xl);
   }
 
@@ -98,10 +128,74 @@
   }
 }
 
-/* On phones the copy column fills the band, so there is no margin left for the
-   scatter to sit in and it has to read as texture behind the text instead. */
-@media screen and (max-width: 749px) {
+/* Tablet and phones: the copy column takes most of the band width, so the
+   desktop scatter (percentages of a 1440 × 1350 band with wide empty margins)
+   lands on the copy — at 768 the About Us intro's 62ch body leaves ~120px
+   margins for 85–145px photos. The photographs keep the design's loose
+   collage instead in space of their own — two staggered above the copy, two
+   below — by turning the
+   scatter wrapper into `display: contents` so the figures join the band's
+   grid. Sizes keep their desktop proportions and never exceed their 1440
+   widths (255 / 271 / 163 / 163). */
+@media screen and (max-width: 989px) {
+  .wc-bundle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    row-gap: var(--space-2xl);
+    padding-inline: var(--page-gutter);
+  }
+
+  .wc-bundle__inner {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-inline: 0;
+  }
+
+  .wc-bundle__scatter {
+    display: contents;
+  }
+
   .wc-bundle__figure {
-    opacity: 0.35;
+    position: relative;
+    top: auto;
+    left: auto;
+  }
+
+  .wc-bundle__figure:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    width: 78%;
+    max-width: 255px;
+  }
+
+  .wc-bundle__figure:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    width: 82%;
+    margin-top: var(--space-4xl);
+    max-width: 271px;
+  }
+
+  .wc-bundle__figure:nth-child(3) {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: center;
+    width: 52%;
+    margin-top: var(--space-xl);
+    max-width: 163px;
+  }
+
+  .wc-bundle__figure:nth-child(4) {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: start;
+    width: 52%;
+    max-width: 163px;
+  }
+
+  .wc-bundle__figure:nth-child(n + 5) {
+    display: none;
   }
 }

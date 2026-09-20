@@ -9,37 +9,87 @@
  */
 {
   "sections": {
-    "banner": {
-      "type": "main-collection-banner",
+    "nav": {
+      "type": "wc-collection-nav",
+      "blocks": {
+        "all": {
+          "type": "all",
+          "settings": {
+            "label": "Shop All"
+          }
+        },
+        "whites": {
+          "type": "collection",
+          "settings": {
+            "collection": "whites",
+            "label": "Whites"
+          }
+        },
+        "reds": {
+          "type": "collection",
+          "settings": {
+            "collection": "reds",
+            "label": "Reds"
+          }
+        },
+        "beer": {
+          "type": "collection",
+          "settings": {
+            "collection": "beer",
+            "label": "Beer"
+          }
+        },
+        "beyond": {
+          "type": "collection",
+          "settings": {
+            "collection": "beyond",
+            "label": "Beyond"
+          }
+        }
+      },
+      "block_order": [
+        "all",
+        "whites",
+        "reds",
+        "beer",
+        "beyond"
+      ],
       "settings": {
-        "show_collection_description": true,
-        "show_collection_image": false,
-        "color_scheme": "scheme-1"
+        "nav_label": "Collections",
+        "padding_top": 116,
+        "padding_bottom": 164
       }
     },
-    "product-grid": {
-      "type": "main-collection-product-grid",
+    "main": {
+      "type": "wc-main-collection",
       "settings": {
         "products_per_page": 16,
-        "columns_desktop": 4,
-        "color_scheme": "scheme-1",
-        "image_ratio": "adapt",
-        "image_shape": "default",
-        "show_secondary_image": false,
-        "show_vendor": false,
-        "show_rating": false,
-        "quick_add": "none",
+        "add_label": "add",
         "enable_filtering": true,
-        "filter_type": "horizontal",
-        "enable_sorting": true,
-        "columns_mobile": "2",
-        "padding_top": 36,
-        "padding_bottom": 36
+        "padding_bottom": 0
+      }
+    },
+    "membership": {
+      "type": "wc-membership",
+      "settings": {
+        "heading": "5% off for life",
+        "body": "<p>Become a Wine Crush member and get 5% off for life, both online and in-store, across most wine and selected products. One simple sign-up, ongoing savings whenever you shop with us.</p>",
+        "body_width": 346,
+        "signup_tag": "five-percent-off",
+        "signup_name_placeholder": "name",
+        "signup_email_placeholder": "email",
+        "signup_phone_placeholder": "phone",
+        "signup_next_label": "Next",
+        "signup_submit_label": "Join the crush",
+        "signup_success": "<p>You're in. Welcome to the crush — your 5% off is on its way.</p>",
+        "padding_top": 188,
+        "padding_bottom": 162
       }
     }
   },
   "order": [
-    "banner",
-    "product-grid"
+    "nav",
+    "main",
+    "membership"
   ]
 }

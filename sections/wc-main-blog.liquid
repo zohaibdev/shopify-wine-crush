@@ -1,0 +1,208 @@
+{%- comment -%}
+  Journal listing (Figma 10047:175). Shopify's blog, nothing else: the cards
+  are `blog.articles`, so the merchant manages them in Content › Blog posts.
+
+  The cards are the shared snippet (snippets/wc-article-card.liquid), the same
+  one the home and About Us grids use.
+
+  "see more" reveals the next batch of cards (assets/wc-journal.js). Every
+  article on the page is server-rendered, so with no JavaScript they are all
+  there and the button is simply Shopify's next-page link. Past one page of
+  articles the button hands over to that link.
+{%- endcomment -%}
+
+{{ 'wc-card-grid.css' | asset_url | stylesheet_tag }}
+{{ 'wc-journal.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'wc-journal.js' | asset_url }}" defer="defer"></script>
+
+<section
+  class="wc-journal"
+  style="
+    --journal-padding-top: {{ section.settings.padding_top }}px;
+    --journal-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container">
+    <header class="wc-journal__head">
+      {%- if section.settings.pill != blank -%}
+        <p class="wc-journal__pill wc-caption">{{ section.settings.pill | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="wc-journal__eyebrow wc-label">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      <h1 class="wc-journal__heading wc-display-m">
+        {{- section.settings.heading | default: blog.title | escape -}}
+      </h1>
+    </header>
+
+    {%- paginate blog.articles by section.settings.page_size -%}
+      {%- if blog.articles.size > 0 -%}
+        <wc-journal-list
+          class="wc-journal__list"
+          data-batch="{{ section.settings.batch_size }}"
+          data-total="{{ blog.articles_count }}"
+        >
+          {%- if section.settings.show_sort and blog.articles.size > 1 -%}
+            <div class="wc-journal__sort">
+              <span class="wc-journal__sort-label wc-caption" aria-hidden="true">
+                {{- 'wc_journal.sort_by' | t -}}
+              </span>
+              <label class="wc-visually-hidden" for="JournalSort-{{ section.id }}">
+                {{- 'wc_journal.sort_label' | t -}}
+              </label>
+              <select id="JournalSort-{{ section.id }}" class="wc-journal__sort-select" data-journal-sort>
+                <option value="newest">{{ 'wc_journal.sort_newest' | t }}</option>
+                <option value="oldest">{{ 'wc_journal.sort_oldest' | t }}</option>
+              </select>
+              <span class="wc-journal__sort-caret" aria-hidden="true"></span>
+            </div>
+          {%- endif -%}
+
+          <ul class="wc-journal__grid" role="list" data-journal-grid>
+            {%- for article in blog.articles -%}
+              <li class="wc-journal__item" data-journal-item data-published="{{ article.published_at | date: '%s' }}">
+                {%- if forloop.index <= 4 -%}
+                  {%- render 'wc-article-card',
+                    article: article,
+                    show_date: section.settings.show_date,
+                    sizes: '(min-width: 990px) calc((100vw - 84px) / 4), (min-width: 750px) calc((100vw - 52px) / 2), calc(100vw - 36px)',
+                    eager: true
+                  -%}
+                {%- else -%}
+                  {%- render 'wc-article-card',
+                    article: article,
+                    show_date: section.settings.show_date,
+                    sizes: '(min-width: 990px) calc((100vw - 84px) / 4), (min-width: 750px) calc((100vw - 52px) / 2), calc(100vw - 36px)'
+                  -%}
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          {%- comment -%}
+            One control, two jobs: the script uses it to reveal the next batch
+            on this page, and it falls back to (or becomes) the next page's
+            link once everything rendered here is visible.
+          {%- endcomment -%}
+          {%- if paginate.next or blog.articles.size > section.settings.batch_size -%}
+            <div class="wc-journal__more">
+              <a
+                class="wc-button wc-journal__more-button"
+                href="{{ paginate.next.url | default: blog.url }}"
+                data-journal-more
+                {% unless paginate.next %}
+                  data-no-next
+                {% endunless %}
+              >
+                {{- section.settings.more_label -}}
+              </a>
+            </div>
+          {%- endif -%}
+        </wc-journal-list>
+      {%- else -%}
+        <p class="wc-journal__empty">{{ 'wc_journal.empty' | t }}</p>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Journal listing",
+  "tag": "section",
+  "class": "wc-journal-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Articles come from this blog (Content › Blog posts). Nothing here is hardcoded."
+    },
+    {
+      "type": "text",
+      "id": "pill",
+      "label": "Pill",
+      "default": "journal"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "for the curious. not the connoisseur."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave blank to use the blog title.",
+      "default": "A place for good bottles, easy recommendations and a few things worth knowing."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show the date on each card",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort",
+      "label": "Show the sort control",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Articles"
+    },
+    {
+      "type": "range",
+      "id": "batch_size",
+      "label": "Articles shown before \"see more\"",
+      "min": 2,
+      "max": 48,
+      "step": 2,
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "page_size",
+      "label": "Articles per page",
+      "info": "Shopify paginates beyond this; \"see more\" then links to the next page.",
+      "min": 12,
+      "max": 50,
+      "step": 2,
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "more_label",
+      "label": "\"See more\" label",
+      "default": "see more"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 128
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 192
+    }
+  ]
+}
+{% endschema %}
+

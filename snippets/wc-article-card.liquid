@@ -1,0 +1,48 @@
+{%- comment -%}
+  One Journal card — the 339 × 498 photo card with a date pill and the title
+  over its foot (Figma 10047:175 on the listing, and the same card on the home
+  and About Us grids).
+
+  Shared by sections/wc-card-grid.liquid (home, About Us) and
+  sections/wc-main-blog.liquid (the Journal listing), so a card only ever
+  exists in one place.
+
+  Accepts:
+  - article: {Object} the article
+  - show_date: {Boolean} render the date pill
+  - sizes: {String} optional sizes attribute for the image
+  - eager: {Boolean} load the image eagerly (the first row of the listing)
+{%- endcomment -%}
+
+{%- liquid
+  assign card_sizes = sizes | default: '(min-width: 990px) 339px, 70vw'
+  assign loading = 'lazy'
+  if eager
+    assign loading = 'eager'
+  endif
+-%}
+
+<a class="wc-card" href="{{ article.url }}">
+  <span class="wc-card__media">
+    {%- if article.image != blank -%}
+      {{
+        article.image
+        | image_url: width: 678
+        | image_tag: widths: '339, 508, 678', sizes: card_sizes, alt: article.image.alt, loading: loading
+      }}
+    {%- else -%}
+      {{ 'image' | placeholder_svg_tag }}
+    {%- endif -%}
+  </span>
+  <span class="wc-card__caption">
+    {%- if show_date -%}
+      {%- comment -%} The artboard's date: "oct ‘26", uppercased in CSS. {%- endcomment -%}
+      <span class="wc-card__pill wc-caption">
+        <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+          {{- article.published_at | date: "%b ‘%y" -}}
+        </time>
+      </span>
+    {%- endif -%}
+    <span class="wc-card__title">{{ article.title }}</span>
+  </span>
+</a>

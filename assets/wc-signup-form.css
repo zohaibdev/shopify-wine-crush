@@ -1,0 +1,235 @@
+/* --------------------------------------------------------------------------
+   Sign-up form (snippets/wc-signup-form.liquid)
+   Figma 10036:30, group 10068:411: a 181×30 outlined pill with a centred 14px
+   caps placeholder, and an 11px gap to a 32×30 outlined pill holding a 21px ↗.
+   One component, two inks. Each variant only swaps the ink tokens; geometry
+   and type are shared.
+   -------------------------------------------------------------------------- */
+
+.wc-signup {
+  --signup-field-width: 181px;
+  --signup-field-height: 30px;
+  --signup-button-width: 32px;
+  --signup-icon-size: 21px;
+  --signup-gap: 11px;
+  --signup-field-font: var(--text-lede);
+
+  display: block;
+  width: 100%;
+  color: var(--signup-ink);
+  text-align: center;
+}
+
+/* Light variant — the Coming Soon UI as drawn (10036:30): Ivory strokes and
+   text over the darkened photo. Hover fills Ivory with a Claret arrow. */
+.wc-signup--light {
+  --signup-ink: var(--color-text);
+  --signup-muted: var(--color-text);
+  --signup-hover-ink: var(--color-page);
+}
+
+/* Dark variant — the same UI in Deep Claret for the 5% off panel, the ink of
+   that panel's heading, copy and its "join the crush" pill (10055:493). Hover
+   fills Claret with a Sorbet arrow, i.e. the panel colour punched through. */
+.wc-signup--dark {
+  --signup-ink: var(--color-text-on-light);
+  --signup-muted: var(--color-text-on-light);
+  --signup-hover-ink: var(--color-surface-accent-soft);
+}
+
+/* Several parts carry their own display value, which would beat the UA's
+   [hidden] rule; JS drives visibility through the attribute alone. */
+.wc-signup [hidden] {
+  display: none !important;
+}
+
+.wc-signup__form {
+  position: relative;
+  margin: 0;
+}
+
+.wc-signup__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--signup-gap);
+}
+
+/* Without JS every step shows, stacked; enhanced, only one is ever visible.
+   The pill is the part that gives way when the container is narrower than
+   field + gap + button; the button never shrinks. */
+.wc-signup__steps {
+  display: grid;
+  flex: 0 1 var(--signup-field-width);
+  gap: var(--signup-gap);
+  min-width: 0;
+}
+
+.wc-signup__input {
+  width: 100%;
+  height: var(--signup-field-height);
+  margin: 0;
+  padding: 0 var(--space-xs);
+  border: var(--button-border-width) solid var(--signup-ink);
+  border-radius: var(--button-radius);
+  background-color: transparent;
+  color: var(--signup-ink);
+  font-family: var(--font-body);
+  font-size: var(--signup-field-font);
+  line-height: var(--leading-flat);
+  text-align: center;
+  box-shadow: none;
+  appearance: none;
+  transition: box-shadow var(--transition-button);
+}
+
+/* The placeholder is the only visible label, so it is drawn at full ink, as
+   the artboard's "NAME" is. */
+.wc-signup__input::placeholder {
+  color: var(--signup-muted);
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.wc-signup__input:focus {
+  outline: none;
+}
+
+.wc-signup__input:focus-visible {
+  outline: 2px solid var(--signup-ink);
+  outline-offset: 2px;
+}
+
+/* Invalid = the stroke doubles; colour alone would fail on Sorbet. */
+.wc-signup__input[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 1px var(--signup-ink);
+}
+
+/* Autofill paints its own background; keep the pill transparent. */
+.wc-signup__input:-webkit-autofill {
+  -webkit-text-fill-color: var(--signup-ink);
+  transition: background-color 9999s ease 0s;
+}
+
+.wc-signup.is-enhanced .wc-signup__step:not([hidden]) {
+  animation: wc-signup-step-in 240ms ease;
+}
+
+@keyframes wc-signup-step-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hover follows the site's button convention: the fill inverts. */
+.wc-signup__submit {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--signup-button-width);
+  height: var(--signup-field-height);
+  margin: 0;
+  padding: 0;
+  border: var(--button-border-width) solid var(--signup-ink);
+  border-radius: var(--button-radius);
+  background-color: transparent;
+  color: var(--signup-ink);
+  cursor: pointer;
+  transition: background-color var(--transition-button), color var(--transition-button);
+}
+
+.wc-signup__submit svg {
+  display: block;
+  width: var(--signup-icon-size);
+  height: var(--signup-icon-size);
+}
+
+.wc-signup__submit:hover,
+.wc-signup__submit:focus-visible {
+  background-color: var(--signup-ink);
+  color: var(--signup-hover-ink);
+}
+
+.wc-signup__submit:focus-visible {
+  outline: 2px solid var(--signup-ink);
+  outline-offset: 2px;
+}
+
+/* In flight: the whole row dims and the arrow drifts up-right on a loop, so
+   the one control in the design doubles as its own progress indicator. */
+.wc-signup.is-loading .wc-signup__row {
+  opacity: 0.6;
+}
+
+.wc-signup__submit[aria-disabled='true'] {
+  cursor: progress;
+}
+
+.wc-signup.is-loading .wc-signup__submit svg {
+  animation: wc-signup-sending 900ms ease-in-out infinite;
+}
+
+@keyframes wc-signup-sending {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* Out of flow, hanging under the row: showing an error must not move the
+   logo on the viewport-centred Coming Soon page, nor re-centre the 5% off
+   panel's copy. Both hosts leave at least 30px clear below the form. */
+.wc-signup__error {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: min(440px, 100%);
+  margin: var(--space-2xs) 0 0;
+  transform: translateX(-50%);
+  color: var(--signup-ink);
+}
+
+.wc-signup__success {
+  color: var(--signup-ink);
+}
+
+.wc-signup__success:focus {
+  outline: none;
+}
+
+.wc-signup__success p {
+  margin: 0;
+}
+
+/* Touch: 44px targets, and 16px text so iOS doesn't zoom on focus. The pill
+   keeps the artboard's proportions around the larger height. */
+@media screen and (max-width: 749px) {
+  .wc-signup {
+    --signup-field-width: 240px;
+    --signup-field-height: 44px;
+    --signup-button-width: 46px;
+    --signup-icon-size: 24px;
+    --signup-field-font: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-signup__input,
+  .wc-signup__submit {
+    transition: none;
+  }
+
+  .wc-signup.is-enhanced .wc-signup__step:not([hidden]),
+  .wc-signup.is-loading .wc-signup__submit svg {
+    animation: none;
+  }
+}

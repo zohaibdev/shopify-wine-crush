@@ -1,0 +1,24 @@
+{
+  "sections": {
+    "coming_soon": {
+      "type": "wc-coming-soon",
+      "settings": {
+        "overlay_opacity": 37,
+        "logo_width": 262,
+        "left_text": "coming",
+        "right_text": "soon",
+        "description": "<p>A considered selection of wine, beer and beyond, without the fuss. Join the list for opening updates, new arrivals and first pours.</p>",
+        "signup_tag": "coming-soon-page",
+        "signup_name_placeholder": "name",
+        "signup_email_placeholder": "email",
+        "signup_phone_placeholder": "phone",
+        "signup_next_label": "Next",
+        "signup_submit_label": "Join the list",
+        "signup_success": "<p>Thanks — you're on the list. We'll be in touch when we open.</p>"
+      }
+    }
+  },
+  "order": [
+    "coming_soon"
+  ]
+}

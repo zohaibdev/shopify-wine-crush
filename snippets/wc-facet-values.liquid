@@ -1,0 +1,120 @@
+{%- comment -%}
+  The values of one Search & Discovery filter, shared by the desktop column and
+  the mobile drawer. Handles every filter type Shopify returns:
+  - list / boolean  → checkboxes (swatch presentation adds a colour/image dot)
+  - price_range     → Dawn's <price-range> with two amount inputs
+  Everything — labels, values, counts, param names — comes from the filter object.
+
+  Accepts:
+  - filter: {Object}
+  - group_id: {String} unique per form
+  - suffix: {String} '' (desktop) or '-mobile', keeps input ids unique
+{%- endcomment -%}
+
+<fieldset class="wc-facet__panel facets-wrap{% if suffix != '' %} mobile-facets__list{% endif %}">
+  <legend class="wc-visually-hidden">{{ filter.label | escape }}</legend>
+
+  {%- case filter.type -%}
+    {%- when 'price_range' -%}
+      {%- liquid
+        # facets.js's <price-range> clamps with Number(), which reads "1,250.00"
+        # as NaN — so every machine-read amount drops the thousands separator.
+        # The visible placeholder keeps the shop's formatting.
+        assign range_max_label = filter.range_max | money_without_currency
+        assign range_max = range_max_label | remove: ','
+        assign min_id = 'Filter-' | append: group_id | append: '-gte'
+        assign max_id = 'Filter-' | append: group_id | append: '-lte'
+      -%}
+      <price-range class="wc-price-range">
+        <div class="wc-price-range__field">
+          <label class="wc-price-range__label wc-meta" for="{{ min_id }}">{{ 'products.facets.from' | t }}</label>
+          <span class="wc-price-range__input">
+            <span class="wc-price-range__currency" aria-hidden="true">{{ cart.currency.symbol }}</span>
+            <input
+              id="{{ min_id }}"
+              class="wc-facet__text"
+              type="text"
+              inputmode="decimal"
+              name="{{ filter.min_value.param_name }}"
+              {% if filter.min_value.value != null -%}
+                value="{{ filter.min_value.value | money_without_currency | remove: ',' }}"
+              {%- endif %}
+              placeholder="0"
+              data-min="0"
+              data-max="{{ range_max }}"
+            >
+          </span>
+        </div>
+        <div class="wc-price-range__field">
+          <label class="wc-price-range__label wc-meta" for="{{ max_id }}">{{ 'products.facets.to' | t }}</label>
+          <span class="wc-price-range__input">
+            <span class="wc-price-range__currency" aria-hidden="true">{{ cart.currency.symbol }}</span>
+            <input
+              id="{{ max_id }}"
+              class="wc-facet__text"
+              type="text"
+              inputmode="decimal"
+              name="{{ filter.max_value.param_name }}"
+              {% if filter.max_value.value != null -%}
+                value="{{ filter.max_value.value | money_without_currency | remove: ',' }}"
+              {%- endif %}
+              placeholder="{{ range_max_label }}"
+              data-min="0"
+              data-max="{{ range_max }}"
+            >
+          </span>
+        </div>
+      </price-range>
+
+    {%- else -%}
+      <ul class="wc-facet__list" role="list">
+        {%- for value in filter.values -%}
+          {%- liquid
+            assign input_id = 'Filter-' | append: group_id | append: '-' | append: forloop.index
+            assign is_disabled = false
+            if value.count == 0 and value.active == false
+              assign is_disabled = true
+            endif
+          -%}
+          <li class="wc-facet__item">
+            <label
+              class="wc-facet__option{% if value.active %} is-checked{% endif %}{% if is_disabled %} is-disabled{% endif %}"
+              for="{{ input_id }}"
+            >
+              <input
+                id="{{ input_id }}"
+                class="wc-facet__input"
+                type="checkbox"
+                name="{{ value.param_name }}"
+                value="{{ value.value }}"
+                {% if value.active %}
+                  checked
+                {% endif %}
+                {% if is_disabled %}
+                  disabled
+                {% endif %}
+              >
+              {%- if filter.presentation == 'swatch' and value.swatch != blank -%}
+                {%- liquid
+                  if value.swatch.image
+                    assign swatch_src = value.swatch.image | image_url: width: 40
+                    assign swatch_style = 'background-image: url(' | append: swatch_src | append: ');'
+                  elsif value.swatch.color
+                    assign swatch_style = 'background-color: ' | append: value.swatch.color | append: ';'
+                  else
+                    assign swatch_style = ''
+                  endif
+                -%}
+                <span class="wc-facet__box wc-facet__box--swatch" style="{{ swatch_style }}" aria-hidden="true"></span>
+              {%- else -%}
+                <span class="wc-facet__box" aria-hidden="true"></span>
+              {%- endif -%}
+              <span class="wc-facet__value">{{ value.label | escape }}</span>
+              <span class="wc-facet__value-count" aria-hidden="true">{{ value.count }}</span>
+              <span class="wc-visually-hidden">({{ 'products.facets.product_count_simple' | t: count: value.count }})</span>
+            </label>
+          </li>
+        {%- endfor -%}
+      </ul>
+  {%- endcase -%}
+</fieldset>

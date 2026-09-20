@@ -131,14 +131,14 @@
       ],
       "settings": {
         "background": "ivory",
+        "cap": true,
         "eyebrow": "pick your six | pick your price",
         "heading": "Build your bundle.",
-        "body": "<p>Build your six from a curated range of Wine Crush favourites. Choose the bottles that suit you and we\u2019ll take care of the rest. Easy drinking, easy choosing, no overthinking required.</p>",
+        "body": "<p>Build your six from a curated range of Wine Crush favourites. Choose the bottles that suit you and we’ll take care of the rest. Easy drinking, easy choosing, no overthinking required.</p>",
         "button_label": "get picking",
         "button_link": "shopify://collections",
         "padding_top": 392,
-        "padding_bottom": 578,
-        "cap": true
+        "padding_bottom": 578
       }
     },
     "journal_grid": {
@@ -146,7 +146,7 @@
       "settings": {
         "heading": "",
         "source": "blog",
-        "blog": "news",
+        "blog": "journal",
         "items_to_show": 4,
         "show_date": true,
         "padding_top": 26,
@@ -174,8 +174,13 @@
         "heading": "5% off for life",
         "body": "<p>Become a Wine Crush member and get 5% off for life, both online and in-store, across most wine and selected products. One simple sign-up, ongoing savings whenever you shop with us.</p>",
         "body_width": 346,
-        "button_label": "join the crush",
-        "button_link": "",
+        "signup_tag": "five-percent-off",
+        "signup_name_placeholder": "name",
+        "signup_email_placeholder": "email",
+        "signup_phone_placeholder": "phone",
+        "signup_next_label": "Next",
+        "signup_submit_label": "Join the crush",
+        "signup_success": "<p>You're in. Welcome to the crush — your 5% off is on its way.</p>",
         "padding_top": 162,
         "padding_bottom": 78
       }
@@ -185,7 +190,7 @@
       "settings": {
         "lead": "<p>We bring together everyday favourites, interesting new finds and bottles from producers worth knowing, all chosen to make good drinking feel a little easier. </p>",
         "lead_width": 410,
-        "closing": "<p>Familiar when you want it, unexpected when you don\u2019t. And never more complicated than it needs to be.</p>",
+        "closing": "<p>Familiar when you want it, unexpected when you don’t. And never more complicated than it needs to be.</p>",
         "closing_width": 300,
         "image_width": 355,
         "image_rotate": 0,
@@ -199,8 +204,66 @@
     },
     "image_grid": {
       "type": "wc-card-grid",
+      "blocks": {
+        "card_wqEGPx": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/Rectangle_102.png",
+            "label": "",
+            "title": "",
+            "link": ""
+          }
+        },
+        "card_PCxF6y": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/Rectangle_104.png",
+            "label": "",
+            "title": "",
+            "link": ""
+          }
+        },
+        "card_mnLDfg": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/Rectangle_103.png",
+            "label": "",
+            "title": "",
+            "link": ""
+          }
+        },
+        "card_WeK3wR": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/Rectangle_102.png",
+            "label": "",
+            "title": "",
+            "link": ""
+          }
+        },
+        "card_ee66NR": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/Rectangle_105.png",
+            "label": "",
+            "title": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "card_wqEGPx",
+        "card_PCxF6y",
+        "card_mnLDfg",
+        "card_WeK3wR",
+        "card_ee66NR"
+      ],
       "settings": {
         "heading": "",
+        "layout": "marquee",
+        "marquee_direction": "left",
+        "marquee_speed": 40,
+        "marquee_pause_on_hover": false,
         "source": "blocks",
         "blog": "",
         "items_to_show": 4,

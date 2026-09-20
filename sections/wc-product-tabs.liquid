@@ -1,10 +1,23 @@
+{{ 'wc-product-card.css' | asset_url | stylesheet_tag }}
 {{ 'wc-product-tabs.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'wc-product-tabs.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 
 <wc-product-tabs class="wc-product-tabs" style="--tabs-padding-top: {{ section.settings.padding_top }}px; --tabs-padding-bottom: {{ section.settings.padding_bottom }}px;">
+  {%- comment -%}
+    The Journal article's "Crowd Favourites" (Figma 10053:93) is this slider
+    under a display heading instead of a tab strip.
+  {%- endcomment -%}
+  {%- if section.settings.heading != blank -%}
+    <div class="wc-container">
+      <h2 class="wc-product-tabs__heading">{{ section.settings.heading | escape }}</h2>
+    </div>
+  {%- endif -%}
+
   {%- if section.blocks.size > 0 -%}
-    <div class="wc-product-tabs__tablist wc-container" role="tablist" aria-label="{{ section.settings.tablist_label | escape }}">
+    <div
+      class="wc-product-tabs__tablist wc-container{% unless section.settings.show_tabs %} wc-visually-hidden{% endunless %}"
+      role="tablist" aria-label="{{ section.settings.tablist_label | escape }}">
       {%- for block in section.blocks -%}
         <button
           class="wc-product-tabs__tab wc-label"
@@ -136,6 +149,19 @@
   "class": "wc-product-tabs-section",
   "max_blocks": 6,
   "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Optional display heading above the slider (the Journal article's \"Crowd Favourites\")."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tabs",
+      "label": "Show the tab strip",
+      "info": "Turn off when the section has a single tab and a heading instead.",
+      "default": true
+    },
     {
       "type": "range",
       "id": "products_to_show",

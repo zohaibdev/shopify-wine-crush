@@ -1,51 +1,60 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "main": {
-      "type": "main-article",
+      "type": "wc-main-article",
+      "settings": {
+        "show_back": true,
+        "back_label": "back to journal",
+        "show_date": true,
+        "show_author": false,
+        "show_tags": false,
+        "padding_top": 58,
+        "padding_bottom": 152
+      }
+    },
+    "crowd_favourites": {
+      "type": "wc-product-tabs",
       "blocks": {
-        "featured_image": {
-          "type": "featured_image",
+        "favourites": {
+          "type": "tab",
           "settings": {
-            "image_height": "adapt"
+            "label": "crowd favourites",
+            "source": "collection",
+            "collection": "all",
+            "tag": ""
           }
-        },
-        "title": {
-          "type": "title",
-          "settings": {
-            "blog_show_date": true,
-            "blog_show_author": false
-          }
-        },
-        "share": {
-          "type": "share",
-          "settings": {
-            "share_label": "Share"
-          }
-        },
-        "content": {
-          "type": "content",
-          "settings": {}
         }
       },
-      "block_order": [
-        "featured_image",
-        "title",
-        "share",
-        "content"
-      ],
-      "settings": {}
+      "block_order": ["favourites"],
+      "settings": {
+        "heading": "Crowd Favourites",
+        "show_tabs": false,
+        "products_to_show": 8,
+        "add_label": "add",
+        "tablist_label": "Crowd favourites",
+        "button_label": "",
+        "button_link": "",
+        "padding_top": 48,
+        "padding_bottom": 90
+      }
+    },
+    "membership": {
+      "type": "wc-membership",
+      "settings": {
+        "heading": "5% off for life",
+        "body": "<p>Become a Wine Crush member and get 5% off for life, both online and in-store, across most wine and selected products. One simple sign-up, ongoing savings whenever you shop with us.</p>",
+        "body_width": 346,
+        "signup_tag": "five-percent-off",
+        "signup_name_placeholder": "name",
+        "signup_email_placeholder": "email",
+        "signup_phone_placeholder": "phone",
+        "signup_next_label": "Next",
+        "signup_submit_label": "Join the crush",
+        "signup_success": "<p>You're in. Welcome to the crush — your 5% off is on its way.</p>",
+        "padding_top": 200,
+        "padding_bottom": 162
+      }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main", "crowd_favourites", "membership"]
 }

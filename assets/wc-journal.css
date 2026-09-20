@@ -1,0 +1,338 @@
+/* --------------------------------------------------------------------------
+   Journal — listing (sections/wc-main-blog.liquid, Figma 10047:175) and
+   article (sections/wc-main-article.liquid, Figma 10053:93).
+
+   Listing at 1440: "journal" pill 59 × 19 @ y186 · eyebrow 18px caps Sorbet
+   @ y239 · heading Dahlia 62 on a 598 measure @ y286 · "sort by" 14px caps
+   Ivory-66% with a caret @ y542 · a 4-up grid of the shared 339 × 498 cards
+   (16px gutters) from y646 · "see more" 130 × 30 @ y2269.
+
+   Article at 1440: "back to journal" 14px caps @ y116 · date pill @ y269 ·
+   title Dahlia 80 / 80 on a 677 measure @ y310 · featured image 254 × 333,
+   r10 @ y541 · body 15 / 23 on a 551 measure @ y945, paragraphs one line
+   apart. The body is Shopify's own HTML, so every element it can contain is
+   styled rather than the markup being rebuilt.
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   Listing
+   -------------------------------------------------------------------------- */
+
+.wc-journal {
+  padding-block: var(--journal-padding-top) var(--journal-padding-bottom);
+}
+
+.wc-journal__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* The card's date pill, standing on its own. */
+.wc-journal__pill,
+.wc-article__pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 19px;
+  margin: 0;
+  padding-inline: var(--space-2xs);
+  border: var(--border-width) solid var(--color-border-accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+}
+
+.wc-journal__eyebrow {
+  margin: 34px 0 0;
+  color: var(--color-accent);
+}
+
+/* The artboard fills each line before wrapping (no balancing), which is what
+   sets its three lines. */
+.wc-journal__heading {
+  width: min(600px, 100%);
+  margin: 24px 0 0;
+}
+
+/* --- Sort --- */
+
+.wc-journal__list {
+  display: block;
+}
+
+.wc-journal__sort {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  width: fit-content;
+  margin: 70px auto 0;
+  padding-inline-end: var(--space-md);
+  color: var(--color-muted);
+}
+
+.wc-journal__sort-label {
+  font-size: var(--text-contact);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* The artboard's control is just "sort by ⌄", so the native select lies over
+   the label rather than printing its own value beside it: still a real,
+   focusable, screen-reader-announced select, with the visible text and caret
+   drawn by the label. */
+.wc-journal__sort-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  font-family: var(--font-body);
+  font-size: var(--text-contact);
+  opacity: 0;
+  cursor: pointer;
+}
+
+.wc-journal__sort-select option {
+  background-color: var(--color-page);
+  color: var(--color-text);
+  text-transform: none;
+}
+
+.wc-journal__sort-select:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--color-border);
+  outline-offset: 4px;
+}
+
+.wc-journal__sort:hover {
+  color: var(--color-text);
+}
+
+.wc-journal__sort-caret {
+  position: absolute;
+  right: 0;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  border-right: var(--border-width) solid currentcolor;
+  border-bottom: var(--border-width) solid currentcolor;
+  transform: translateY(-2px) rotate(45deg);
+  pointer-events: none;
+}
+
+/* --- Grid --- */
+
+.wc-journal__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  margin: 89px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-journal__item {
+  display: flex;
+}
+
+.wc-journal__item > .wc-card {
+  width: 100%;
+}
+
+/* Hidden by the script until "see more" is pressed; without JavaScript every
+   card stays in the page. */
+.wc-journal__item[hidden] {
+  display: none;
+}
+
+.wc-journal__more {
+  display: flex;
+  justify-content: center;
+  margin-top: 97px;
+}
+
+.wc-journal__empty {
+  margin: var(--space-6xl) 0 0;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Article
+   -------------------------------------------------------------------------- */
+
+.wc-article {
+  padding-block: var(--article-padding-top) var(--article-padding-bottom);
+}
+
+.wc-article__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  /* The artboard sets the chevron at x37, 19 inside the gutter. */
+  margin-inline-start: 19px;
+  color: var(--color-text);
+  font-size: var(--text-contact);
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.wc-article__back-arrow {
+  width: 6px;
+  height: 6px;
+  border-left: var(--border-width) solid currentcolor;
+  border-bottom: var(--border-width) solid currentcolor;
+  transform: rotate(45deg);
+}
+
+.wc-article__back:hover {
+  color: var(--color-accent);
+}
+
+.wc-article__back:focus-visible {
+  outline: 2px solid var(--color-border);
+  outline-offset: 4px;
+}
+
+.wc-article__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wc-article__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 135px;
+}
+
+.wc-article__title {
+  width: min(680px, 100%);
+  margin: 22px 0 0;
+  font-size: var(--text-display-product);
+  line-height: var(--leading-display);
+  text-wrap: balance;
+}
+
+.wc-article__author {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+
+.wc-article__figure {
+  width: min(254px, 60%);
+  margin: 71px 0 0;
+}
+
+.wc-article__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 254 / 333;
+  border-radius: var(--radius-card);
+  object-fit: cover;
+}
+
+/* --- The merchant's HTML ---
+   Shopify's article body: the shared `.wc-rte` treatment (wc-editorial.css)
+   on the artboard's 551 measure. Only what is particular to the article page
+   lives here. */
+
+.wc-article__content {
+  width: min(551px, 100%);
+  margin-top: 71px;
+}
+
+.wc-article__tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2xs);
+  width: min(551px, 100%);
+  margin: var(--space-3xl) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-article__tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 19px;
+  padding-inline: var(--space-2xs);
+  border: var(--border-width) solid var(--color-border-accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.wc-article__comments-note {
+  margin-top: var(--space-3xl);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Tablet and phones (derived — no mobile artboard). The grid follows the
+   shared --grid-columns rhythm, the article column keeps its measure inside
+   the gutters, and the artboard's fixed gaps give way to the section rhythm.
+   -------------------------------------------------------------------------- */
+
+@media screen and (max-width: 989px) {
+  .wc-journal {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .wc-journal__eyebrow,
+  .wc-journal__heading {
+    margin-top: var(--space-xl);
+  }
+
+  .wc-journal__sort {
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-journal__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-journal__more {
+    margin-top: var(--space-4xl);
+  }
+
+  .wc-article {
+    padding-block: var(--space-xl) var(--section-spacing-desktop);
+  }
+
+  .wc-article__head {
+    margin-top: var(--space-5xl);
+  }
+
+  .wc-article__figure,
+  .wc-article__content {
+    margin-top: var(--space-4xl);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .wc-journal__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wc-article__figure {
+    width: min(254px, 70%);
+  }
+
+  .wc-article__content {
+    margin-top: var(--space-3xl);
+  }
+}

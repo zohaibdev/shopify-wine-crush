@@ -36,7 +36,19 @@
           | image_tag: widths: '438, 657, 876', sizes: '(min-width: 990px) 438px, 70vw', alt: shop.name
         }}
       {%- else -%}
-        <img src="{{ 'wine-crush-logo-dark.png' | asset_url }}" alt="{{ shop.name }}" width="438" height="108" loading="lazy">
+        {%- comment -%}
+          The site's vector wordmark (assets/wine-crush-logo.svg — the same
+          122:30 as the 438 × 108 artboard logo) used as a mask over the footer's
+          Crimson, so it is sharp at any pixel density; the old fallback was a 1×
+          438px PNG. A mask, not inline SVG: the file is over Shopify's 15 KB
+          inline_asset_content limit.
+        {%- endcomment -%}
+        <span
+          class="wc-footer__logo-mark"
+          role="img"
+          aria-label="{{ shop.name | escape }}"
+          style="--logo-mask: url('{{ 'wine-crush-logo.svg' | asset_url }}');"
+        ></span>
       {%- endif -%}
     </div>
 

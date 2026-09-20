@@ -1,8 +1,14 @@
 {{ 'wc-bundle-band.css' | asset_url | stylesheet_tag }}
 
+{%- liquid
+  assign heading_size = section.settings.heading_size | default: 'xl'
+  assign body_size = section.settings.body_size | default: 's'
+-%}
+
 <section
-  class="wc-bundle wc-band wc-band--{{ section.settings.background }}{% if section.settings.cap %} wc-band--capped{% endif %}"
+  class="wc-bundle wc-bundle--body-{{ body_size }} wc-band wc-band--{{ section.settings.background }}{% if section.settings.cap %} wc-band--capped{% endif %}"
   style="
+    --bundle-heading-width: {{ section.settings.heading_width | default: 1300 }}px;
     --bundle-padding-top: {{ section.settings.padding_top }}px;
     --bundle-padding-bottom: {{ section.settings.padding_bottom }}px;
   "
@@ -20,11 +26,11 @@
     {%- endif -%}
 
     {%- if section.settings.heading != blank -%}
-      <h2 class="wc-bundle__heading wc-display-xl">{{ section.settings.heading }}</h2>
+      <h2 class="wc-bundle__heading wc-bundle__heading--{{ heading_size }} wc-display-{{ heading_size }}">{{ section.settings.heading }}</h2>
     {%- endif -%}
 
     {%- if section.settings.body != blank -%}
-      <div class="wc-bundle__body wc-body-s rte">{{ section.settings.body }}</div>
+      <div class="wc-bundle__body wc-body-{{ body_size }} rte">{{ section.settings.body }}</div>
     {%- endif -%}
 
     {%- if section.settings.button_label != blank -%}
@@ -108,10 +114,41 @@
       "default": "Build your bundle."
     },
     {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "xl", "label": "Extra large (bundle)" },
+        { "value": "m", "label": "Medium (page intro)" }
+      ],
+      "default": "xl"
+    },
+    {
+      "type": "range",
+      "id": "heading_width",
+      "label": "Heading width",
+      "info": "Sets where the heading wraps.",
+      "min": 300,
+      "max": 1300,
+      "step": 10,
+      "unit": "px",
+      "default": 1300
+    },
+    {
       "type": "richtext",
       "id": "body",
       "label": "Body text",
       "default": "<p>Six bottles, chosen by you. Mix reds, whites and everything in between — we'll pack it and send it.</p>"
+    },
+    {
+      "type": "select",
+      "id": "body_size",
+      "label": "Body text size",
+      "options": [
+        { "value": "s", "label": "Small (12px, 477px column)" },
+        { "value": "m", "label": "Medium (16px, 595px column)" }
+      ],
+      "default": "s"
     },
     {
       "type": "header",

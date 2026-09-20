@@ -1,0 +1,630 @@
+/* --------------------------------------------------------------------------
+   Collection page — Figma 10008:35 ("Shop"), 1440 × 3748.
+   sections/wc-collection-nav.liquid · sections/wc-main-collection.liquid ·
+   snippets/wc-facets.liquid · snippets/wc-facet-values.liquid
+   Cards: assets/wc-product-card.css (.wc-product-card--grid).
+   -------------------------------------------------------------------------- */
+
+/* --- Collection navigation (group 10075:2520) ---
+   Dahlia 62px (Display M), centred, 76px between items (502 − 426 …). The
+   current collection is underlined from the font's own metrics; the rest sit at
+   66% Ivory, the design's muted text. */
+
+.wc-collection-nav {
+  padding-block: var(--collection-nav-padding-top) var(--collection-nav-padding-bottom);
+}
+
+/* The nav is the scroller, the list centres inside it: centred while the row
+   fits, scrollable from the first item when it doesn't — never wrapped. */
+.wc-collection-nav__nav {
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.wc-collection-nav__nav::-webkit-scrollbar {
+  display: none;
+}
+
+.wc-collection-nav__list {
+  display: flex;
+  gap: clamp(24px, 5.28vw, 76px);
+  width: max-content;
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+  list-style: none;
+}
+
+.wc-collection-nav__link {
+  display: block;
+  color: var(--color-muted);
+  white-space: nowrap;
+  text-decoration: none;
+  text-decoration-thickness: from-font;
+  text-underline-position: from-font;
+  transition: color var(--transition-button);
+}
+
+.wc-collection-nav__link:hover,
+.wc-collection-nav__link.is-current {
+  color: var(--color-text);
+}
+
+.wc-collection-nav__link.is-current {
+  text-decoration-line: underline;
+}
+
+.wc-collection-nav__link:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 4px;
+}
+
+/* --- Layout ---
+   18px gutter · 204px filter column · 15px gap · results (x237…x1422 at 1440).
+   204 + 15 is what puts the first card at the artboard's x237. */
+
+.wc-collection {
+  padding-bottom: var(--collection-padding-bottom);
+}
+
+.wc-collection__layout {
+  display: grid;
+  grid-template-columns: 204px minmax(0, 1fr);
+  column-gap: var(--slider-gap);
+  padding-inline: var(--page-gutter);
+}
+
+.wc-collection--no-filters .wc-collection__layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The labels start 18px below the grid top (418 − 400), 16px inside the
+   column so they line up with the header's 34px gutter. */
+.wc-collection__filters {
+  padding: 18px 0 0 16px;
+}
+
+/* --- Grid (4 × 285, 15px gaps both ways: 537 − 522, 849 − 834) --- */
+
+.wc-collection__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--slider-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-collection__item {
+  min-width: 0;
+  /* The card queries its own width (wc-product-card.css). */
+  container: wc-card / inline-size;
+}
+
+/* facets.js adds .loading while a filtered section is in flight. */
+.wc-collection .collection {
+  transition: opacity var(--transition-button);
+}
+
+.wc-collection .collection.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* --- Empty state (not drawn in Figma; built from the type scale) --- */
+
+.wc-collection__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  padding-block: var(--space-6xl);
+  text-align: center;
+}
+
+.wc-collection__empty-title {
+  margin: 0;
+}
+
+/* --- Pagination (not drawn in Figma: 16 products fill the artboard's grid).
+   Numbers are the 14px button type; the current page is a 30px outlined
+   circle; prev/next reuse the product slider's 52px arrow. --- */
+
+.wc-pagination {
+  margin-top: var(--space-5xl);
+}
+
+.wc-pagination__list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-pagination__page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--button-height);
+  height: var(--button-height);
+  padding-inline: var(--space-2xs);
+  border: var(--button-border-width) solid transparent;
+  border-radius: var(--button-radius);
+  color: var(--color-muted);
+  font-size: var(--button-font-size);
+  text-decoration: none;
+  transition: color var(--transition-button), border-color var(--transition-button);
+}
+
+.wc-pagination__page:hover {
+  color: var(--color-text);
+}
+
+.wc-pagination__page.is-current {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.wc-pagination__gap {
+  color: var(--color-muted);
+}
+
+.wc-pagination__step {
+  display: block;
+  width: 52px;
+  height: 28px;
+  margin-inline: var(--space-xs);
+  color: var(--color-text);
+}
+
+.wc-pagination__step svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wc-pagination__step--prev svg {
+  transform: scaleX(-1);
+}
+
+.wc-pagination__page:focus-visible,
+.wc-pagination__step:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* --- Filters: desktop column ---
+   "VARIETAL +" etc.: 14px caps (--text-lede), 18px line, 27px pitch
+   (418 → 445 → 472). Closed = 66% Ivory; open or active = Ivory, underlined. */
+
+.wc-facets__form {
+  margin: 0;
+}
+
+.wc-facet + .wc-facet {
+  margin-top: 9px;
+}
+
+.wc-facet__summary {
+  display: inline-flex;
+  gap: 0.6em;
+  color: var(--color-muted);
+  font-size: var(--text-lede);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  text-decoration-thickness: from-font;
+  text-underline-position: from-font;
+  list-style: none;
+  cursor: pointer;
+  transition: color var(--transition-button);
+}
+
+.wc-facet__summary::-webkit-details-marker {
+  display: none;
+}
+
+.wc-facet__summary:hover,
+.wc-facet__summary.is-active,
+.wc-facet[open] > .wc-facet__summary {
+  color: var(--color-text);
+}
+
+.wc-facet[open] > .wc-facet__summary,
+.wc-facet__summary.is-active {
+  text-decoration-line: underline;
+}
+
+.wc-facet__summary:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 3px;
+}
+
+.wc-facet__count {
+  margin-inline-start: -0.3em;
+}
+
+/* Values: 12px caps (the product-meta size), 8px apart, under the label. */
+.wc-facet__panel {
+  min-width: 0;
+  margin: 12px 0 18px;
+  padding: 0;
+  border: 0;
+}
+
+.wc-facet__list {
+  display: grid;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-facet__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  color: var(--color-muted-strong);
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.wc-facet__option:hover,
+.wc-facet__option.is-checked {
+  color: var(--color-text);
+}
+
+.wc-facet__option.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The real checkbox stays in the tab order; the box is its drawing. */
+.wc-facet__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.wc-facet__box {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border: var(--border-width) solid currentColor;
+  border-radius: 2px;
+  background-color: transparent;
+  background-position: center;
+  background-size: cover;
+}
+
+.wc-facet__input:checked + .wc-facet__box {
+  background-color: currentColor;
+}
+
+.wc-facet__box--swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.wc-facet__input:checked + .wc-facet__box--swatch {
+  outline: var(--border-width) solid currentColor;
+  outline-offset: 2px;
+}
+
+.wc-facet__input:focus-visible + .wc-facet__box {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.wc-facet__value-count {
+  margin-inline-start: auto;
+  color: var(--color-muted);
+}
+
+/* Price: two small outlined fields in the site's pill language. */
+.wc-price-range {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.wc-price-range__field {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.wc-price-range__label {
+  color: var(--color-muted-strong);
+}
+
+.wc-price-range__input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  height: var(--button-height);
+  padding-inline: var(--space-xs);
+  border: var(--button-border-width) solid var(--color-muted);
+  border-radius: var(--button-radius);
+  font-size: var(--text-meta);
+}
+
+.wc-price-range__input:focus-within {
+  border-color: var(--color-text);
+}
+
+.wc-price-range__currency {
+  color: var(--color-muted);
+}
+
+.wc-facet__text {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  outline: none;
+}
+
+.wc-facet__text::placeholder {
+  color: var(--color-muted);
+}
+
+/* Active filters: removable pills + "remove all", under the groups. */
+.wc-active-facets:empty {
+  display: none;
+}
+
+.wc-active-facets {
+  margin-top: var(--space-lg);
+}
+
+.wc-active-facets__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin: 0 0 var(--space-xs);
+  padding: 0;
+  list-style: none;
+}
+
+.wc-active-facets__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-height: var(--button-height-sm);
+  padding-inline: var(--button-padding-inline-sm);
+  border: var(--button-border-width) solid var(--color-border);
+  border-radius: var(--button-radius);
+  color: var(--color-text);
+  font-size: var(--text-caption);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background-color var(--transition-button), color var(--transition-button);
+}
+
+.wc-active-facets__pill:hover,
+.wc-active-facets__pill:focus-visible {
+  background-color: var(--color-border);
+  color: var(--color-page);
+}
+
+.wc-active-facets__pill.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.wc-active-facets__clear-link {
+  color: var(--color-muted-strong);
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  text-underline-position: from-font;
+}
+
+.wc-active-facets__clear-link:hover {
+  color: var(--color-text);
+}
+
+/* --- Filters: mobile / tablet drawer (derived; no artboard below 1440) --- */
+
+.wc-facets__mobile {
+  display: none;
+}
+
+.wc-facets__open {
+  list-style: none;
+}
+
+.wc-facets__open::-webkit-details-marker {
+  display: none;
+}
+
+/* Full-height panel from the left in Claret, like the site's nav drawer:
+   280ms, same easing. Dawn's menu-drawer adds .menu-opening on open. */
+.wc-facets__drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 10;
+  display: flex;
+  width: min(420px, 100%);
+  height: 100%;
+  background-color: var(--color-page);
+  color: var(--color-text);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 280ms cubic-bezier(0.22, 0.61, 0.36, 1), visibility 280ms;
+}
+
+.wc-facets__drawer-toggle.menu-opening .wc-facets__drawer {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+/* The scrim behind the open drawer. A pseudo-element: Dawn hides empty divs. */
+.wc-facets__drawer-toggle[open]::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background-color: var(--overlay-menu);
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.wc-facets__drawer-toggle.menu-opening::after {
+  opacity: 1;
+}
+
+/* Header and footer stay put; only the body scrolls. */
+.wc-facets__drawer facet-filters-form,
+.wc-facets__drawer-form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+}
+
+.wc-facets__drawer-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-3xs) var(--space-xs);
+  padding: var(--space-md) var(--page-gutter);
+  border-bottom: var(--border-width) solid var(--color-muted);
+}
+
+.wc-facets__drawer-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--color-text);
+}
+
+.wc-facets__drawer-count {
+  grid-column: 1;
+  margin: 0;
+  color: var(--color-muted-strong);
+}
+
+.wc-facets__close {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.wc-facets__close svg {
+  width: 16px;
+  height: 16px;
+}
+
+.wc-facets__close:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: -4px;
+}
+
+.wc-facets__drawer-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-lg) var(--page-gutter);
+}
+
+.wc-facet--static + .wc-facet--static {
+  margin-top: var(--space-lg);
+}
+
+.wc-facet--static .wc-facet__summary {
+  margin: 0;
+  color: var(--color-text);
+  cursor: default;
+}
+
+.wc-facet--static .wc-facet__panel {
+  margin-bottom: 0;
+}
+
+/* Bigger targets on touch. */
+.wc-facets__drawer .wc-facet__option {
+  min-height: 32px;
+}
+
+.wc-facets__drawer-footer {
+  padding: var(--space-xs) var(--page-gutter) var(--space-md);
+  border-top: var(--border-width) solid var(--color-muted);
+}
+
+.wc-facets__apply {
+  width: 100%;
+}
+
+/* --- Responsive ---
+   Desktop keeps the column; ≥ 1200 holds the artboard's 4 columns, 990–1199
+   drops to 3 so cards stay ≥ 240px. Below 990 the column becomes the drawer. */
+
+@media screen and (max-width: 1199px) {
+  .wc-collection__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 989px) {
+  .wc-collection-nav {
+    padding-block: var(--space-4xl) var(--space-3xl);
+  }
+
+  .wc-collection__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wc-collection__filters {
+    padding: 0 0 var(--space-lg);
+  }
+
+  .wc-facets__desktop {
+    display: none;
+  }
+
+  .wc-facets__mobile {
+    display: block;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .wc-collection__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wc-collection-nav {
+    padding-block: var(--space-3xl) var(--space-2xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-collection-nav__link,
+  .wc-facet__summary,
+  .wc-collection .collection,
+  .wc-facets__drawer,
+  .wc-facets__drawer-toggle[open]::after {
+    transition: none;
+  }
+}

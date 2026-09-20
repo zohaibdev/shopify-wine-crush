@@ -1,0 +1,261 @@
+{%- comment -%}
+  Cart drawer — the Reserve Cellar cart (Figma 10071:439 reference) in the
+  Wine Crush language. Replaces Dawn's snippets/cart-drawer.liquid (left on
+  disk) in layout/theme.liquid and sections/cart-drawer.liquid.
+
+  Dawn's cart JavaScript is reused unchanged, so this markup keeps its contract:
+  - <cart-drawer> › #CartDrawer › #CartDrawer-Overlay + .drawer__inner
+    (assets/cart-drawer.js: open/close, Escape, overlay, focus trap)
+  - .drawer__inner is re-rendered from the `cart-drawer` section after every
+    change (assets/cart.js); <cart-drawer-items> › form#CartDrawer-Form ›
+    #CartDrawer-CartItems.js-contents › .cart-item#CartDrawer-Item-N with
+    <quantity-input> (#Drawer-quantity-N, data-index, data-quantity-*),
+    #CartDrawer-LineItemError-N
+    .cart-item__error-text and a .loading__spinner
+  - .drawer__inner-empty (focus target when the last item is removed)
+  - .cart-drawer__footer (swapped when the cart changes elsewhere)
+  - button#CartDrawer-Checkout[name=checkout][form=CartDrawer-Form]
+  Wine Crush additions (assets/wc-cart.js): <wc-cart-extras> (gift message →
+  cart attribute, delivery notes → cart note) and <wc-age-gate>.
+  As in the reference there is no "remove" link: for the standard minimum of
+  1 the quantity input validates against 0, so "−" at 1 removes the line
+  through Dawn's quantity flow. Variants with a higher minimum keep a link.
+{%- endcomment -%}
+
+{%- comment -%}
+  cart.js defines CartItems, which cart-drawer.js extends for <cart-drawer-items>
+  (quantity, remove). Dawn's snippet loaded it here; without it the drawer's
+  items element is never defined and opening the drawer throws. Deferred, and
+  rendered before theme.liquid's cart-drawer.js, so it runs first.
+{%- endcomment -%}
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign threshold_cents = settings.wc_cart_free_shipping_threshold | times: 100
+  assign threshold_money = threshold_cents | money_without_trailing_zeros
+-%}
+
+<cart-drawer class="drawer wc-cart{% if cart == empty %} is-empty{% endif %}">
+  <div id="CartDrawer" class="cart-drawer">
+    <div id="CartDrawer-Overlay" class="cart-drawer__overlay"></div>
+    <div
+      class="drawer__inner wc-cart__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{ 'sections.cart.title' | t | escape }}"
+      tabindex="-1"
+    >
+      <div class="wc-cart__header">
+        <button type="button" class="drawer__close wc-cart__back" onclick="this.closest('cart-drawer').close()">
+          <span class="wc-cart__circle" aria-hidden="true">{{- 'icon-wc-arrow.svg' | inline_asset_content -}}</span>
+          <span>{{ 'wc_cart.close' | t }}</span>
+        </button>
+      </div>
+
+      {%- if cart == empty -%}
+        <div class="drawer__inner-empty wc-cart__empty">
+          <h2 class="wc-cart__empty-title wc-display-m">{{ 'sections.cart.empty' | t }}</h2>
+          <a href="{{ routes.all_products_collection_url }}" class="wc-button">
+            {{- 'general.continue_shopping' | t -}}
+          </a>
+        </div>
+      {%- else -%}
+        <div class="wc-cart__body">
+          {%- if settings.wc_cart_message != blank or settings.wc_cart_free_shipping_threshold > 0 -%}
+            <div class="wc-cart__promo">
+              {%- if settings.wc_cart_message != blank -%}
+                <div class="wc-cart__message rte">
+                  {{- settings.wc_cart_message | replace: '[threshold]', threshold_money -}}
+                </div>
+              {%- endif -%}
+              {%- if settings.wc_cart_free_shipping_threshold > 0 -%}
+                {%- liquid
+                  assign progress = cart.total_price | times: 100.0 | divided_by: threshold_cents | at_most: 100
+                -%}
+                <div
+                  class="wc-cart__progress"
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="{{ progress | round }}"
+                  aria-label="{{ 'wc_cart.free_delivery_progress' | t: threshold: threshold_money | escape }}"
+                >
+                  <span style="width: {{ progress }}%;"></span>
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          <cart-drawer-items
+            view-event-payload="{{ cart | standard_event_data: 'view', context: 'dialog' | escape }}"
+            view-event-trigger="manual"
+          >
+            <form action="{{ routes.cart_url }}" id="CartDrawer-Form" class="cart__contents wc-cart__form" method="post">
+              <div id="CartDrawer-CartItems" class="drawer__contents js-contents">
+                <ul class="wc-cart__items" role="list">
+                  {%- for item in cart.items -%}
+                    {%- assign line = item.index | plus: 1 -%}
+                    <li id="CartDrawer-Item-{{ line }}" class="cart-item wc-cart-item">
+                      <a href="{{ item.url }}" class="wc-cart-item__media" tabindex="-1" aria-hidden="true">
+                        {%- if item.image -%}
+                          {{ item.image | image_url: width: 220 | image_tag: alt: '', loading: 'lazy', width: 110, height: 110 }}
+                        {%- endif -%}
+                      </a>
+
+                      <div class="wc-cart-item__details">
+                        <a href="{{ item.url }}" class="cart-item__name wc-cart-item__title">{{ item.product.title | escape }}</a>
+
+                        {%- unless item.product.has_only_default_variant -%}
+                          <p class="wc-cart-item__meta">{{ item.variant.title | escape }}</p>
+                        {%- endunless -%}
+                        {%- for property in item.properties -%}
+                          {%- assign first_char = property.first | slice: 0 -%}
+                          {%- if property.last != blank and first_char != '_' -%}
+                            <p class="wc-cart-item__meta">{{ property.first }}: {{ property.last }}</p>
+                          {%- endif -%}
+                        {%- endfor -%}
+                        {%- if item.selling_plan_allocation -%}
+                          <p class="wc-cart-item__meta">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                        {%- endif -%}
+
+                        {%- assign each_price = item.final_price | money -%}
+                        <p class="wc-cart-item__each">{{ 'wc_cart.each' | t: price: each_price }}</p>
+
+                        <div class="wc-cart-item__controls">
+                          <quantity-input class="wc-cart-qty">
+                            <button class="quantity__button wc-cart-qty__button" name="minus" type="button">
+                              <span class="wc-visually-hidden">{{ 'products.product.quantity.decrease' | t: product: item.product.title | escape }}</span>
+                              <span aria-hidden="true">−</span>
+                            </button>
+                            <input
+                              class="quantity__input wc-cart-qty__input"
+                              type="number"
+                              data-quantity-variant-id="{{ item.variant.id }}"
+                              data-quantity-line-key="{{ item.key }}"
+                              name="updates[]"
+                              value="{{ item.quantity }}"
+                              {% # theme-check-disable %}
+                              data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+                              min="0"
+                              {%- comment -%}
+                                "−" at the minimum removes the line, as in the
+                                reference: for the standard minimum of 1 the
+                                cart validates against 0 (Dawn's cart.js
+                                rejects anything below data-min).
+                              {%- endcomment -%}
+                              {%- assign qty_min = item.variant.quantity_rule.min -%}
+                              {%- if qty_min <= 1 -%}
+                                {%- assign qty_min = 0 -%}
+                              {%- endif -%}
+                              data-min="{{ qty_min }}"
+                              {% if item.variant.quantity_rule.max != null %}
+                                max="{{ item.variant.quantity_rule.max }}"
+                              {% endif %}
+                              step="{{ item.variant.quantity_rule.increment }}"
+                              {% # theme-check-enable %}
+                              aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                              id="Drawer-quantity-{{ line }}"
+                              data-index="{{ line }}"
+                              {% if item.instructions and item.instructions.can_update_quantity == false %}
+                                disabled
+                              {% endif %}
+                            >
+                            <button class="quantity__button wc-cart-qty__button" name="plus" type="button">
+                              <span class="wc-visually-hidden">{{ 'products.product.quantity.increase' | t: product: item.product.title | escape }}</span>
+                              <span aria-hidden="true">+</span>
+                            </button>
+                          </quantity-input>
+
+                          {%- comment -%}
+                            A variant with a minimum above 1 cannot step to 0,
+                            so it keeps an explicit remove link.
+                          {%- endcomment -%}
+                          {%- if item.variant.quantity_rule.min > 1 -%}
+                            {%- unless item.instructions and item.instructions.can_remove == false -%}
+                              <cart-remove-button id="CartDrawer-Remove-{{ line }}" data-index="{{ line }}">
+                                <button
+                                  type="button"
+                                  class="wc-cart-item__remove"
+                                  aria-label="{{ 'sections.cart.remove_title' | t: title: item.title | escape }}"
+                                  data-variant-id="{{ item.variant.id }}"
+                                >
+                                  {{- 'wc_cart.remove' | t -}}
+                                </button>
+                              </cart-remove-button>
+                            {%- endunless -%}
+                          {%- endif -%}
+
+                        </div>
+
+                        <div id="CartDrawer-LineItemError-{{ line }}" class="wc-cart-item__error" role="alert">
+                          <span class="cart-item__error-text"></span>
+                        </div>
+                      </div>
+
+                      <div class="wc-cart-item__total">
+                        {%- if item.original_line_price != item.final_line_price -%}
+                          <s class="wc-cart-item__was">{{ item.original_line_price | money }}</s>
+                        {%- endif -%}
+                        <span>{{ item.final_line_price | money }}</span>
+                        {%- for discount in item.line_level_discount_allocations -%}
+                          <span class="wc-cart-item__discount">{{ discount.discount_application.title | escape }}</span>
+                        {%- endfor -%}
+                      </div>
+
+                      {%- render 'loading-spinner' -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+
+              <p id="CartDrawer-LiveRegionText" class="wc-visually-hidden" role="status"></p>
+              <p id="CartDrawer-LineItemStatus" class="wc-visually-hidden" aria-hidden="true" role="status">
+                {{ 'accessibility.loading' | t }}
+              </p>
+              <div id="CartDrawer-CartErrors" class="wc-cart__errors" role="alert"></div>
+            </form>
+          </cart-drawer-items>
+
+          <div class="drawer__footer cart-drawer__footer wc-cart__footer">
+            <div class="wc-cart__subtotal">
+              <p class="wc-cart__subtotal-label">{{ 'wc_cart.subtotal' | t }}</p>
+              <p class="wc-cart__subtotal-value totals__total-value">{{ cart.total_price | money }}</p>
+              {%- for discount in cart.cart_level_discount_applications -%}
+                <p class="wc-cart__discount">{{ discount.title | escape }} (−{{ discount.total_allocated_amount | money }})</p>
+              {%- endfor -%}
+            </div>
+
+            {%- if settings.wc_cart_gift_enabled or settings.show_cart_note -%}
+              {%- render 'wc-cart-extras' -%}
+            {%- endif -%}
+
+            {%- if settings.wc_age_gate_enabled -%}
+              {%- render 'wc-age-gate', id: 'drawer', checkout_id: 'CartDrawer-Checkout' -%}
+            {%- endif -%}
+
+            <div class="wc-cart__actions">
+              <button type="button" class="wc-cart__back" onclick="this.closest('cart-drawer').close()">
+                <span class="wc-cart__circle" aria-hidden="true">{{- 'icon-wc-arrow.svg' | inline_asset_content -}}</span>
+                <span>{{ 'general.continue_shopping' | t }}</span>
+              </button>
+              <button
+                type="submit"
+                id="CartDrawer-Checkout"
+                class="wc-button wc-cart__checkout"
+                name="checkout"
+                form="CartDrawer-Form"
+                {% if cart == empty %}
+                  disabled
+                {% endif %}
+              >
+                <span>{{ 'wc_cart.checkout' | t }}</span>
+                <span class="wc-cart__checkout-arrow" aria-hidden="true">{{- 'icon-wc-arrow.svg' | inline_asset_content -}}</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</cart-drawer>

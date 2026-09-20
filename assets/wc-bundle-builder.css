@@ -1,0 +1,495 @@
+/* --------------------------------------------------------------------------
+   Bundle builder — sections/wc-bundle-builder.liquid (Figma 10072:1173,
+   1440 × 3572).
+
+   Measured at 1440: eyebrow @ y199 · "Build your bundle." Dahlia 150 @ y248 ·
+   a 26 × 52 arrow @ y468 · from y589 a 885px grid of 285 × 434 cards (3 up,
+   15px gutters) beside a 504px panel (15px away, Crimson, r10):
+     panel inset 24 · "Your Bundle:" Dahlia 40 @ +18 · hint 16 @ +77 ·
+     three 147 × 70 pack buttons @ +106 (10 apart; chosen = Coral) with an
+     18px count over a 29px price · hint @ +199 · slot rows between 2px
+     Sorbet-50% rules, 73 tall when filled (46 × 69 thumb) and 44 when empty,
+     index at +34, thumb at +66, title at +112 · subtotal 12 caps · the CTA
+     is the 31px large pill.
+   The cards themselves are the collection card (assets/wc-product-card.css)
+   in select mode.
+   -------------------------------------------------------------------------- */
+
+.wc-bundle-builder {
+  --bundle-gap: 15px;
+  /* 504 of the artboard's 1404 container = 35.9%, so the panel keeps its
+     share and the cards stay three across below 1440. */
+  --bundle-panel-width: clamp(330px, 35.9%, 504px);
+  --bundle-panel-inset: 24px;
+  --bundle-rule: 2px solid var(--color-hairline);
+
+  padding-block: var(--bundle-padding-top) var(--bundle-padding-bottom);
+}
+
+/* --- Heading --- */
+
+.wc-bundle-builder__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wc-bundle-builder__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  margin: 0 0 26px;
+}
+
+.wc-bundle-builder__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.wc-bundle-builder__heading {
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* The site arrow (52 × 28) turned a quarter-turn: 26 × 52 pointing down. */
+.wc-bundle-builder__arrow {
+  display: block;
+  width: 52px;
+  /* Rotated, so the 52 × 28 box paints 26 × 52: the visual top sits 12px
+     above the box, which the margin takes back. */
+  margin-top: 81px;
+  color: var(--color-text);
+  transform: rotate(90deg);
+}
+
+.wc-bundle-builder__arrow svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* --- Layout: cards beside the panel --- */
+
+.wc-bundle-builder__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--bundle-panel-width);
+  gap: var(--bundle-gap);
+  align-items: start;
+  margin-top: 81px;
+}
+
+/* Three across, as drawn, for the whole desktop range; the panel gives up
+   width instead of the grid giving up a column (--bundle-panel-width). */
+.wc-bundle-builder__items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--bundle-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each card judges its own width (wc-product-card.css): under 280 the photo
+   leaves the overlay and takes its own row, so narrow cards stay readable. */
+.wc-bundle-builder__item {
+  container: wc-card / inline-size;
+}
+
+.wc-bundle-builder__item > .wc-product-card {
+  height: 100%;
+}
+
+.wc-bundle-builder__item .wc-product-card {
+  width: 100%;
+}
+
+/* A product that cannot be bought is dimmed and inert, as the card's own
+   sold-out state already says. */
+.wc-bundle-builder__item[data-unavailable] .wc-product-card {
+  opacity: 0.45;
+}
+
+/* Full bundle: the bottles not chosen step back, but stay readable — the
+   chosen ones can still be swapped out. */
+.wc-bundle-builder__layout.is-full
+  .wc-bundle-builder__item:not(.is-selected):not([data-unavailable])
+  .wc-product-card {
+  opacity: 0.6;
+}
+
+.wc-bundle-builder__item.is-selected .wc-product-card {
+  outline: var(--border-width) solid var(--color-border);
+  outline-offset: 2px;
+}
+
+/* The whole card is the control in select mode. */
+.wc-product-card--select {
+  cursor: pointer;
+}
+
+/* The pack-shot fills the inset frame as the artboard draws it (and as a
+   collection card does); the sources are square with empty margins, so the
+   crop only takes that empty space. */
+.wc-product-card--select .wc-product-card__media img {
+  object-position: 50% 45%;
+}
+
+.wc-bundle-builder__item[data-unavailable] .wc-product-card--select {
+  cursor: not-allowed;
+}
+
+.wc-bundle-builder__item.is-selected .wc-product-card__add {
+  background-color: var(--color-border);
+  color: var(--color-page);
+}
+
+/* --- Panel --- */
+
+.wc-bundle-builder__panel {
+  display: flex;
+  flex-direction: column;
+  /* 18 above the title, 24 everywhere else — the artboard's own inset. */
+  min-height: 764px;
+  padding: 18px var(--bundle-panel-inset) var(--bundle-panel-inset);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface-card);
+}
+
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__panel {
+  position: sticky;
+  top: calc(var(--header-height) + var(--bundle-gap));
+}
+
+.wc-bundle-builder__panel-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.wc-bundle-builder__hint {
+  margin: 19px 0 0;
+  color: var(--color-accent-muted);
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+/* The hint under the packs sits a little lower than the one under the title. */
+.wc-bundle-builder__packs + .wc-bundle-builder__hint {
+  margin-top: 23px;
+}
+
+/* --- Pack chooser --- */
+
+.wc-bundle-builder__packs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.wc-bundle-builder__pack {
+  display: block;
+  cursor: pointer;
+}
+
+.wc-bundle-builder__pack-face {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  /* 14 + 3 + 29 of content, 10 of padding either side and the 1px border. */
+  min-height: 70px;
+  padding: 10px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-card);
+  text-align: center;
+  transition: background-color var(--transition-button), border-color var(--transition-button);
+}
+
+.wc-bundle-builder__pack-count {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Mono, not the display face: the artboard sets the pack price in IBM Plex
+   Mono at 22 (a 7-character run measures 90px = 7 × 0.6em). */
+.wc-bundle-builder__pack-price {
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.wc-bundle-builder__pack-input:checked + .wc-bundle-builder__pack-face {
+  border-color: var(--color-surface-accent);
+  background-color: var(--color-surface-accent);
+}
+
+.wc-bundle-builder__pack-input:focus-visible + .wc-bundle-builder__pack-face {
+  outline: 2px solid var(--color-border);
+  outline-offset: 2px;
+}
+
+.wc-bundle-builder__pack:hover .wc-bundle-builder__pack-face {
+  border-color: var(--color-surface-accent);
+}
+
+/* --- Slots --- */
+
+.wc-bundle-builder__slots {
+  margin: 9px 0 0;
+  padding: 0;
+  border-top: var(--bundle-rule);
+  list-style: none;
+  counter-reset: none;
+}
+
+.wc-bundle-builder__slot {
+  display: grid;
+  grid-template-columns: 32px 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 0 10px;
+  min-height: 44px;
+  padding-block: 6px;
+  border-bottom: var(--bundle-rule);
+}
+
+/* A filled row is 73 tall: the 69px thumb with 2px either side. */
+.wc-bundle-builder__slot.is-filled {
+  min-height: 73px;
+  padding-block: 2px;
+}
+
+.wc-bundle-builder__slot-index {
+  color: var(--color-muted);
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+}
+
+.wc-bundle-builder__slot-label {
+  grid-column: 2 / -1;
+  color: var(--color-muted);
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-bundle-builder__slot-thumb {
+  display: block;
+  width: 46px;
+  height: 69px;
+  object-fit: contain;
+}
+
+.wc-bundle-builder__slot-title {
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+/* Over the pack's count after a switch: flagged rather than dropped. */
+.wc-bundle-builder__slot.is-over .wc-bundle-builder__slot-index,
+.wc-bundle-builder__slot.is-over .wc-bundle-builder__slot-title {
+  color: var(--color-surface-accent);
+}
+
+/* --- Status, subtotal, CTA --- */
+
+.wc-bundle-builder__status:empty {
+  display: none;
+}
+
+.wc-bundle-builder__status {
+  margin: 14px 0 0;
+  color: var(--color-accent);
+  font-size: var(--text-meta);
+  line-height: var(--leading-body);
+}
+
+/* The panel is as tall as the artboard's 764 until the pack needs more rows;
+   the foot is pinned to its bottom either way. */
+.wc-bundle-builder__foot {
+  margin-top: auto;
+  padding-top: var(--space-4xl);
+}
+
+.wc-bundle-builder__subtotal {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+  margin: 0;
+  font-size: var(--text-contact);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-bundle-builder__form-wrap {
+  display: block;
+  margin-top: 11px;
+}
+
+.wc-bundle-builder__form {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+}
+
+/* Both add buttons (panel and phone bar) show when the bundle is short. */
+[data-bundle-submit][aria-disabled='true'] {
+  opacity: 0.5;
+}
+
+.wc-bundle-builder__error:empty,
+.wc-bundle-builder__error .product-form__error-message:empty {
+  display: none;
+}
+
+.wc-bundle-builder__error {
+  margin: var(--space-2xs) 0 0;
+  color: var(--color-accent);
+  text-align: right;
+}
+
+.wc-bundle-builder__notice {
+  margin-top: var(--space-4xl);
+  padding: var(--space-xl);
+  border: var(--border-width) solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+/* --- The phone summary bar (derived: no mobile artboard) ---
+   On phones the panel scrolls away above the cards, so the count and the add
+   button follow the customer. It mirrors the panel's form rather than owning
+   a second one: the button submits the same <form>. */
+
+.wc-bundle-builder__bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--page-gutter);
+  padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom));
+  border-top: var(--border-width) solid var(--color-hairline);
+  background-color: var(--color-surface-card);
+}
+
+.wc-bundle-builder__bar-count {
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-bundle-builder__bar-count b {
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+/* --- Tablet: the panel drops under the cards --- */
+
+@media screen and (max-width: 989px) {
+  .wc-bundle-builder {
+    padding-block: var(--section-spacing-desktop);
+  }
+
+  .wc-bundle-builder__arrow {
+    width: 40px;
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-bundle-builder__layout {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: var(--space-3xl);
+  }
+
+  /* Tablet: two across; phones take one (below). */
+  .wc-bundle-builder__items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The panel leads on narrow screens — the first step is choosing a pack. */
+  .wc-bundle-builder__panel {
+    order: -1;
+  }
+
+  .wc-bundle-builder__layout--sticky .wc-bundle-builder__panel {
+    position: static;
+  }
+
+  .wc-bundle-builder__panel {
+    min-height: 0;
+  }
+
+  .wc-bundle-builder__foot {
+    padding-top: var(--space-3xl);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  /* Phones keep two across; each card is narrower than 280, so its own
+     container query gives the photo a row of its own (wc-product-card.css). */
+  .wc-bundle-builder__items {
+    gap: var(--space-2xs);
+  }
+
+  .wc-bundle-builder__panel {
+    --bundle-panel-inset: var(--space-md);
+  }
+
+  .wc-bundle-builder__panel-title {
+    font-size: 32px;
+  }
+
+  .wc-bundle-builder__packs {
+    gap: 8px;
+  }
+
+  .wc-bundle-builder__pack-price {
+    font-size: 22px;
+  }
+
+  .wc-bundle-builder__pack-face {
+    min-height: 60px;
+    padding: 8px 4px;
+  }
+
+  .wc-bundle-builder__slot {
+    grid-template-columns: 24px 38px minmax(0, 1fr);
+  }
+
+  .wc-bundle-builder__slot-thumb {
+    width: 38px;
+    height: 57px;
+  }
+
+  /* Room for the fixed bar. */
+  .wc-bundle-builder__layout--bar .wc-bundle-builder__bar {
+    display: flex;
+  }
+
+  .wc-bundle-builder__layout--bar ~ * {
+    scroll-margin-bottom: 80px;
+  }
+
+  .wc-bundle-builder__layout--bar {
+    padding-bottom: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-bundle-builder__pack-face {
+    transition: none;
+  }
+}

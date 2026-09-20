@@ -1,0 +1,972 @@
+/* --------------------------------------------------------------------------
+   Cart drawer — snippets/wc-cart-drawer.liquid (+ wc-cart-extras, wc-age-gate).
+   Replaces Dawn's component-cart-drawer.css (see layout/theme.liquid).
+
+   Built to the design as drawn: Figma 10071:439 "Cart Popup" is the Reserve
+   Cellar cart (screenshot 10071:557) placed 472px wide at the right of the
+   1440 artboard. Every value below is measured off that frame at 1440:
+
+     panel 472 incl. a 1px rule · header 47 + 1px rule · gutter 30 (header 20)
+     promo box 58 tall, r8, 15/19 · progress 5px, 10 below · item 30 / 30 / 30,
+     image 102 × 126 square-cornered · title and prices 16 · qty pill 80 × 26
+     subtotal caps 10 / amount 22 · switches 34 × 20 · selects 41 tall, gap 10
+     checkbox 13 · checkout pill 50 tall, r25 · every tracked caps run is
+     10px / 0.16em (cap height 7 on the frame).
+
+   Palette and face are the reference's own, exposed as Theme settings ›
+   Wine Crush — Cart › Drawer style (tokens --color-cart-* and --font-cart in
+   layout/theme.liquid). Inside the panel the site's semantic tokens are
+   re-pointed at them, so the shared switches, age gate and pill buttons follow
+   without separate rules — and the same age gate on /cart keeps the site look.
+   Rules, surfaces and switch tracks are tints of the text over the background
+   (#7A7A76 = 50%, #3C3D3B = 25%, #242420 = 15%, #111 = 7% on the reference).
+   -------------------------------------------------------------------------- */
+
+/* --- Mechanics (cart-drawer.js toggles .active and waits for a transitionend
+   on the panel before trapping focus) --- */
+
+/* cart-drawer.js only toggles .active, so the panel has to animate both ways
+   itself. Visibility cannot tween, so on close it is held until the slide-out
+   and the overlay fade have finished; on open it flips immediately. */
+.drawer.wc-cart {
+  --cart-motion: 280ms;
+  --cart-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  visibility: hidden;
+  transition: visibility 0s linear var(--cart-motion);
+}
+
+.drawer.wc-cart.active {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.wc-cart .cart-drawer {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+}
+
+/* base.css hides every empty div, and this one is empty by design — without
+   an explicit display it never paints, so there is no scrim and no
+   click-outside-to-close. */
+.wc-cart .cart-drawer__overlay {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background-color: var(--overlay-menu);
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity var(--cart-motion) ease;
+}
+
+.wc-cart.active .cart-drawer__overlay {
+  opacity: 1;
+}
+
+.wc-cart .drawer__inner {
+  /* Geometry */
+  --cart-head: 47px;
+  --cart-head-inset: 20px;
+  --cart-gutter: 30px;
+  --cart-image-width: 102px;
+  --cart-image-height: 126px;
+  --cart-control-height: 26px;
+  --cart-cta-height: 50px;
+
+  /* Type */
+  --cart-text: 16px;
+  --cart-text-sm: 15px;
+  --cart-caps: 10px;
+  --cart-caps-sm: 10px;
+  --cart-amount: 22px;
+  --cart-tracking: 0.16em;
+
+  /* Palette: the reference's, from theme settings */
+  --cart-rule: color-mix(in srgb, var(--color-cart-text) 50%, var(--color-cart-bg));
+  --cart-track: color-mix(in srgb, var(--color-cart-text) 25%, var(--color-cart-bg));
+  --cart-surface: color-mix(in srgb, var(--color-cart-text) 15%, var(--color-cart-bg));
+  --cart-media: color-mix(in srgb, var(--color-cart-text) 7%, var(--color-cart-bg));
+
+  /* The site's tokens, re-pointed for everything rendered inside the panel */
+  --color-page: var(--color-cart-bg);
+  --color-text: var(--color-cart-text);
+  --color-border: var(--color-cart-text);
+  --color-muted: var(--color-cart-muted);
+  --color-muted-strong: var(--color-cart-muted);
+  --color-accent: var(--color-cart-text);
+  --font-body: var(--font-cart);
+
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(472px, 100vw);
+  height: 100%;
+  border-left: var(--border-width) solid var(--cart-rule);
+  background-color: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--cart-text);
+  line-height: 1.25;
+  -webkit-font-smoothing: antialiased;
+  transform: translateX(100%);
+  transition: transform var(--cart-motion) var(--cart-ease);
+}
+
+.wc-cart.active .drawer__inner {
+  transform: translateX(0);
+}
+
+.wc-cart .drawer__inner:focus {
+  outline: none;
+}
+
+/* --- Header: "close cart" --- */
+
+.wc-cart__header {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: var(--cart-head);
+  padding: 0 var(--cart-head-inset);
+  border-bottom: var(--border-width) solid var(--cart-rule);
+}
+
+/* "close cart" / "continue shopping": a 24px outlined circle with a reversed
+   arrow, then small tracked caps in the secondary colour. */
+.wc-cart__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--cart-caps);
+  font-weight: 500;
+  letter-spacing: var(--cart-tracking);
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.wc-cart__circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: var(--border-width) solid var(--color-muted);
+  border-radius: 50%;
+  color: var(--color-text);
+  transition: background-color var(--transition-button), color var(--transition-button);
+}
+
+.wc-cart__circle svg {
+  width: 10px;
+  height: auto;
+  transform: scaleX(-1);
+}
+
+/* The site arrow is drawn on a 52-unit box with a 1.5 stroke; at 10–12px it
+   would be a 0.3px hairline. The reference's arrows are solid, so the stroke
+   is thickened to ≈ 1.2px at this size. */
+.wc-cart__circle svg path,
+.wc-cart__checkout-arrow svg path {
+  stroke-width: 6;
+}
+
+.wc-cart__back:hover .wc-cart__circle,
+.wc-cart__back:focus-visible .wc-cart__circle {
+  background-color: var(--color-text);
+  color: var(--color-page);
+}
+
+.wc-cart__back:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 4px;
+}
+
+/* --- Scrolling body: everything below the header scrolls as one --- */
+
+/* A slim scrollbar in the drawer's own palette, in place of the OS one. */
+.wc-cart__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cart-track) transparent;
+}
+
+.wc-cart__body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.wc-cart__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wc-cart__body::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background-color: var(--cart-track);
+}
+
+.wc-cart__body:hover {
+  scrollbar-color: var(--cart-rule) transparent;
+}
+
+.wc-cart__body:hover::-webkit-scrollbar-thumb {
+  background-color: var(--cart-rule);
+}
+
+/* The note and gift textareas scroll too. */
+.wc-cart-extras__field {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cart-track) transparent;
+}
+
+/* --- Delivery message + progress --- */
+
+.wc-cart__promo {
+  padding: var(--cart-gutter) var(--cart-gutter) 0;
+}
+
+.wc-cart__message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  padding: 10px var(--space-md);
+  border-radius: 8px;
+  background-color: var(--cart-surface);
+  font-size: var(--cart-text-sm);
+  line-height: 19px;
+  text-align: center;
+}
+
+.wc-cart__message p {
+  margin: 0;
+}
+
+.wc-cart__message a {
+  color: var(--color-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wc-cart__message a:hover {
+  color: var(--color-text);
+}
+
+.wc-cart__progress {
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 3px;
+  background-color: var(--cart-surface);
+  overflow: hidden;
+}
+
+.wc-cart__progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--color-cart-progress);
+  transition: width 400ms ease;
+}
+
+/* --- Line items: image, details, line total --- */
+
+.wc-cart__form {
+  margin: 0;
+}
+
+.wc-cart__items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-cart-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--cart-image-width) minmax(0, 1fr) auto;
+  gap: var(--cart-gutter);
+  padding: var(--cart-gutter);
+  border-bottom: var(--border-width) solid var(--cart-rule);
+}
+
+.wc-cart-item__media {
+  display: block;
+  width: var(--cart-image-width);
+  height: var(--cart-image-height);
+  background-color: var(--cart-media);
+  overflow: hidden;
+}
+
+.wc-cart-item__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wc-cart-item__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.wc-cart-item__title {
+  color: var(--color-text);
+  font-size: var(--cart-text);
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.wc-cart-item__title:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wc-cart-item__meta {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--cart-text-sm);
+}
+
+.wc-cart-item__each {
+  margin: auto 0 0;
+  font-size: var(--cart-text);
+}
+
+.wc-cart-item__controls {
+  display: flex;
+  align-items: center;
+}
+
+/* Quantity: an 80 × 26 outlined pill, "- n +". At 1 the "−" takes the line to
+   0, which removes it (the reference has no separate remove link). */
+.wc-cart-qty {
+  display: inline-flex;
+  align-items: center;
+  width: 80px;
+  height: var(--cart-control-height);
+  border: var(--border-width) solid var(--cart-rule);
+  border-radius: var(--radius-pill);
+}
+
+.wc-cart-qty__button {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--cart-text-sm);
+  cursor: pointer;
+}
+
+.wc-cart-qty__button.disabled {
+  opacity: 0.4;
+}
+
+.wc-cart-qty__input {
+  width: 2.5ch;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--cart-text);
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.wc-cart-qty__input::-webkit-inner-spin-button,
+.wc-cart-qty__input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.wc-cart-qty__button:focus-visible,
+.wc-cart-qty__input:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: -2px;
+  border-radius: var(--radius-pill);
+}
+
+.wc-cart-item__controls {
+  gap: var(--space-xs);
+}
+
+.wc-cart-item__remove {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--cart-text-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.wc-cart-item__remove:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.wc-cart-item__error:empty,
+.wc-cart-item__error:has(.cart-item__error-text:empty),
+.wc-cart-item__error .cart-item__error-text:empty {
+  display: none;
+}
+
+.wc-cart-item__error {
+  color: var(--color-text);
+  font-size: var(--cart-text-sm);
+}
+
+/* The total sits on the quantity pill's centre line. */
+.wc-cart-item__total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-size: var(--cart-text);
+  line-height: var(--cart-control-height);
+  white-space: nowrap;
+}
+
+.wc-cart-item__was,
+.wc-cart-item__discount {
+  color: var(--color-muted);
+  font-size: var(--cart-text-sm);
+  line-height: 1.25;
+}
+
+/* Dawn's per-line spinner while a change is in flight. */
+.wc-cart-item .loading__spinner {
+  position: absolute;
+  top: var(--cart-gutter);
+  right: var(--cart-gutter);
+  width: 16px;
+}
+
+.wc-cart-item .loading__spinner .path {
+  stroke: var(--color-text);
+}
+
+.wc-cart .cart__items--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.wc-cart__errors:empty {
+  display: none;
+}
+
+.wc-cart__errors {
+  padding: var(--space-xs) var(--cart-gutter);
+  font-size: var(--cart-text-sm);
+}
+
+/* --- Footer: subtotal, extras, age check, actions --- */
+
+.wc-cart__footer {
+  padding: 30px var(--cart-gutter) var(--cart-gutter);
+}
+
+.wc-cart__subtotal {
+  text-align: right;
+}
+
+.wc-cart__subtotal p {
+  margin: 0;
+}
+
+.wc-cart__subtotal-label {
+  color: var(--color-muted);
+  font-size: var(--cart-caps-sm);
+  font-weight: 500;
+  letter-spacing: var(--cart-tracking);
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.wc-cart .wc-cart__subtotal-value {
+  margin-top: 2px;
+  font-size: var(--cart-amount);
+  line-height: 1;
+}
+
+.wc-cart__discount {
+  color: var(--color-muted);
+  font-size: var(--cart-text-sm);
+}
+
+/* Gift message / delivery notes: two switches on one right-aligned row. */
+.wc-cart-extras {
+  display: block;
+  margin-top: 32px;
+}
+
+.wc-cart-extras__toggles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-xs) var(--cart-gutter);
+}
+
+.wc-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--color-muted);
+  font-size: var(--cart-text);
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.wc-switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.wc-switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: var(--cart-track);
+  transition: background-color var(--transition-button);
+}
+
+.wc-switch__track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--color-muted);
+  transition: transform var(--transition-button), background-color var(--transition-button);
+}
+
+.wc-switch__input:checked + .wc-switch__track {
+  background-color: var(--color-muted);
+}
+
+.wc-switch__input:checked + .wc-switch__track::after {
+  background-color: var(--color-text);
+  transform: translateX(14px);
+}
+
+.wc-switch__input:checked ~ .wc-switch__label {
+  color: var(--color-text);
+}
+
+.wc-switch__input:focus-visible + .wc-switch__track {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.wc-cart-extras__panel {
+  margin-top: var(--space-md);
+}
+
+.wc-cart-extras__editor {
+  display: grid;
+  gap: 10px;
+}
+
+.wc-cart-extras__field {
+  width: 100%;
+  min-height: 84px;
+  padding: var(--space-xs);
+  border: var(--border-width) solid var(--cart-rule);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--cart-text);
+  line-height: 1.3;
+  resize: vertical;
+}
+
+.wc-cart-extras__field::placeholder {
+  color: var(--color-muted);
+}
+
+.wc-cart-extras__field:focus-visible {
+  border-color: var(--color-text);
+  outline: none;
+}
+
+.wc-cart .wc-cart-extras__confirm {
+  width: 100%;
+  min-height: 40px;
+  font-family: var(--font-body);
+  font-size: var(--cart-caps);
+  letter-spacing: var(--cart-tracking);
+}
+
+.wc-cart-extras__confirm[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.wc-cart-extras__status:empty {
+  display: none;
+}
+
+.wc-cart-extras__saved {
+  display: grid;
+  gap: var(--space-3xs);
+  width: 100%;
+  padding: var(--space-xs) var(--space-md);
+  border: 0;
+  border-radius: 8px;
+  background-color: var(--cart-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.wc-cart-extras__saved-label {
+  color: var(--color-muted);
+  font-size: var(--cart-caps-sm);
+  letter-spacing: var(--cart-tracking);
+  text-transform: uppercase;
+}
+
+.wc-cart-extras__saved-text {
+  font-size: var(--cart-text);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.wc-cart-extras__saved:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* --- Age check. Base rules are the site's (used as-is on /cart); the drawer
+   overrides follow them. --- */
+
+.wc-age-gate {
+  display: block;
+  margin-top: var(--space-xl);
+  color: var(--color-text);
+}
+
+.wc-age-gate__dob {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.wc-age-gate__legend {
+  margin-bottom: var(--space-2xs);
+  padding: 0;
+  font-size: var(--text-lede);
+  line-height: var(--leading-flat);
+}
+
+.wc-age-gate__selects {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  gap: var(--space-2xs);
+}
+
+.wc-age-gate__select {
+  position: relative;
+}
+
+/* An underlined select with a chevron (a 6px rotated corner). */
+.wc-age-gate__select select {
+  width: 100%;
+  height: 40px;
+  padding: 0 var(--space-lg) 0 0;
+  border: 0;
+  border-bottom: var(--border-width) solid var(--color-text);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-lede);
+  appearance: none;
+  cursor: pointer;
+}
+
+.wc-age-gate__select select option {
+  background-color: var(--color-page);
+  color: var(--color-text);
+}
+
+.wc-age-gate__select::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-right: var(--border-width) solid var(--color-text);
+  border-bottom: var(--border-width) solid var(--color-text);
+  transform: translateY(-75%) rotate(45deg);
+  pointer-events: none;
+}
+
+.wc-age-gate__select select:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.wc-age-gate__select select[aria-invalid] {
+  border-bottom-color: var(--color-accent);
+}
+
+.wc-age-gate__confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  margin-top: var(--space-lg);
+}
+
+.wc-age-gate__checkbox {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  accent-color: var(--color-text);
+  cursor: pointer;
+}
+
+.wc-age-gate__checkbox:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.wc-age-gate__confirm-label {
+  font-size: var(--text-meta);
+  line-height: var(--leading-body);
+  cursor: pointer;
+}
+
+.wc-age-gate__confirm-label a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+
+/* Sorbet on Claret on /cart; the drawer re-points --color-accent to its text. */
+.wc-age-gate__error {
+  margin: var(--space-2xs) 0 0;
+  color: var(--color-accent);
+  font-size: var(--text-meta);
+  line-height: var(--leading-flat);
+}
+
+/* Drawer: 16px secondary label 33 under the switches, 41px selects 10 apart
+   with a heavier chevron, a 13px checkbox 33 under the selects, 16/20
+   statement. */
+.wc-cart .wc-age-gate {
+  margin-top: 31px;
+}
+
+.wc-cart .wc-age-gate__legend {
+  margin-bottom: 22px;
+  color: var(--color-muted);
+  font-size: var(--cart-text);
+  line-height: 20px;
+}
+
+.wc-cart .wc-age-gate__selects {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* The artboard sets the value on the rule's line, not the box's centre. */
+.wc-cart .wc-age-gate__select select {
+  height: 41px;
+  padding-block: 0 9px;
+  padding-inline: 4px 24px;
+  border-bottom-color: var(--cart-rule);
+  font-size: var(--cart-text);
+}
+
+.wc-cart .wc-age-gate__select::after {
+  right: 6px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.wc-cart .wc-age-gate__confirm {
+  gap: 15px;
+  margin-top: 31px;
+}
+
+.wc-cart .wc-age-gate__checkbox {
+  width: 13px;
+  height: 13px;
+  margin-top: 3px;
+}
+
+.wc-cart .wc-age-gate__confirm-label {
+  font-size: var(--cart-text);
+  line-height: 20px;
+}
+
+.wc-cart .wc-age-gate__confirm-label a {
+  text-underline-offset: 3px;
+}
+
+.wc-cart .wc-age-gate__error {
+  font-size: var(--cart-text-sm);
+}
+
+/* --- Actions: continue shopping left, checkout pill right --- */
+
+.wc-cart__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-top: var(--cart-gutter);
+}
+
+.wc-cart__actions > * {
+  white-space: nowrap;
+}
+
+/* .wc-cart prefix: style.css (and .wc-button) loads after this file. */
+.wc-cart .wc-cart__checkout {
+  min-height: var(--cart-cta-height);
+  margin-inline-start: auto;
+  padding-inline: 19px;
+  gap: 10px;
+  border-radius: calc(var(--cart-cta-height) / 2);
+  font-family: var(--font-body);
+  font-size: var(--cart-caps);
+  font-weight: 500;
+  letter-spacing: var(--cart-tracking);
+}
+
+.wc-cart__checkout-arrow svg {
+  display: block;
+  width: 12px;
+  height: auto;
+}
+
+.wc-cart__checkout[aria-busy='true'] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* --- Empty cart --- */
+
+.wc-cart__empty {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.wc-cart__empty-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--cart-amount);
+  font-weight: 400;
+}
+
+.wc-cart__empty .wc-button {
+  min-height: var(--cart-cta-height);
+  padding-inline: 19px;
+  border-radius: calc(var(--cart-cta-height) / 2);
+  font-size: var(--cart-caps);
+  letter-spacing: var(--cart-tracking);
+}
+
+/* --- Phones: the reference's own 1× geometry (a 375px drawer scaled
+   × 1.2587 onto the artboard) — 62px of page left visible, 24px gutter,
+   42px header, 82 × 100 image. Type steps down one size. --- */
+
+@media screen and (max-width: 749px) {
+  .wc-cart .drawer__inner {
+    --cart-head: 42px;
+    --cart-head-inset: 16px;
+    --cart-gutter: 24px;
+    --cart-image-width: 82px;
+    --cart-image-height: 100px;
+    --cart-cta-height: 44px;
+    --cart-text: 15px;
+    --cart-text-sm: 14px;
+    --cart-amount: 20px;
+
+    width: calc(100vw - 62px);
+  }
+
+  .wc-cart-item {
+    grid-template-columns: var(--cart-image-width) minmax(0, 1fr);
+    column-gap: var(--cart-gutter);
+    row-gap: var(--space-2xs);
+  }
+
+  /* The line total moves under the details, right-aligned. */
+  .wc-cart-item__total {
+    grid-column: 2;
+  }
+
+  .wc-cart-item .loading__spinner {
+    right: var(--page-gutter);
+  }
+
+  .wc-cart__checkout {
+    padding-inline: var(--space-xs);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* cart-drawer.js traps focus on the panel's transitionend, so keep one. */
+  .drawer.wc-cart {
+    --cart-motion: 1ms;
+  }
+
+  .wc-cart .drawer__inner,
+  .wc-cart .cart-drawer__overlay {
+    transition-duration: 1ms;
+  }
+
+  .wc-cart__progress span,
+  .wc-switch__track,
+  .wc-switch__track::after {
+    transition: none;
+  }
+}

@@ -1,0 +1,113 @@
+{%- comment -%}
+  Contact form — Shopify's `form 'contact'`, in the Wine Crush field style
+  (assets/wc-form.css). Same primitives as the sign-up form: underlined
+  fields, a pill submit, server-rendered success and error states.
+{%- endcomment -%}
+
+{{ 'wc-form.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="wc-contact"
+  style="--contact-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="wc-container wc-contact__inner">
+    {%- form 'contact', class: 'wc-form' -%}
+      {%- if form.posted_successfully? -%}
+        <p class="wc-form__success" role="status">{{ 'templates.contact.form.post_success' | t }}</p>
+      {%- elsif form.errors -%}
+        <p class="wc-form__error" role="alert">
+          {{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}
+        </p>
+      {%- endif -%}
+
+      <div class="wc-form__row">
+        <div class="wc-field">
+          <label class="wc-field__label" for="ContactName-{{ section.id }}">
+            {{- 'templates.contact.form.name' | t -}}
+          </label>
+          <input
+            type="text"
+            id="ContactName-{{ section.id }}"
+            class="wc-field__input"
+            name="contact[{{ 'templates.contact.form.name' | t }}]"
+            autocomplete="name"
+            value="{{ form.name | escape }}"
+          >
+        </div>
+
+        <div class="wc-field">
+          <label class="wc-field__label" for="ContactEmail-{{ section.id }}">
+            {{- 'templates.contact.form.email' | t -}}
+          </label>
+          <input
+            type="email"
+            id="ContactEmail-{{ section.id }}"
+            class="wc-field__input"
+            name="contact[email]"
+            autocomplete="email"
+            required
+            value="{{ form.email | escape }}"
+            aria-required="true"
+          >
+        </div>
+      </div>
+
+      <div class="wc-field">
+        <label class="wc-field__label" for="ContactPhone-{{ section.id }}">
+          {{- 'templates.contact.form.phone' | t -}}
+        </label>
+        <input
+          type="tel"
+          id="ContactPhone-{{ section.id }}"
+          class="wc-field__input"
+          name="contact[{{ 'templates.contact.form.phone' | t }}]"
+          autocomplete="tel"
+          value="{{ form.phone | escape }}"
+        >
+      </div>
+
+      <div class="wc-field">
+        <label class="wc-field__label" for="ContactBody-{{ section.id }}">
+          {{- 'templates.contact.form.comment' | t -}}
+        </label>
+        <textarea
+          rows="6"
+          id="ContactBody-{{ section.id }}"
+          class="wc-field__input wc-field__input--area"
+          name="contact[{{ 'templates.contact.form.comment' | t }}]"
+        >{{ form.body }}</textarea>
+      </div>
+
+      <button type="submit" class="wc-button wc-button--lg wc-form__submit">
+        {{- section.settings.button_label | escape -}}
+      </button>
+    {%- endform -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Contact form",
+  "tag": "section",
+  "class": "wc-contact-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "send"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 300,
+      "step": 3,
+      "unit": "px",
+      "default": 162
+    }
+  ]
+}
+{% endschema %}
+

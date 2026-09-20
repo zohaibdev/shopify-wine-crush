@@ -79,6 +79,15 @@
   height: auto;
 }
 
+.wc-footer__logo-mark {
+  display: block;
+  width: 100%;
+  aspect-ratio: 122 / 30;
+  background-color: var(--color-text-footer);
+  -webkit-mask: var(--logo-mask) center / contain no-repeat;
+  mask: var(--logo-mask) center / contain no-repeat;
+}
+
 .wc-footer__legal {
   width: min(1248px, 100%);
   margin-top: 43px;
@@ -115,8 +124,9 @@
     margin-top: var(--space-xl);
   }
 
+  /* Width stays the base min(438px, 70%): the artboard's wordmark is a
+     centred mark with air either side, not a gutter-to-gutter fill. */
   .wc-footer__logo {
-    width: min(438px, 100%);
     margin-top: var(--space-xl);
   }
 

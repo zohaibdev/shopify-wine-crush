@@ -1,0 +1,210 @@
+{%- comment -%}
+  Collection filters — Figma 10008:35: a left column of "VARIETAL +", "PRICE +",
+  "REGION +" (14px caps, 27px pitch; open/active = full Ivory + underline, rest
+  at 66%). Rendered entirely from `results.filters`, i.e. whatever is configured
+  in Shopify Search & Discovery — no filter name or value is written here.
+
+  The markup deliberately satisfies Dawn's assets/facets.js contract so that
+  its AJAX section rendering, URL/history handling and response cache are
+  reused unchanged:
+  - desktop  <facet-filters-form> › form#FacetFiltersForm › .js-filter[id]
+  - mobile   <menu-drawer> › <facet-filters-form> › form#FacetFiltersFormMobile › .js-filter[id]
+  - .facets__summary / .facets-wrap / .mobile-facets__list — re-rendered on the
+    filter being used, so an open group stays open while its counts refresh
+  - .active-facets-desktop / .active-facets-mobile / .mobile-facets__open /
+    .mobile-facets__count — re-rendered on every change
+  - <facet-remove> links (url_to_remove) and <price-range> from facets.js
+
+  Accepts:
+  - results: {Object} the collection
+  - section_id: {String}
+{%- endcomment -%}
+
+{%- liquid
+  assign active_count = 0
+  for filter in results.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != null or filter.max_value.value != null
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+-%}
+
+{%- capture active_facets -%}
+  {%- if active_count > 0 -%}
+    <ul class="wc-active-facets__list" role="list">
+      {%- for filter in results.filters -%}
+        {%- for value in filter.active_values -%}
+          <li>
+            <facet-remove>
+              <a href="{{ value.url_to_remove }}" class="wc-active-facets__pill js-facet-remove">
+                <span>{{ value.label | escape }}</span>
+                <span class="wc-active-facets__x" aria-hidden="true">×</span>
+                <span class="wc-visually-hidden">{{ 'products.facets.clear' | t }}: {{ filter.label | escape }} {{ value.label | escape }}</span>
+              </a>
+            </facet-remove>
+          </li>
+        {%- endfor -%}
+        {%- if filter.type == 'price_range' -%}
+          {%- if filter.min_value.value != null or filter.max_value.value != null -%}
+            <li>
+              <facet-remove>
+                <a href="{{ filter.url_to_remove }}" class="wc-active-facets__pill js-facet-remove">
+                  <span>{{ filter.min_value.value | default: 0 | money }} – {{ filter.max_value.value | default: filter.range_max | money }}</span>
+                  <span class="wc-active-facets__x" aria-hidden="true">×</span>
+                  <span class="wc-visually-hidden">{{ 'products.facets.clear' | t }}: {{ filter.label | escape }}</span>
+                </a>
+              </facet-remove>
+            </li>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+    <facet-remove class="wc-active-facets__clear">
+      <a href="{{ results.url }}" class="wc-active-facets__clear-link js-facet-remove">
+        {{- 'products.facets.clear_all' | t -}}
+      </a>
+    </facet-remove>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- comment -%} Sorting is not in the design; an incoming sort_by is carried through so filtering never drops it. {%- endcomment -%}
+{%- capture sort_passthrough -%}
+  {%- if results.sort_by != blank and results.sort_by != results.default_sort_by -%}
+    <input type="hidden" name="sort_by" value="{{ results.sort_by | escape }}">
+  {%- endif -%}
+{%- endcapture -%}
+
+<div
+  class="facets-container wc-facets"
+  data-template="collection"
+  data-collection-id="{{ results.id }}"
+  data-collection-handle="{{ results.handle }}"
+>
+  {%- comment -%} Desktop (≥ 990px): the Figma column {%- endcomment -%}
+  <facet-filters-form class="wc-facets__desktop">
+    <form id="FacetFiltersForm" class="wc-facets__form">
+      {%- for filter in results.filters -%}
+        {%- liquid
+          assign group_id = filter.param_name | handleize | append: '-' | append: section_id
+          if filter.type == 'price_range'
+            assign group_active = false
+            if filter.min_value.value != null or filter.max_value.value != null
+              assign group_active = true
+            endif
+            assign group_count = 0
+          else
+            assign group_count = filter.active_values.size
+            assign group_active = false
+            if group_count > 0
+              assign group_active = true
+            endif
+          endif
+        -%}
+        {%- comment -%}
+          facets.js swaps this element's innerHTML but keeps the element, so the
+          open state survives a filter change and the active state lives on the
+          summary (which is re-rendered), not here.
+        {%- endcomment -%}
+        <details
+          id="Details-{{ group_id }}"
+          class="wc-facet js-filter"
+          {% if group_active %}
+            open
+          {% endif %}
+        >
+          <summary class="wc-facet__summary facets__summary{% if group_active %} is-active{% endif %}">
+            <span class="wc-facet__label">{{ filter.label | escape }}</span>
+            <span class="wc-facet__sign" aria-hidden="true">+</span>
+            {%- if group_count > 0 -%}
+              <span class="wc-facet__count">({{ group_count }})</span>
+            {%- endif -%}
+          </summary>
+
+          {%- render 'wc-facet-values', filter: filter, group_id: group_id, suffix: '' -%}
+        </details>
+      {%- endfor -%}
+
+      {{ sort_passthrough }}
+
+      <div class="wc-active-facets active-facets-desktop" aria-live="polite">
+        {{- active_facets -}}
+      </div>
+    </form>
+  </facet-filters-form>
+
+  {%- comment -%}
+    Mobile / tablet (< 990px): no artboard exists, so the column becomes a drawer
+    opened by a "filter +" pill (derived; see docs/UI-UX.md § 10). Dawn's
+    menu-drawer supplies open/close, body scroll lock, Escape and focus trap.
+    Groups are always expanded here: menu-drawer traps focus inside any nested
+    <details> it opens, which would strand keyboard users in one group.
+  {%- endcomment -%}
+  <menu-drawer class="wc-facets__mobile" data-breakpoint="tablet">
+    <details class="wc-facets__drawer-toggle">
+      <summary class="wc-facets__open wc-button">
+        <span class="mobile-facets__open">
+          {{- 'products.facets.filter_button' | t | downcase }} +
+          {%- if active_count > 0 %} ({{ active_count }}){% endif -%}
+        </span>
+      </summary>
+
+      <div
+        class="wc-facets__drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="{{ 'products.facets.filter_button' | t | escape }}"
+      >
+        <facet-filters-form>
+          <form id="FacetFiltersFormMobile" class="wc-facets__drawer-form">
+            <div class="wc-facets__drawer-header">
+              <h2 class="wc-facets__drawer-title wc-label">{{ 'products.facets.filter_button' | t }}</h2>
+              <p class="wc-facets__drawer-count wc-meta mobile-facets__count">
+                {{- 'products.facets.product_count_simple' | t: count: results.products_count -}}
+              </p>
+              <button
+                type="button"
+                class="wc-facets__close"
+                aria-label="{{ 'accessibility.close' | t | escape }}"
+                onclick="this.closest('menu-drawer').querySelector('summary').click()"
+              >
+                {{- 'icon-close.svg' | inline_asset_content -}}
+              </button>
+            </div>
+
+            <div class="wc-facets__drawer-body">
+              {%- for filter in results.filters -%}
+                {%- assign group_id = filter.param_name | handleize | append: '-mobile-' | append: section_id -%}
+                <div id="Details-{{ group_id }}" class="wc-facet wc-facet--static js-filter">
+                  <p class="wc-facet__summary facets__summary" aria-hidden="true">
+                    <span class="wc-facet__label">{{ filter.label | escape }}</span>
+                  </p>
+                  {%- render 'wc-facet-values', filter: filter, group_id: group_id, suffix: '-mobile' -%}
+                </div>
+              {%- endfor -%}
+
+              <div class="wc-active-facets active-facets-mobile">
+                {{- active_facets -}}
+              </div>
+            </div>
+
+            {{ sort_passthrough }}
+
+            <div class="wc-facets__drawer-footer">
+              <button
+                type="button"
+                class="wc-button wc-facets__apply"
+                onclick="this.closest('menu-drawer').querySelector('summary').click()"
+              >
+                {{- 'products.facets.apply' | t -}}
+              </button>
+            </div>
+          </form>
+        </facet-filters-form>
+      </div>
+    </details>
+  </menu-drawer>
+</div>

@@ -78,7 +78,10 @@
   margin: 0;
 }
 
+/* The sign-up form in the old CTA slot. The column centres its children, so
+   the wrapper is given the form's measure explicitly or it would shrink-wrap. */
 .wc-membership__cta {
+  width: min(440px, 100%);
   margin: 0;
 }
 

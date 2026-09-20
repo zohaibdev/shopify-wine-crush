@@ -1,0 +1,150 @@
+{%- comment -%}
+  FAQ — "Shipping & Frequently Asked Questions" (Figma 10058:711). An eyebrow,
+  a display heading, a 504px column of question rows, a footnote and a round
+  photograph. Rows are native <details>, so they open with no JavaScript; the
+  answers are the merchant's, question by question.
+{%- endcomment -%}
+
+{{ 'wc-faq.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'wc-faq.js' | asset_url }}" defer="defer"></script>
+
+{%- assign faq_heading = section.settings.heading | default: page.title -%}
+
+<section
+  class="wc-faq"
+  style="
+    --faq-padding-top: {{ section.settings.padding_top }}px;
+    --faq-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="wc-container wc-faq__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="wc-faq__eyebrow wc-label">{{ section.settings.eyebrow | escape }}</p>
+    {%- endif -%}
+
+    {%- if faq_heading != blank -%}
+      <h1 class="wc-faq__heading wc-display-m">{{ faq_heading | escape }}</h1>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <wc-accordion class="wc-faq__list">
+        {%- for block in section.blocks -%}
+          <details class="wc-faq__item" {{ block.shopify_attributes }}>
+            <summary class="wc-faq__question">{{ block.settings.question | escape }}</summary>
+            {%- if block.settings.answer != blank -%}
+              {%- comment -%}
+                The inner element carries the padding so the outer one can be
+                animated from a height of 0 (assets/wc-faq.js).
+              {%- endcomment -%}
+              <div class="wc-faq__answer">
+                <div class="wc-faq__answer-inner rte">{{ block.settings.answer }}</div>
+              </div>
+            {%- endif -%}
+          </details>
+        {%- endfor -%}
+      </wc-accordion>
+    {%- endif -%}
+
+    {%- if section.settings.footnote != blank -%}
+      <div class="wc-faq__footnote rte">{{ section.settings.footnote }}</div>
+    {%- endif -%}
+
+    {%- if section.settings.image != blank -%}
+      <div class="wc-faq__figure">
+        {{
+          section.settings.image
+          | image_url: width: 900
+          | image_tag: widths: '350, 700, 900', sizes: '(min-width: 990px) 352px, 70vw', alt: '', loading: 'lazy'
+        }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "FAQ",
+  "tag": "div",
+  "class": "wc-faq-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "the finer details"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "The page's heading. Leave blank to use the page title.",
+      "default": "Shipping & Frequently Asked Questions"
+    },
+    {
+      "type": "richtext",
+      "id": "footnote",
+      "label": "Footnote",
+      "default": "<p>Still have a question? Send us a message at hello@winecrush.com.au and we'll point you in the right direction.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Cropped to the design's circle."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 300,
+      "step": 3,
+      "unit": "px",
+      "default": 177
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 300,
+      "step": 4,
+      "unit": "px",
+      "default": 164
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "Where do you deliver?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ",
+      "blocks": [
+        { "type": "question", "settings": { "question": "Where do you deliver?" } },
+        { "type": "question", "settings": { "question": "How much is shipping?" } },
+        { "type": "question", "settings": { "question": "How long will my order take?" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
