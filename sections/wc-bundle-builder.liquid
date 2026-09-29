@@ -2,11 +2,16 @@
   Bundle builder — "Build your bundle." (Figma 10072:1173), the product
   template for the Bundle Packs product (handle `bundle-packs`).
 
-  All of it comes from the product:
-  - the pack options are the product's own variants; each one's bottle count is
-    its `custom.bundle_bottles_quantity` metafield (never the variant title)
-    and its price is the variant price;
-  - the bottles on offer are the product's `custom.bundle_products` list.
+  All of it comes from the product's variants — each pack carries its own two
+  metafields:
+  - `custom.bundle_bottles_quantity` — how many bottles this pack takes (never
+    guessed from the variant title);
+  - `custom.bundle_products` — the bottles *this pack* may be built from.
+
+  Every pack's list is rendered here once and only the chosen pack's is shown,
+  so switching packs needs no request. Changing pack clears the selection: the
+  lists are independent, and a bottle from the old pack must never travel into
+  the new one.
 
   The customer picks a pack, then picks that many bottles. Adding to cart adds
   the *bundle variant* through Dawn's own <product-form> (so the AJAX add, the
@@ -33,31 +38,41 @@
     remove_from_bundle: {{ 'wc_bundle.remove_from_bundle_js' | t | json }},
     unavailable_product: {{ 'wc_bundle.unavailable_product' | t | json }},
     unavailable_selection: {{ 'wc_bundle.unavailable_selection' | t | json }},
-    pack_unconfigured: {{ 'wc_bundle.pack_unconfigured' | t | json }}
+    pack_unconfigured: {{ 'wc_bundle.pack_unconfigured' | t | json }},
+    no_products: {{ 'wc_bundle.no_products' | t | json }}
   };
 </script>
 
 {%- liquid
-  assign bundle_products = product.metafields.custom.bundle_products.value
-
   comment
     Only variants that carry a bottle count can drive the builder: that count
-    is what every selection is validated against, so it is never guessed from
-    the variant title.
+    is what every selection is validated against. The page opens on the
+    product's own selected variant when that qualifies, otherwise on the first
+    one that does.
   endcomment
   assign first_pack = null
+  assign packs_with_products = 0
+
+  assign chosen = product.selected_or_first_available_variant
+  assign chosen_bottles = chosen.metafields.custom.bundle_bottles_quantity.value | plus: 0
+  if chosen_bottles > 0 and chosen.available
+    assign first_pack = chosen
+    assign first_bottles = chosen_bottles
+  endif
+
   for variant in product.variants
     assign bottles = variant.metafields.custom.bundle_bottles_quantity.value | plus: 0
-    if bottles > 0 and variant.available and first_pack == null
-      assign first_pack = variant
-      assign first_bottles = bottles
+    if bottles > 0 and variant.available
+      if first_pack == null
+        assign first_pack = variant
+        assign first_bottles = bottles
+      endif
+      assign variant_products = variant.metafields.custom.bundle_products.value
+      if variant_products != blank and variant_products.size > 0
+        assign packs_with_products = packs_with_products | plus: 1
+      endif
     endif
   endfor
-
-  assign has_products = false
-  if bundle_products != blank and bundle_products.size > 0
-    assign has_products = true
-  endif
 
   assign form_id = 'WcBundleForm-' | append: section.id
 -%}
@@ -93,7 +108,7 @@
       {%- endif -%}
     </header>
 
-    {%- if has_products == false or first_pack == null -%}
+    {%- if first_pack == null or packs_with_products == 0 -%}
       {%- comment -%}
         Nothing to build with. Rather than a broken builder, say what is
         missing — the storefront copy stays neutral, the detail is in the log.
@@ -104,10 +119,10 @@
       <script>
         console.warn(
           '[wc-bundle-builder] Not rendered.',
-          {%- if has_products == false -%}
-            'The product metafield custom.bundle_products has no products.'
-          {%- else -%}
+          {%- if first_pack == null -%}
             'No available variant has a custom.bundle_bottles_quantity value.'
+          {%- else -%}
+            'No available variant has products in its custom.bundle_products metafield.'
           {%- endif -%}
         );
       </script>
@@ -120,39 +135,81 @@
         data-add-label="{{ section.settings.card_add_label | escape }}"
       >
         <div class="wc-bundle-builder__grid">
-          <ul class="wc-bundle-builder__items" role="list">
-            {%- for bundle_product in bundle_products -%}
-              {%- liquid
-                assign bundle_variant = bundle_product.selected_or_first_available_variant
-                assign is_available = false
-                if bundle_product.available and bundle_variant.available
-                  assign is_available = true
-                endif
-                assign thumb = ''
-                if bundle_product.featured_image != blank
-                  assign thumb = bundle_product.featured_image | image_url: width: 138
-                endif
-              -%}
-              <li
-                class="wc-bundle-builder__item"
-                data-bundle-item
-                data-product-id="{{ bundle_product.id }}"
-                data-title="{{ bundle_product.title | escape }}"
-                data-thumb="{{ thumb }}"
-                {% unless is_available %}
-                  data-unavailable
-                {% endunless %}
+          {%- comment -%}
+            One list per pack, rendered once. Only the chosen pack's list is
+            shown; the rest stay hidden (their images are lazy, so nothing is
+            fetched until a pack is chosen). assets/wc-bundle-builder.js swaps
+            them on change — no request, and no list can bleed into another.
+          {%- endcomment -%}
+          {%- for variant in product.variants -%}
+            {%- liquid
+              assign bottles = variant.metafields.custom.bundle_bottles_quantity.value | plus: 0
+              if bottles == 0 or variant.available == false
+                continue
+              endif
+              assign variant_products = variant.metafields.custom.bundle_products.value
+              assign is_current = false
+              if variant.id == first_pack.id
+                assign is_current = true
+              endif
+            -%}
+
+            {%- if variant_products != blank and variant_products.size > 0 -%}
+              <ul
+                class="wc-bundle-builder__items"
+                role="list"
+                data-bundle-list
+                data-variant-id="{{ variant.id }}"
+                {% unless is_current %}hidden{% endunless %}
               >
-                {%- render 'wc-product-card',
-                  product: bundle_product,
-                  section_id: section.id,
-                  layout: 'grid',
-                  mode: 'select',
-                  add_label: section.settings.card_add_label
-                -%}
-              </li>
-            {%- endfor -%}
-          </ul>
+                {%- for bundle_product in variant_products -%}
+                  {%- liquid
+                    assign bundle_variant = bundle_product.selected_or_first_available_variant
+                    assign is_available = false
+                    if bundle_product.available and bundle_variant.available
+                      assign is_available = true
+                    endif
+                    assign thumb = ''
+                    if bundle_product.featured_image != blank
+                      assign thumb = bundle_product.featured_image | image_url: width: 138
+                    endif
+                  -%}
+                  <li
+                    class="wc-bundle-builder__item"
+                    data-bundle-item
+                    data-product-id="{{ bundle_product.id }}"
+                    data-title="{{ bundle_product.title | escape }}"
+                    data-thumb="{{ thumb }}"
+                    {% unless is_available %}
+                      data-unavailable
+                    {% endunless %}
+                  >
+                    {%- render 'wc-product-card',
+                      product: bundle_product,
+                      section_id: section.id,
+                      layout: 'grid',
+                      mode: 'select',
+                      add_label: section.settings.card_add_label
+                    -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- else -%}
+              {%- comment -%}
+                This pack has no bottles set up: say so in its place rather
+                than leaving the previous pack's list on screen.
+              {%- endcomment -%}
+              <div
+                class="wc-bundle-builder__notice wc-bundle-builder__notice--list"
+                data-bundle-list
+                data-variant-id="{{ variant.id }}"
+                data-empty
+                {% unless is_current %}hidden{% endunless %}
+              >
+                <p>{{ 'wc_bundle.no_products' | t }}</p>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
         </div>
 
         <aside class="wc-bundle-builder__panel" aria-labelledby="BundlePanelTitle-{{ section.id }}">
@@ -188,6 +245,13 @@
                   {% endif %}
                 >
                 <span class="wc-bundle-builder__pack-face">
+                  {%- comment -%}
+                    The artboard shows only "N for <price>", but the packs can
+                    share a bottle count (Classic / Reserve / Prestige are all
+                    six), so the variant's own name carries the distinction for
+                    anyone listening rather than looking.
+                  {%- endcomment -%}
+                  <span class="wc-visually-hidden">{{ variant.title }}</span>
                   <span class="wc-bundle-builder__pack-count wc-label">
                     {{- 'wc_bundle.pack_count' | t: count: bottles -}}
                   </span>

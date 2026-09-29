@@ -265,7 +265,17 @@ None. The design uses no drop shadows anywhere — depth comes entirely from the
 
 The logo reveal is the defining interaction: hidden at scroll 0 on the home page, fading/sliding in as the header becomes sticky. On all non-home templates the header starts in the scrolled state.
 
-**Every page but home** (Figma 10008:339 Shop, 10075:1873 About Us): the same bar in **Coral** with a 0.7px Ivory rule along its foot (`.wc-header--page`, tokens `--color-header-bg-page` / `--color-header-rule-page`; the rule is an inset shadow, so the bar stays 58). Home scrolled stays Deep Claret.
+**The bar is Coral on every page** (Figma 10008:339 Shop, 10075:1873 About Us), with a 0.7px Ivory rule along its foot (`.wc-header--page`, tokens `--color-header-bg-page` / `--color-header-rule-page`; the rule is an inset shadow, so the bar stays 58). Home keeps its transparent state over the hero and takes the same Coral bar the moment it sticks or a mega menu opens (client, 2026-09-28 — it used to resolve to Claret, which made home the odd page out).
+
+**Shop button.** The trigger is the pill primitive (`.wc-button.wc-button--nav`): 1px Ivory border, r37, 27 tall, 13px caps — the artboard's 75 × 27 pill. `.wc-header__link` resets `border` for plain links only (`:not(.wc-button)`); a blanket reset there sits later in the cascade than `.wc-button` and flattened the pill.
+
+**Shop is a link as well as a trigger.** With a destination set on the block it renders as an `<a>` carrying `aria-haspopup` / `aria-expanded`: a mouse opens the panel on the way in and the click follows the link, a touch opens on the first tap and follows on the second, and keyboard focus opens it (Escape closes). Without a destination it stays a plain disclosure button.
+
+**Mega menu column titles are links.** Each column resolves, in order: the column's own link setting, else the collection whose handle matches the menu's, else plain text — so nothing is hardcoded and nothing links to nowhere. In the drawer the title is a link inside the summary row and the rest of the row still opens the children (`assets/wc-header.js` stops the toggle when the link itself is tapped).
+
+**Cart circle and count.** The circle is the artboard's 28 x 28 with a 16px trolley (`icon-wc-cart.svg`, viewBox 24); it flips to Ivory on Claret on hover. The artboard never draws a non-empty cart, so the count chip is the theme's own: 15px, Claret on Ivory, 10px digits, pinned -4/-4, ringed in `--header-surface` (the bar's current colour) so it clears the circle's stroke, and `transparent` on the floating home header where there is no bar. It is Claret rather than Coral because the bar itself is Coral — a Coral chip vanished into it. `99+` above 99. The link's contents come from `snippets/wc-cart-icon.liquid`, which `sections/cart-icon-bubble.liquid` also renders, because the cart JS writes that section back into the header after every cart change.
+
+**Link treatment** (`.wc-underline`, in `style.css`). The artboards draw no underline, so links are bare at rest and the line is **drawn from the left on hover and focus** — `::after`, `scaleX(0) → 1`, `transform-origin: left`, 200ms, no layout shift. `.wc-underline--rest` adds a quiet Ivory-18% rule at rest and is used only where the affordance must survive without a pointer: the mega menu's column titles and their drawer rows.
 
 ### Mega menus
 
@@ -618,19 +628,22 @@ Below 990 (derived): the photograph moves above the copy, capped at 70% of the v
 
 Figma `10071:439` "Cart Popup" is the Reserve Cellar cart (screenshot `10071:557`) placed **472px wide** at the right of the 1440 artboard, with the brief "copy the exact cart popup functionality… age verification exactly like reserve cellars". **The drawer is built to that frame as drawn** — its own palette and face, not the site's (client, 2026-09-19: "Cart Drawer still is not as per design").
 
-### Palette and face (Theme settings › Wine Crush — Cart › Drawer style)
+### Palette and face — the site's own
 
-| Token | Value | Used for |
-| --- | --- | --- |
-| `--color-cart-bg` | `#000000` | panel |
-| `--color-cart-text` | `#F2F2EB` | text, checkout pill, switch knob when on |
-| `--color-cart-muted` | `#B4B3A0` | labels, caps, links, switch knob |
-| `--color-cart-progress` | `#8A2224` | delivery progress fill |
-| `--font-cart` | Inter (`inter_n4`) | everything in the panel |
+The drawer is Figma `10071:439`'s **geometry** in the **site's palette** (client, 2026-09-28: it has to read as the same theme as the rest of Wine Crush). Nothing in it is particular to the component:
 
-Rules and fills are tints of the text over the background, so one colour change carries them: hairlines 50% (`#7A7A76`), switch track 25% (`#3C3D3B`), promo box / saved card 15% (`#242420`), product image 7% (`#111`). The reference's face is a Neue-Haas-style grotesk; Shopify retired its Monotype library (the handle now resolves to Instrument Sans), and **Inter is the closest match — it reproduces the reference's line breaks exactly**.
+| Part | Token |
+| --- | --- |
+| Panel | `--color-page` (Claret) |
+| Type | `--color-text` (Ivory), `--font-body` (IBM Plex Mono) |
+| Secondary type | `--color-muted` (Ivory 66%) |
+| Promo box, saved cards, product media | `--color-surface-card` (Crimson) |
+| Rules, switch tracks | `--color-divider` (Ivory 18%) — the nav drawer's divider |
+| Delivery progress | `--color-surface-accent` (Coral) |
+| Errors | `--color-accent` (Sorbet) |
+| Buttons, pills | the shared `.wc-button` primitive |
 
-Inside `.drawer__inner` the site's semantic tokens (`--color-page`, `--color-text`, `--color-border`, `--color-muted`, `--font-body`) are re-pointed at the cart tokens, so the shared switches, age gate and pill buttons follow with no duplicate rules — and the same age gate on `/cart` keeps the site's Claret look.
+Product titles are caps, as on the cards and the cart page. There are no drawer-only colour or font settings any more — the earlier "Drawer style" group was removed, so the brand palette drives it like everything else.
 
 ### Geometry (measured off the frame at 1440; phones use the reference's own 1× values)
 
@@ -753,6 +766,8 @@ Figma `10058:711`, 1440 × 2019. Template `templates/page.shipping-faq.json`, on
 ---
 
 ## 16. Bundle builder (Build Your Bundle)
+
+**The bottles on offer belong to the pack, not the product** (client, 2026-09-29): every variant carries its own `custom.bundle_products` alongside its `custom.bundle_bottles_quantity`. Each pack's list is rendered once and hidden until that pack is chosen, so switching packs needs no request; choosing a pack clears the selection, because the lists are independent.
 
 Figma `10072:1173`, 1440 × 3572. The product template for **Bundle Packs** (`templates/product.bundle-packs.json` → `sections/wc-bundle-builder.liquid`), then the membership band and the footer.
 

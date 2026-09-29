@@ -103,43 +103,6 @@
     "settings": [
       {
         "type": "header",
-        "content": "Drawer style",
-        "info": "The cart drawer follows the Reserve Cellar reference in Figma (10071:439): its own palette and a grotesk sans, independent of the page. Inter is the closest library match to the reference face (same line breaks)."
-      },
-      {
-        "type": "font_picker",
-        "id": "wc_cart_font",
-        "label": "Font",
-        "default": "inter_n4"
-      },
-      {
-        "type": "color",
-        "id": "wc_cart_color_background",
-        "label": "Background",
-        "default": "#000000"
-      },
-      {
-        "type": "color",
-        "id": "wc_cart_color_text",
-        "label": "Text",
-        "info": "Rules, panels and switch tracks are tints of this over the background.",
-        "default": "#F2F2EB"
-      },
-      {
-        "type": "color",
-        "id": "wc_cart_color_muted",
-        "label": "Secondary text",
-        "info": "Labels, links and switch knobs.",
-        "default": "#B4B3A0"
-      },
-      {
-        "type": "color",
-        "id": "wc_cart_color_progress",
-        "label": "Delivery progress",
-        "default": "#8A2224"
-      },
-      {
-        "type": "header",
         "content": "Delivery message"
       },
       {

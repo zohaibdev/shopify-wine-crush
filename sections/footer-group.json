@@ -18,12 +18,12 @@
         "show_social": true,
         "contact": "<p>hello@winecrush.com.au</p><p>Shop 5/327 Honour Avenue Graceville 4075</p>",
         "legal": "<p>Payment Methods Accepted - Visa - Mastercard - American Express - ApplePay. winecrush supports the responsible service of alcohol. It is against the law to sell or supply alcohol too, or obtain alcohol on behalf of, a person under the age of 18 years. SA Liquor Licensing Act 1997, Section 113. Liquor Licence Number: 57708146 Liquor Must Not Be Supplied To Persons Under 18.</p>",
-        "padding_top": 31,
-        "padding_bottom": 16,
         "policies_label": "policies",
         "policies_link": "",
-        "credit_label": "a w\u00fclfe site",
-        "credit_link": ""
+        "credit_label": "a wülfe site",
+        "credit_link": "https://www.wulfe.company/",
+        "padding_top": 31,
+        "padding_bottom": 16
       }
     }
   },

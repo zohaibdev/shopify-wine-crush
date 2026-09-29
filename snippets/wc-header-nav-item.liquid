@@ -10,17 +10,43 @@
 
 {%- case block.type -%}
   {%- when 'shop_mega_menu', 'info_mega_menu' -%}
-    <button
-      class="wc-header__link wc-header__trigger{% if block.type == 'shop_mega_menu' %} wc-button wc-button--nav{% endif %}"
-      type="button"
-      aria-expanded="false"
-      aria-controls="WcMega-{{ block.id }}"
-      data-wc-megamenu-trigger="WcMega-{{ block.id }}"
-      {{ block.shopify_attributes }}
-    >
-      {{ block.settings.label }}
-      <span class="wc-header__trigger-plus" aria-hidden="true">+</span>
-    </button>
+    {%- comment -%}
+      With a destination the trigger is a real link that also opens the panel:
+      the pointer opens it on the way in and a click follows the link, while a
+      touch opens it first and follows on the second tap (assets/wc-header.js).
+      Without one it stays a plain disclosure button.
+    {%- endcomment -%}
+    {%- assign trigger_class = 'wc-header__link wc-header__trigger' -%}
+    {%- if block.type == 'shop_mega_menu' -%}
+      {%- assign trigger_class = trigger_class | append: ' wc-button wc-button--nav' -%}
+    {%- endif -%}
+
+    {%- if block.settings.url != blank -%}
+      <a
+        href="{{ block.settings.url }}"
+        class="{{ trigger_class }}"
+        aria-expanded="false"
+        aria-controls="WcMega-{{ block.id }}"
+        aria-haspopup="true"
+        data-wc-megamenu-trigger="WcMega-{{ block.id }}"
+        {{ block.shopify_attributes }}
+      >
+        {{ block.settings.label }}
+        <span class="wc-header__trigger-plus" aria-hidden="true">+</span>
+      </a>
+    {%- else -%}
+      <button
+        class="{{ trigger_class }}"
+        type="button"
+        aria-expanded="false"
+        aria-controls="WcMega-{{ block.id }}"
+        data-wc-megamenu-trigger="WcMega-{{ block.id }}"
+        {{ block.shopify_attributes }}
+      >
+        {{ block.settings.label }}
+        <span class="wc-header__trigger-plus" aria-hidden="true">+</span>
+      </button>
+    {%- endif -%}
 
   {%- when 'link' -%}
     <a

@@ -13,13 +13,13 @@
      checkbox 13 · checkout pill 50 tall, r25 · every tracked caps run is
      10px / 0.16em (cap height 7 on the frame).
 
-   Palette and face are the reference's own, exposed as Theme settings ›
-   Wine Crush — Cart › Drawer style (tokens --color-cart-* and --font-cart in
-   layout/theme.liquid). Inside the panel the site's semantic tokens are
-   re-pointed at them, so the shared switches, age gate and pill buttons follow
-   without separate rules — and the same age gate on /cart keeps the site look.
-   Rules, surfaces and switch tracks are tints of the text over the background
-   (#7A7A76 = 50%, #3C3D3B = 25%, #242420 = 15%, #111 = 7% on the reference).
+   The palette is the site's (client, 2026-09-28: the drawer must read as the
+   same theme as the rest of Wine Crush): Claret panel, Ivory type, Ivory-66%
+   secondary, Crimson surfaces for the promo box, saved cards and the product
+   media, Ivory-18% rules (the nav drawer's divider) and a Coral progress
+   fill — every value a token, none particular to this component. The face is
+   IBM Plex Mono like the rest of the site. Only the geometry below is the
+   reference's.
    -------------------------------------------------------------------------- */
 
 /* --- Mechanics (cart-drawer.js toggles .active and waits for a transitionend
@@ -79,28 +79,21 @@
   --cart-control-height: 26px;
   --cart-cta-height: 50px;
 
-  /* Type */
-  --cart-text: 16px;
-  --cart-text-sm: 15px;
+  /* Type — the site's mono, on the reference's sizes */
+  --cart-text: 14px;
+  --cart-text-sm: 13px;
   --cart-caps: 10px;
   --cart-caps-sm: 10px;
   --cart-amount: 22px;
-  --cart-tracking: 0.16em;
+  --cart-tracking: var(--tracking-caps);
 
-  /* Palette: the reference's, from theme settings */
-  --cart-rule: color-mix(in srgb, var(--color-cart-text) 50%, var(--color-cart-bg));
-  --cart-track: color-mix(in srgb, var(--color-cart-text) 25%, var(--color-cart-bg));
-  --cart-surface: color-mix(in srgb, var(--color-cart-text) 15%, var(--color-cart-bg));
-  --cart-media: color-mix(in srgb, var(--color-cart-text) 7%, var(--color-cart-bg));
-
-  /* The site's tokens, re-pointed for everything rendered inside the panel */
-  --color-page: var(--color-cart-bg);
-  --color-text: var(--color-cart-text);
-  --color-border: var(--color-cart-text);
-  --color-muted: var(--color-cart-muted);
-  --color-muted-strong: var(--color-cart-muted);
-  --color-accent: var(--color-cart-text);
-  --font-body: var(--font-cart);
+  /* Surfaces: the site's own, not a palette of the drawer's own. The panel is
+     the page colour, the promo box and saved cards are the card surface, and
+     rules are the nav drawer's Ivory-18% divider. */
+  --cart-rule: var(--color-divider);
+  --cart-track: var(--color-divider);
+  --cart-surface: var(--color-surface-card);
+  --cart-media: var(--color-surface-card);
 
   position: relative;
   z-index: 1;
@@ -113,8 +106,7 @@
   color: var(--color-text);
   font-family: var(--font-body);
   font-size: var(--cart-text);
-  line-height: 1.25;
-  -webkit-font-smoothing: antialiased;
+  line-height: var(--leading-flat);
   transform: translateX(100%);
   transition: transform var(--cart-motion) var(--cart-ease);
 }
@@ -278,7 +270,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background-color: var(--color-cart-progress);
+  background-color: var(--color-surface-accent);
   transition: width 400ms ease;
 }
 
@@ -326,10 +318,12 @@
   padding-top: 2px;
 }
 
+/* Caps, as every other product title in the theme (cards and the cart page). */
 .wc-cart-item__title {
   color: var(--color-text);
   font-size: var(--cart-text);
-  line-height: 1.25;
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
   text-decoration: none;
 }
 

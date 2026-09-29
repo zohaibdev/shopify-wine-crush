@@ -14,6 +14,11 @@
  * Data comes from Liquid: each card carries the product's id, title, thumb
  * and availability; each pack radio carries its variant id, its bottle count
  * (the custom.bundle_bottles_quantity metafield) and its price.
+ *
+ * Each pack has its own list of bottles (the variant's custom.bundle_products),
+ * rendered once and hidden until that pack is chosen. Only the chosen pack's
+ * list is ever read, so a bottle from another pack can neither be shown,
+ * selected, nor submitted.
  */
 (() => {
   /* Strings come from the section (locales/en.default.json > wc_bundle), with
@@ -56,6 +61,7 @@
       this.addEventListener('submit', this.onSubmit, true);
 
       this.selection = [];
+      this.showList();
       this.render();
     }
 
@@ -73,6 +79,16 @@
       return parseInt(this.pack.dataset.bottles, 10) || 0;
     }
 
+    /* The chosen pack's own list of bottles. */
+    get list() {
+      return this.querySelector(`[data-bundle-list][data-variant-id="${this.pack.value}"]`);
+    }
+
+    get items() {
+      const list = this.list;
+      return list ? [...list.querySelectorAll('[data-bundle-item]')] : [];
+    }
+
     /* --- Events --- */
 
     onClick = (event) => {
@@ -80,6 +96,8 @@
 
       const item = event.target.closest('[data-bundle-item]');
       if (!item || !this.contains(item)) return;
+      /* Belt and braces: only the chosen pack's bottles are selectable. */
+      if (item.closest('[data-bundle-list]') !== this.list) return;
 
       /* The whole card is the control, so a click anywhere in it counts. */
       event.preventDefault();
@@ -89,10 +107,22 @@
     onChange = (event) => {
       if (!event.target.matches('[data-bundle-pack]')) return;
       this.variantInput.value = event.target.value;
-      /* Selections are kept across a pack change; the customer is told what
-         to remove rather than having bottles taken off them. */
+      /* Each pack has its own bottles, so the selection starts again: keeping
+         it would carry bottles this pack may not even offer. */
+      this.selection = [];
+      this.showList();
       this.render();
     };
+
+    /* Show the chosen pack's list, hide the rest. */
+    showList() {
+      this.querySelectorAll('[data-bundle-list]').forEach((list) => {
+        const current = list.dataset.variantId === this.pack.value;
+        list.hidden = !current;
+        /* The hidden lists' images are lazy; reveal lets them load. */
+        if (current) list.querySelectorAll('img[loading="lazy"]').forEach((img) => img.removeAttribute('loading'));
+      });
+    }
 
     onSubmit = (event) => {
       if (event.target !== this.form) return;
@@ -131,8 +161,10 @@
       this.render();
     }
 
+    /* Scoped to the chosen pack: a bottle only exists if this pack offers it. */
     itemFor(id) {
-      return this.querySelector(`[data-bundle-item][data-product-id="${id}"]`);
+      const list = this.list;
+      return list ? list.querySelector(`[data-bundle-item][data-product-id="${id}"]`) : null;
     }
 
     /* --- Rendering --- */
@@ -159,7 +191,7 @@
     }
 
     renderCards(max) {
-      this.querySelectorAll('[data-bundle-item]').forEach((item) => {
+      this.items.forEach((item) => {
         const selected = this.selection.includes(item.dataset.productId);
         const button = item.querySelector('[data-bundle-toggle]');
         item.classList.toggle('is-selected', selected);
@@ -260,6 +292,10 @@
       const count = this.selection.length;
 
       if (!max) return t('pack_unconfigured');
+      /* A pack with no bottles set up cannot be built. */
+      if (!this.items.length) return t('no_products');
+      /* Nothing may reach the cart that this pack does not offer. */
+      if (this.selection.some((id) => !this.itemFor(id))) return t('unavailable_selection');
       if (count > max) return t('remove_extra', { count: count - max, total: max });
       if (count < max) return t('select_more', { count: max - count, total: max });
 

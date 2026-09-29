@@ -325,15 +325,7 @@
         --page-gutter: {{ settings.wc_page_gutter }}px;
         --border-width: {{ settings.wc_button_border_width }}px;
 
-        {%- comment -%} Cart drawer (Theme settings › Wine Crush — Cart › Drawer style). {%- endcomment -%}
-        --color-cart-bg: {{ settings.wc_cart_color_background }};
-        --color-cart-text: {{ settings.wc_cart_color_text }};
-        --color-cart-muted: {{ settings.wc_cart_color_muted }};
-        --color-cart-progress: {{ settings.wc_cart_color_progress }};
-        --font-cart: {{ settings.wc_cart_font.family }}, {{ settings.wc_cart_font.fallback_families }};
       }
-
-      {{ settings.wc_cart_font | font_face: font_display: 'swap' }}
 
       @media screen and (max-width: 749px) {
         :root {

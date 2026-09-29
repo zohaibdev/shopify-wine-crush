@@ -424,6 +424,57 @@ h6,
 }
 
 /* --------------------------------------------------------------------------
+   Links
+   On hover the line is drawn across the text from the left. The artboards
+   draw no underline at rest, so the rule only shows where the affordance has
+   to survive without a pointer — `--rest`, used by the mega menu's column
+   titles and their drawer rows. Both are pseudo-elements on their own row, so
+   nothing moves and no width changes.
+   -------------------------------------------------------------------------- */
+
+.wc-underline {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 2px;
+  text-decoration: none;
+}
+
+.wc-underline--rest::before,
+.wc-underline::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--border-width);
+  pointer-events: none;
+}
+
+.wc-underline--rest::before {
+  background-color: var(--color-divider);
+}
+
+/* Drawn from the left on hover, focus and while the row is open. */
+.wc-underline::after {
+  background-color: currentcolor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-button);
+}
+
+.wc-underline:hover::after,
+.wc-underline:focus-visible::after,
+[open] > .wc-underline::after,
+[aria-expanded='true'] .wc-underline::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-underline::after {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Buttons
    The design uses a single primitive: a 1px outlined pill, transparent fill.
    -------------------------------------------------------------------------- */

@@ -34,7 +34,22 @@ class WcHeader extends HTMLElement {
       const panel = document.getElementById(trigger.getAttribute('aria-controls'));
       if (!panel) return;
 
+      // A trigger with an href is a link as well as a disclosure: with a
+      // mouse the pointer has already opened the panel, so the click follows
+      // the link; by touch the first tap opens it and the second follows.
+      const isLink = trigger.tagName === 'A' && trigger.getAttribute('href');
+
       trigger.addEventListener('click', (event) => {
+        if (isLink) {
+          const canHover = window.matchMedia('(hover: hover)').matches;
+          if (canHover) return;
+          if (this.openPanel !== panel) {
+            event.preventDefault();
+            this.open(trigger, panel, 'click');
+          }
+          return;
+        }
+
         event.preventDefault();
         if (this.openPanel !== panel) {
           this.open(trigger, panel, 'click');
@@ -46,6 +61,14 @@ class WcHeader extends HTMLElement {
           this.close();
         }
       });
+
+      // Keyboard: a link trigger cannot be "pressed" to open, so tabbing to it
+      // reveals the panel — Escape closes it again.
+      if (isLink) {
+        trigger.addEventListener('focus', () => {
+          if (trigger.matches(':focus-visible')) this.open(trigger, panel, 'focus');
+        });
+      }
 
       trigger.addEventListener('pointerenter', (event) => {
         if (event.pointerType !== 'mouse') return;
@@ -174,6 +197,12 @@ class WcDrawer {
     });
 
     if (this.backBtn) this.backBtn.addEventListener('click', () => this.showRoot());
+
+    /* A column title inside a <summary> is a link first: let it navigate
+       rather than toggling the row it happens to live in. */
+    root.addEventListener('click', (event) => {
+      if (event.target.closest('[data-wc-drawer-link]')) event.stopPropagation();
+    });
 
     root.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {

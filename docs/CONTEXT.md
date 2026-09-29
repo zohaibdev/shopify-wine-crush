@@ -468,6 +468,22 @@ Decisions made where Figma was silent or ambiguous. Each records the reasoning s
 | 100 | The cart page keeps Dawn's `cart.js` contract rather than a new cart script. | Quantity, remove, section re-render, error handling and the drawer all keep working; only the markup and styling are the theme's. `cart.js` is loaded once (the drawer already loads it) — loading it again re-declared its classes and threw. |
 | 101 | The product card's price is Ivory 75% on **both** card types. | Sampled off both artboards (slider card in 10053:93, grid card in 10072:1173); the slider card was full Ivory. Fixed on the shared component, not per page. |
 | 102 | The drawer row divider and the Coming Soon scrim are tokens, not literals. | `--color-divider` (Ivory 18%) joins the emitted brand tokens; the scrim uses `rgb(0 0 0 / …)` so no stray hex remains in the wc CSS. |
+| 103 | **The cart drawer now wears the site palette, not the reference's.** This reverses #67 / #69. | Client, 2026-09-28: "the Cart Drawer currently does not feel consistent with the current Wine Crush theme… use the existing Wine Crush theme colors". Claret panel, Ivory mono type, Crimson surfaces, Ivory-18% rules, Coral progress. The drawer-only palette and font settings were deleted rather than re-pointed, so there is one palette for the site. The reference's *geometry* is untouched. |
+| 104 | Home's sticky bar is the same Coral as every other page. | Client, 2026-09-28. Home was the only page resolving to Claret once scrolled. The transparent state over the hero is kept; Coral arrives with `.wc-header--scrolled` or `--menu-open`, which is the only time home has a bar. |
+| 105 | `.wc-header__link` resets the border for plain links only. | The reset is later in the cascade than `.wc-button` and at the same specificity, so it was flattening the Shop pill's border. `:not(.wc-button)` fixes it at the cause — no override, no `!important`. |
+| 106 | The Shop trigger is an `<a>` when the block has a destination, and still opens the panel. | Mouse: hover opens, click follows the link. Touch: first tap opens, second follows. Keyboard: focus opens, Escape closes. With no destination it stays a `<button>`, so the markup never promises a link it does not have. |
+| 107 | Column-title destinations resolve setting → matching collection handle → plain text. | Keeps the merchant's menu architecture (four link lists) without hardcoding URLs, and never renders a link to nowhere. The drawer reuses the same resolution. |
+| 108 | One link treatment (`.wc-underline`), hover-drawn from the left; `--rest` only where there is no pointer. | The artboards draw no underline, so a permanent rule on 29 mega-menu links read as a different design. Titles (and their drawer rows) keep a quiet Ivory-18% rule because touch has no hover. Transform-based, so nothing reflows. |
+| 109 | Dawn's `cart.js` got a null guard in `enableLoading` / `disableLoading`. | Removing the last line re-renders the drawer into its empty state, which has no items container, and Dawn dereferenced it — a console error on every "cart emptied". Two `if` guards, no behaviour change. |
+| 110 | **`custom.bundle_products` is variant-level, not product-level.** This replaces the product-list half of #78–#79. | Client, 2026-09-29: each pack has its own bottles. The section now reads `variant.metafields.custom.bundle_products` for every qualifying variant; the product-level metafield is no longer read at all. |
+| 111 | Every pack's list is rendered once in Liquid and hidden until chosen. | No request on variant change, and no second data system: the markup already carries id, title, thumb and availability per card. Hidden lists keep `loading="lazy"`, so their images are only fetched when that pack is revealed. |
+| 112 | Changing pack clears the selection. | The lists are independent, so a bottle from the old pack could be one the new pack does not offer. Clearing is the safe reading of the brief; the counter and the properties reset with it. |
+| 113 | Lookups and validation are scoped to the chosen pack's list. | `itemFor()` searches only the active list, and `validate()` refuses if any selected id is not in it — a stale selection cannot reach the cart even if the state is tampered with. |
+| 114 | A pack with an empty `custom.bundle_products` shows its own empty state. | The previous pack's grid must never stand in for it; the CTA is blocked with "No bottles are set up for this pack just now." |
+| 115 | The pack radio announces the variant title, which stays visually hidden. | The artboard shows only "6 for <price>", and the three packs (Classic / Reserve / Prestige) now share a bottle count, so the name carries the distinction for screen readers without changing the design. |
+| 116 | Hiding a pack's list is stated in CSS, not left to the `hidden` attribute. | `.wc-bundle-builder__items { display: grid }` is an author rule and beats the UA's `[hidden] { display: none }`, so every pack's list painted at once — 27 cards stacked, and switching appeared to do nothing. The QA that missed it asserted on `element.hidden` (the property, always correct) instead of on what paints; paint-based assertions (`getBoundingClientRect().height`) are the ones that matter for a visibility change. |
+| 117 | The header cart link's contents live in one snippet, `snippets/wc-cart-icon.liquid`. | `sections/cart-icon-bubble.liquid` is re-rendered by Dawn's cart JS and written straight into `#cart-icon-bubble` after every cart change, so it and the header must emit the same markup. They had drifted — the section still carried Dawn's `icon-cart.svg` (viewBox 40) — and the Wine Crush trolley was replaced by a shrunken bag the moment anything was added to the cart. Rendering both from one snippet makes the drift impossible rather than merely fixed. |
+| 118 | The cart count chip is Claret on Ivory with a ring in the bar's own colour. | It was `--color-surface-accent` — Coral — on a Coral header bar, so with items in the cart it read as a hole punched through the Ivory circle rather than a count. Claret is the header's existing inverse pair (it is what the circle flips to on hover), and `--header-surface`, set beside each bar background, lets the ring separate the chip from the circle it overlaps; on the transparent home header that surface is `transparent`, so no ring is drawn. |
 | 42 | The Coming Soon form has **no visible labels, counter or Back control**. | None exist in the artboard. Accessibility is carried by visually hidden labels, a visually hidden `aria-live` step line and a per-step `aria-label` on the icon button. Backspace in an empty field steps back, so an earlier answer can still be corrected without inventing UI. |
 
 ### Open questions for the client
@@ -930,3 +946,76 @@ Home: marquee runs, product tabs switch, card add-to-cart opens the drawer with 
 
 Every script is a custom element (`customElements.define`), so a section re-render re-initialises it and no listener is bound twice; `wc-header.js` additionally listens for `shopify:section:load`. The new sections carry no JavaScript.
 
+---
+
+## 32. Cart drawer theme, header and mega menu pass
+
+Decisions #103–#109; geometry and tokens in `UI-UX.md` § 6 and § 12.
+
+### Changed
+
+| File | Change |
+| --- | --- |
+| `assets/wc-cart-drawer.css` | palette re-pointed at the site tokens; mono type; caps product titles |
+| `config/settings_schema.json`, `layout/theme.liquid` | the "Drawer style" font + colour settings and their `--color-cart-*` / `--font-cart` tokens removed |
+| `assets/wc-header.css` | border reset scoped to plain links; Coral bar extended to home's scrolled and menu-open states; drawer title-link style |
+| `assets/style.css` | `.wc-underline` / `.wc-underline--rest` |
+| `snippets/wc-header-nav-item.liquid` | trigger renders as `<a>` when the block has a destination |
+| `sections/wc-header.liquid` | column-title links (panel + drawer), `url` and `menu_N_url` settings |
+| `sections/header-group.json` | the Shop block's destination set to the all-products collection |
+| `assets/wc-header.js` | link-trigger click/focus behaviour; drawer link does not toggle its row |
+| `assets/cart.js` | null guard (decision #109) |
+
+### Verified
+
+1440 / 1366 / 1280 / 1024 / 768 / 430 / 390 / 375: Shop pill `<a>` 77 × 27 with its 1px border at every desktop width; the mega menu opens with all four titles as links and no overflow; below 990 the drawer carries 4 title links and 29 child links, accordions open, no overflow; the cart drawer is Claret/mono at every width with no inner or page overflow, and none left behind after closing. Home: transparent at the top, Coral when scrolled, Coral with a menu open.
+
+Functional: cart drawer quantity up/down, remove, empty state, blocked checkout on an empty age gate; the drawer title link navigates without toggling its row while the rest of the row still opens the children; mega menu opens on hover, closes on outside pointerdown and on Escape from the trigger. No console errors on home, collection, product, bundle or cart at 1440 or 375.
+
+---
+
+## 33. Bundle: variant-level product lists
+
+Decisions #110–#115; the page itself is unchanged (`UI-UX.md` § 16).
+
+### Data
+
+```
+Bundle Packs (9311292129418 / bundle-packs)
+    └── variant
+          ├── custom.bundle_bottles_quantity → how many bottles this pack takes
+          └── custom.bundle_products         → the bottles THIS pack offers
+```
+
+Read live on 2026-09-29: the packs are **Classic $100, Reserve $150, Prestige $200**, each with `bundle_bottles_quantity = 6` and its own nine-product list (all three lists differ). The variant titles are not drawn on the artboard — which is why it shows "6 for" three times — so they are announced but not displayed.
+
+### Where the data is prepared
+
+`sections/wc-bundle-builder.liquid` loops the variants once and renders, per qualifying variant, a `<ul data-bundle-list data-variant-id="…">` of cards (or a `data-empty` notice). All but the chosen pack's are `hidden`. Nothing is fetched at runtime and there is no JSON blob: each card carries its own `data-product-id`, `data-title`, `data-thumb` and availability, exactly as before.
+
+`assets/wc-bundle-builder.js` — `list` / `items` getters resolve the chosen pack's list by variant id; `showList()` swaps visibility on change and un-lazies the revealed images; `onChange` clears the selection; `itemFor()` and `validate()` only ever see the chosen pack.
+
+### Verified (dev)
+
+Re-verified against what actually paints (see decision #116), not the `hidden` property. Initial load shows the default variant's list (9 cards). Selecting three, then switching pack: the list swaps, the selection resets to 0, the counter and subtotal update, the hidden variant input follows, and the old bottles are gone — checked switching 1→2, 2→3 and 3→1. The three lists are distinct sets of ids. Building on Prestige adds variant 50246128959626 at $200 with exactly its six bottles as properties, and the drawer opens. A selection containing an id from another pack is refused by `validate()`. Emptying a pack's list in the DOM produces the empty-pack message and blocks the CTA. No console errors. Layout unchanged at 1440 / 1366 / 1280 / 1024 / 768 / 430 / 390 / 375: three card columns on desktop, two below 990, exactly one list visible, no overflow.
+
+
+---
+
+## 34. Header cart icon with a non-empty cart
+
+Reported: "cart icon is not correct when there is any product in cart". Two separate causes, decisions #117 and #118.
+
+### Cause 1 — the icon was swapped by the cart JS
+
+`#cart-icon-bubble` is the header's cart link. Every cart mutation (`cart.js`, `cart-drawer.js`, `cart-notification.js`, `quick-add-bulk.js`, `quick-order-list.js`) re-requests `?section_id=cart-icon-bubble` and assigns that section's HTML to `#cart-icon-bubble.innerHTML`. `sections/cart-icon-bubble.liquid` had been given the Wine Crush classes but still drew Dawn's `icon-cart.svg` / `icon-cart-empty.svg` (viewBox `0 0 40 40`, art inset to 11.8–28.4), so the first add-to-cart replaced the 24-viewBox trolley with a bag that painted at roughly 6.6px inside the 16px frame.
+
+Both the header and the section now render `snippets/wc-cart-icon.liquid`, which is the icon plus the count. Dawn's own `sections/header.liquid` is untouched and unused.
+
+### Cause 2 — the count chip was invisible on the bar
+
+`.wc-header__cart-count` was `--color-surface-accent` (Coral) with Ivory digits, and every non-home header — plus home once scrolled — is a Coral bar, so the chip disappeared into it and its digits cut across the Ivory circle's stroke. It is now Claret on Ivory at 15px, with `box-shadow: 0 0 0 var(--border-width) var(--header-surface)`. `--header-surface` is declared on `.wc-header` and re-declared beside each bar background, so the ring is Coral on the bar and `transparent` on the floating home header.
+
+### Verified (dev, cart non-empty)
+
+Icon identical before and after the JS re-render (viewBox `0 0 24 24`, 16 × 16 painted) at 1440 / 1024 / 768 / 390 / 375. Live drawer flow on `/pages/about-us` at 1440 / 768 / 390: load shows "1", "+" updates to "2" and the icon holds, "−" to zero removes the chip and leaves the trolley; no console errors. Captured at 3× on the Coral bar, the floating home header and mobile — the chip reads on all three.

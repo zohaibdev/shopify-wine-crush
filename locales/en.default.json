@@ -90,6 +90,7 @@
     "unavailable_product": "[title] is sold out just now.",
     "unavailable_selection": "One of your bottles has sold out. Remove it and pick another.",
     "pack_unconfigured": "This pack is not available just now.",
+    "no_products": "No bottles are set up for this pack just now. Try another pack.",
     "unavailable": "The bundle builder is not available just now. Please check back soon."
   },
   "wc_cart": {

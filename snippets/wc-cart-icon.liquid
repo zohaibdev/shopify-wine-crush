@@ -1,0 +1,16 @@
+{%- comment -%}
+  Contents of the header cart link.
+
+  `sections/cart-icon-bubble.liquid` re-renders on its own after every cart
+  change and the cart JS writes it back into `#cart-icon-bubble`, so the header
+  and that section have to emit the same markup or the icon swaps mid-session.
+{%- endcomment -%}
+<span class="wc-header__cart-icon">{{ 'icon-wc-cart.svg' | inline_asset_content }}</span>
+{%- if cart != empty -%}
+  <span class="wc-header__cart-count" aria-hidden="true">
+    {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
+  </span>
+  <span class="wc-visually-hidden">
+    {{- 'sections.header.cart_count' | t: count: cart.item_count -}}
+  </span>
+{%- endif -%}

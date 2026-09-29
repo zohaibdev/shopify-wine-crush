@@ -81,6 +81,13 @@
   margin-top: 81px;
 }
 
+/* Only the chosen pack's list is in the page. `display: grid` below would beat
+   the UA's `[hidden] { display: none }`, so hiding is stated here. */
+.wc-bundle-builder__items[hidden],
+.wc-bundle-builder__notice--list[hidden] {
+  display: none;
+}
+
 /* Three across, as drawn, for the whole desktop range; the panel gives up
    width instead of the grid giving up a column (--bundle-panel-width). */
 .wc-bundle-builder__items {
@@ -356,6 +363,11 @@
   margin: var(--space-2xs) 0 0;
   color: var(--color-accent);
   text-align: right;
+}
+
+/* An empty pack's message stands where its grid would have been. */
+.wc-bundle-builder__notice--list {
+  margin-top: 0;
 }
 
 .wc-bundle-builder__notice {

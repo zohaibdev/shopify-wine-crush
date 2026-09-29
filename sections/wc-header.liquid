@@ -83,15 +83,7 @@
         id="cart-icon-bubble"
         aria-label="{{ 'templates.cart.cart' | t }}"
       >
-        <span class="wc-header__cart-icon">{{ 'icon-wc-cart.svg' | inline_asset_content }}</span>
-        {%- if cart != empty -%}
-          <span class="wc-header__cart-count" aria-hidden="true">
-            {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
-          </span>
-          <span class="wc-visually-hidden">
-            {{- 'sections.header.cart_count' | t: count: cart.item_count -}}
-          </span>
-        {%- endif -%}
+        {%- render 'wc-cart-icon' -%}
       </a>
     </nav>
   </div>
@@ -119,24 +111,45 @@
                   case i
                     when 1
                       assign menu = block.settings.menu_1
+                      assign menu_url = block.settings.menu_1_url
                     when 2
                       assign menu = block.settings.menu_2
+                      assign menu_url = block.settings.menu_2_url
                     when 3
                       assign menu = block.settings.menu_3
+                      assign menu_url = block.settings.menu_3_url
                     when 4
                       assign menu = block.settings.menu_4
+                      assign menu_url = block.settings.menu_4_url
                   endcase
+
+                  comment
+                    A column title links to whatever the merchant set, or to
+                    the collection that shares the menu's handle when there is
+                    one. With neither it stays plain text rather than a link
+                    to nowhere.
+                  endcomment
+                  if menu_url == blank and collections[menu.handle] != empty
+                    assign menu_url = collections[menu.handle].url
+                  endif
                 -%}
                 {%- if menu != blank and menu.links.size > 0 -%}
                   <div class="wc-megamenu__column">
-                    <p class="wc-megamenu__column-title">
-                      {{- menu.title -}}
-                      <span aria-hidden="true"> +</span>
-                    </p>
+                    {%- if menu_url != blank -%}
+                      <a href="{{ menu_url }}" class="wc-megamenu__column-title wc-underline wc-underline--rest">
+                        {{- menu.title -}}
+                        <span aria-hidden="true"> +</span>
+                      </a>
+                    {%- else -%}
+                      <p class="wc-megamenu__column-title">
+                        {{- menu.title -}}
+                        <span aria-hidden="true"> +</span>
+                      </p>
+                    {%- endif -%}
                     <ul class="wc-megamenu__list" role="list">
                       {%- for link in menu.links -%}
                         <li>
-                          <a href="{{ link.url }}" class="wc-megamenu__link">{{ link.title }}</a>
+                          <a href="{{ link.url }}" class="wc-megamenu__link wc-underline">{{ link.title }}</a>
                         </li>
                       {%- endfor -%}
                     </ul>
@@ -329,18 +342,36 @@
                   case i
                     when 1
                       assign menu = block.settings.menu_1
+                      assign menu_url = block.settings.menu_1_url
                     when 2
                       assign menu = block.settings.menu_2
+                      assign menu_url = block.settings.menu_2_url
                     when 3
                       assign menu = block.settings.menu_3
+                      assign menu_url = block.settings.menu_3_url
                     when 4
                       assign menu = block.settings.menu_4
+                      assign menu_url = block.settings.menu_4_url
                   endcase
+                  if menu_url == blank and collections[menu.handle] != empty
+                    assign menu_url = collections[menu.handle].url
+                  endif
                 -%}
                 {%- if menu != blank and menu.links.size > 0 -%}
                   <details class="wc-drawer__accordion">
+                    {%- comment -%}
+                      The row does both jobs: the title is the column's link,
+                      the rest of the row opens the children. assets/wc-header.js
+                      stops the toggle when the link itself is tapped.
+                    {%- endcomment -%}
                     <summary class="wc-drawer__item wc-drawer__item--summary">
-                      {{ menu.title }}
+                      {%- if menu_url != blank -%}
+                        <a href="{{ menu_url }}" class="wc-drawer__item-link wc-underline wc-underline--rest" data-wc-drawer-link>
+                          {{- menu.title -}}
+                        </a>
+                      {%- else -%}
+                        {{ menu.title }}
+                      {%- endif -%}
                       <span aria-hidden="true"> +</span>
                     </summary>
                     <ul class="wc-drawer__sublist" role="list">
@@ -423,12 +454,24 @@
           "info": "A + is added automatically to show this opens a menu."
         },
         {
+          "type": "url",
+          "id": "url",
+          "label": "Link",
+          "info": "Makes the label itself a link as well as the menu trigger. Leave blank for a trigger only."
+        },
+        {
           "type": "select",
           "id": "position",
           "label": "Position in header",
           "options": [
-            { "value": "left", "label": "Left" },
-            { "value": "right", "label": "Right" }
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
           ],
           "default": "left"
         },
@@ -449,9 +492,21 @@
           "default": "main-menu"
         },
         {
+          "type": "url",
+          "id": "menu_1_url",
+          "label": "Column 1 link",
+          "info": "Optional. Leave blank to use the collection matching the menu's handle, if there is one."
+        },
+        {
           "type": "link_list",
           "id": "menu_2",
           "label": "Column 2"
+        },
+        {
+          "type": "url",
+          "id": "menu_2_url",
+          "label": "Column 2 link",
+          "info": "Optional. Leave blank to use the collection matching the menu's handle, if there is one."
         },
         {
           "type": "link_list",
@@ -459,9 +514,21 @@
           "label": "Column 3"
         },
         {
+          "type": "url",
+          "id": "menu_3_url",
+          "label": "Column 3 link",
+          "info": "Optional. Leave blank to use the collection matching the menu's handle, if there is one."
+        },
+        {
           "type": "link_list",
           "id": "menu_4",
           "label": "Column 4"
+        },
+        {
+          "type": "url",
+          "id": "menu_4_url",
+          "label": "Column 4 link",
+          "info": "Optional. Leave blank to use the collection matching the menu's handle, if there is one."
         },
         {
           "type": "header",
@@ -498,12 +565,24 @@
           "info": "A + is added automatically to show this opens a menu."
         },
         {
+          "type": "url",
+          "id": "url",
+          "label": "Link",
+          "info": "Makes the label itself a link as well as the menu trigger. Leave blank for a trigger only."
+        },
+        {
           "type": "select",
           "id": "position",
           "label": "Position in header",
           "options": [
-            { "value": "left", "label": "Left" },
-            { "value": "right", "label": "Right" }
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
           ],
           "default": "right"
         },
@@ -602,8 +681,14 @@
           "id": "position",
           "label": "Position in header",
           "options": [
-            { "value": "left", "label": "Left" },
-            { "value": "right", "label": "Right" }
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
           ],
           "default": "right"
         }
