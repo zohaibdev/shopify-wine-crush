@@ -70,9 +70,39 @@
       <div class="wc-coming-soon__description wc-lede rte">{{ section.settings.description }}</div>
     {%- endif -%}
 
-    <div class="wc-coming-soon__form">
-      {%- render 'wc-signup-form', id: section.id, config: section.settings, variant: 'light' -%}
-    </div>
+    {%- comment -%}
+      The "Ralle Membership" frame draws this as one plain pill — no arrow
+      circle beside it — measured at 161.5 × 30 on the frame's centre line,
+      which is the theme's own .wc-button (30px tall, 18px inset, 37px radius,
+      Ivory stroke) sized to its label. So it is that component, and the fill
+      on hover and the focus ring come with it.
+    {%- endcomment -%}
+    <a
+      class="wc-button wc-coming-soon__join"
+      href="{{ section.settings.membership_url | default: 'https://go.ralle.co/Fy3G' }}"
+      target="_blank"
+      rel="noopener"
+    >
+      {{- section.settings.membership_label | default: 'become a member' -}}
+      <span class="wc-visually-hidden">{{ 'general.accessibility.link_messages.new_window' | t }}</span>
+    </a>
+
+    {%- if section.settings.membership_note != blank -%}
+      <div class="wc-coming-soon__note rte">{{ section.settings.membership_note }}</div>
+    {%- endif -%}
+
+    {%- comment -%}
+      The three-step sign-up is kept but switched off (client, 2026-11-10):
+      the page points at the membership link instead. The snippet, its script
+      and its settings are untouched — tick "Show the e-mail sign-up form" to
+      bring it back. snippets/wc-signup-form.liquid is shared with the 5% off
+      section, which is unaffected either way.
+    {%- endcomment -%}
+    {%- if section.settings.show_signup_form -%}
+      <div class="wc-coming-soon__form">
+        {%- render 'wc-signup-form', id: section.id, config: section.settings, variant: 'light' -%}
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -138,7 +168,36 @@
     },
     {
       "type": "header",
+      "content": "Membership button"
+    },
+    {
+      "type": "text",
+      "id": "membership_label",
+      "label": "Button text",
+      "default": "become a member"
+    },
+    {
+      "type": "url",
+      "id": "membership_url",
+      "label": "Button link",
+      "info": "Opens in a new tab. Paste the membership sign-up URL here."
+    },
+    {
+      "type": "richtext",
+      "id": "membership_note",
+      "label": "Note under the button",
+      "info": "Empty by default — the design has nothing under the button. Anything added here renders under it; links open in the same tab."
+    },
+    {
+      "type": "header",
       "content": "Sign-up form"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_signup_form",
+      "label": "Show the e-mail sign-up form",
+      "info": "Off while the page points at the membership link. The settings below are kept either way.",
+      "default": false
     },
     {
       "type": "text",

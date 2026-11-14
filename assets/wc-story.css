@@ -121,3 +121,49 @@
     text-align: left;
   }
 }
+
+/* Phones: the two-corner composition has no room, so the whole section reads
+   as one centred stack — mark, opening line, photograph, address, button,
+   closing line — on a single rhythm (client, Ovais round 2). The mark leads
+   the stack via `order`, which keeps the opening line first in the document
+   for anything reading the page in source order. */
+@media screen and (max-width: 749px) {
+  .wc-story__head {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xl);
+  }
+
+  .wc-story__icon {
+    order: -1;
+  }
+
+  .wc-story__lead {
+    width: 100%;
+    text-align: center;
+  }
+
+  .wc-story__media {
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-story__foot {
+    align-items: center;
+    gap: var(--space-xl);
+    margin-top: var(--space-3xl);
+  }
+
+  .wc-story__place {
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .wc-story__address,
+  .wc-story__closing {
+    text-align: center;
+  }
+
+  .wc-story__closing {
+    width: 100%;
+  }
+}

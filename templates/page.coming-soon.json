@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "coming_soon": {
@@ -8,6 +17,9 @@
         "left_text": "coming",
         "right_text": "soon",
         "description": "<p>A considered selection of wine, beer and beyond, without the fuss. Join the list for opening updates, new arrivals and first pours.</p>",
+        "membership_label": "become a member",
+        "membership_url": "https://go.ralle.co/Fy3G",
+        "show_signup_form": false,
         "signup_tag": "coming-soon-page",
         "signup_name_placeholder": "name",
         "signup_email_placeholder": "email",

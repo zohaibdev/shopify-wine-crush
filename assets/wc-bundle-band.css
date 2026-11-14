@@ -130,13 +130,19 @@
 
 /* Tablet and phones: the copy column takes most of the band width, so the
    desktop scatter (percentages of a 1440 × 1350 band with wide empty margins)
-   lands on the copy — at 768 the About Us intro's 62ch body leaves ~120px
-   margins for 85–145px photos. The photographs keep the design's loose
-   collage instead in space of their own — two staggered above the copy, two
-   below — by turning the
-   scatter wrapper into `display: contents` so the figures join the band's
-   grid. Sizes keep their desktop proportions and never exceed their 1440
-   widths (255 / 271 / 163 / 163). */
+   would land on the copy — at 768 the About Us intro's 62ch body leaves ~120px
+   margins for 85–145px photos.
+
+   The photographs keep the design's loose collage instead, in space of their
+   own: the scatter wrapper becomes `display: contents` so the figures join
+   the band's two-column grid as two staggered above the copy and one centred
+   below it. Sizes keep their desktop proportions and never exceed their 1440
+   widths (255 / 271 / 163). The fourth is hidden — hidden, not removed, so
+   every block survives in the section and on desktop.
+
+   This arrangement serves both bands: "Build your bundle." on Home and "Good
+   drinks, without the carry-on." on About Us. Round 3 cut it back to a single
+   image at the top; the client asked for the three back (round 4). */
 @media screen and (max-width: 989px) {
   .wc-bundle {
     display: grid;
@@ -178,24 +184,18 @@
     max-width: 271px;
   }
 
+  /* 26% is the width this figure has as 52% of a half-width column, kept now
+     that it spans both and sits on the band's centre line. */
   .wc-bundle__figure:nth-child(3) {
-    grid-column: 1;
+    grid-column: 1 / -1;
     grid-row: 3;
     justify-self: center;
-    width: 52%;
+    width: 26%;
     margin-top: var(--space-xl);
     max-width: 163px;
   }
 
-  .wc-bundle__figure:nth-child(4) {
-    grid-column: 2;
-    grid-row: 3;
-    justify-self: start;
-    width: 52%;
-    max-width: 163px;
-  }
-
-  .wc-bundle__figure:nth-child(n + 5) {
+  .wc-bundle__figure:nth-child(n + 4) {
     display: none;
   }
 }

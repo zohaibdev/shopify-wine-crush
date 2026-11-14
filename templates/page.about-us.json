@@ -106,7 +106,7 @@
             "title": "Around the Corner",
             "text": "<p>Pop in-store to our Graceville, Queensland shop and browse the collection in person. Good bottles and plenty worth discovering.</p>",
             "button_label": "get directions +",
-            "button_link": "shopify://pages/contact"
+            "button_link": "https://share.google/9zg1a4gXtlhzacjvr"
           }
         }
       },
@@ -163,7 +163,7 @@
         "alignment": "center",
         "tone": "default",
         "max_width": 600,
-        "icon": "shopify://shop_images/icon.png",
+        "icon": "shopify://shop_images/icon_3673b888-85bd-4003-9758-6894f666b5b1.svg",
         "background": "image",
         "overlay_opacity": 25,
         "tuck_under": true,

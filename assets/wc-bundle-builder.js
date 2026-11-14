@@ -134,7 +134,12 @@
       event.stopImmediatePropagation();
       this.setStatus(problem, true);
       const firstEmpty = this.querySelector('.wc-bundle-builder__slot:not(.is-filled)');
-      (firstEmpty || this.slotList).scrollIntoView({ block: 'center', behavior: 'smooth' });
+      /* `nearest`, not `center`: on desktop the slot list is its own scroller
+         inside the pinned panel, so this reveals the slot within the list and
+         leaves the page where the customer left it. `center` would try to
+         centre a slot that the sticky panel holds in place regardless, and
+         drag the page with it. */
+      (firstEmpty || this.slotList).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     };
 
     /* --- Selection --- */

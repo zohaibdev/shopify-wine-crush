@@ -137,15 +137,18 @@
   margin-top: 139px;
 }
 
+/* The artwork carries its own shape — the merchant supplies a PNG already
+   masked to the design's ellipse. So nothing here may re-shape it: an
+   `aspect-ratio` box plus `object-fit: cover` cropped that ellipse into a
+   different one, and `border-radius: 50%` rounded the result a second time
+   (client, round 3). Width is the only thing this rule sets; the height
+   follows the file. */
 .wc-faq__figure img {
   display: block;
   width: 100%;
   /* The tag's height attribute is a presentational hint that would otherwise
-     beat the aspect ratio. */
+     beat the file's own ratio. */
   height: auto;
-  aspect-ratio: 352 / 299;
-  border-radius: 50%;
-  object-fit: cover;
 }
 
 /* Below the artboard the shared section rhythm takes over and the gaps close

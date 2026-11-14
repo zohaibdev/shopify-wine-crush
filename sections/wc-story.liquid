@@ -17,11 +17,20 @@
         <div class="wc-story__lead wc-body-l rte">{{ section.settings.lead }}</div>
       {%- endif -%}
 
-      {%- if section.settings.icon != blank -%}
-        <div class="wc-story__icon" aria-hidden="true">
-          {{ section.settings.icon | image_url: width: 132 | image_tag: widths: '44, 88, 132', alt: '' }}
-        </div>
-      {%- endif -%}
+      {%- comment -%}
+        The mark is the theme's own vector (assets/icon-wc-mark.svg, lifted from
+        the wordmark), so it stays crisp at 44px on any pixel density. An
+        uploaded bitmap — or an SVG that wraps one — is what made it blurry
+        (client, Ovais round 2), so a picked image is only used when the
+        merchant deliberately supplies one.
+      {%- endcomment -%}
+      <div class="wc-story__icon" aria-hidden="true">
+        {%- if section.settings.icon != blank -%}
+          {{ section.settings.icon | image_url: width: 264 | image_tag: widths: '88, 132, 264', sizes: '44px', alt: '' }}
+        {%- else -%}
+          <img src="{{ 'icon-wc-mark.svg' | asset_url }}" alt="" width="22" height="30" loading="lazy">
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="wc-story__media" aria-hidden="true">
@@ -127,7 +136,8 @@
     {
       "type": "image_picker",
       "id": "icon",
-      "label": "Brand mark"
+      "label": "Brand mark",
+      "info": "Leave empty to use the theme's vector brand mark, which stays sharp at every size. An uploaded file is only as sharp as the pixels it carries."
     },
     {
       "type": "header",

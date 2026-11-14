@@ -78,15 +78,22 @@
    Native overflow scrolling carries the touch/swipe behaviour; the arrows only
    nudge the same scroll container so both inputs stay in sync. */
 
+/* The two figures the rail is built from carry their own fallbacks: a slide
+   whose width cannot be resolved must not also take the gap down with it, or
+   the cards end up touching with no rail spacing at all. */
 .wc-product-slider {
-  --slide-width: calc((100% - (var(--slides-visible) - 1) * var(--slider-gap)) / var(--slides-visible));
+  --slider-rail-gap: var(--slider-gap, 15px);
+  --slider-rail-visible: var(--slides-visible, 4.1);
+  --slide-width: calc(
+    (100% - (var(--slider-rail-visible) - 1) * var(--slider-rail-gap)) / var(--slider-rail-visible)
+  );
 
   position: relative;
 }
 
 .wc-product-slider__track {
   display: flex;
-  gap: var(--slider-gap);
+  gap: var(--slider-rail-gap);
   margin: 0;
   padding: 0;
   overflow-x: auto;
@@ -105,10 +112,14 @@
    element's own, so a bare `padding-top: 30.51%` measured off the 331px card
    would resolve against the 1404px track. The slide width is factored out so
    both the basis and the bottle overhang derive from the same figure. */
+/* Width rather than flex-basis: a slide whose width is dropped still keeps
+   `flex: 0 0 auto`, so the rail stays a rail instead of shrinking every card
+   to share one screen with no gap between them. */
 .wc-product-slider__slide {
   display: flex;
-  flex: 0 0 var(--slide-width);
+  flex: 0 0 auto;
   flex-direction: column;
+  width: var(--slide-width);
   padding-top: calc(var(--slide-width) * 0.3051);
   scroll-snap-align: start;
 }

@@ -65,8 +65,13 @@
     data-form-source: source_tag
   -%}
     <input type="hidden" name="contact[tags]" value="newsletter,{{ source_tag }}">
-    {%- comment -%} Filled from the name field on submit (everything after the first word). {%- endcomment -%}
-    <input type="hidden" name="contact[last_name]" value="" data-signup-last-name>
+    {%- comment -%}
+      Filled from the name field on submit (everything after the first word).
+      Disabled until it holds one: Shopify discards a customer post carrying an
+      empty last name, and a one-word name leaves it blank. JS re-enables it
+      when there is a surname; without JS it stays out of the post.
+    {%- endcomment -%}
+    <input type="hidden" name="contact[last_name]" value="" disabled data-signup-last-name>
 
     {%- if form.posted_successfully? -%}
       {{ success_markup }}

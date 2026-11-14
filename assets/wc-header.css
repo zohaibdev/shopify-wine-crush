@@ -342,6 +342,18 @@
   line-height: 1;
 }
 
+/* When the heading carries a destination it is an <a>, and it has to keep the
+   plain heading's box or the columns below it move: block (so there is no
+   inline-block strut) and shrink-wrapped (so the hover line stops at the word).
+   The line is dropped clear of a display-size descender and the box is pulled
+   back by the same amount. */
+a.wc-megamenu__heading {
+  display: block;
+  width: fit-content;
+  padding-bottom: 6px;
+  margin-bottom: -6px;
+}
+
 .wc-megamenu__body {
   flex: 1 1 auto;
   min-width: 0;
@@ -375,7 +387,7 @@
 }
 
 .wc-megamenu__link {
-  display: block;
+  display: inline-block;
   color: var(--color-text);
   font-size: var(--text-menu-link);
   line-height: 21px;

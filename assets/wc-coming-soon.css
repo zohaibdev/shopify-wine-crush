@@ -9,6 +9,10 @@
    (589 − 524 and 916 − 851), whatever the text lengths.
    -------------------------------------------------------------------------- */
 
+.wc-header, .wc-footer {
+    display: none !important;
+}
+
 .wc-coming-soon {
   --coming-soon-flank-gap: 65px;
 
@@ -129,8 +133,42 @@
   margin-top: 124px;
 }
 
-/* Mobile: the flanks and logo still share one row (that row *is* the design),
-   so the logo gives up width to keep "coming" and "soon" on it. */
+/* --------------------------------------------------------------------------
+   Membership button
+
+   The shape is the theme's .wc-button, which already is what the frame draws:
+   a 30px Ivory-stroked pill on the 37px radius, 18px inside its label, that
+   fills Ivory and punches the page colour through the text over 200ms, with
+   its own focus ring. Only where it sits in this section's stack is here.
+   -------------------------------------------------------------------------- */
+
+/* 762.8 − 721: the frame puts the pill 42px under the foot of the copy. */
+.wc-coming-soon__join {
+  margin-top: 42px;
+}
+
+/* 14px caps under the button, on the description's measure. Empty in the
+   drawn design; rendered only when the merchant fills the setting in. */
+.wc-coming-soon__note {
+  max-width: 435px;
+  margin-top: var(--space-sm);
+  font-size: var(--text-lede);
+  line-height: var(--leading-flat);
+  text-transform: uppercase;
+}
+
+.wc-coming-soon__note p {
+  margin: 0;
+}
+
+.wc-coming-soon__note a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+
+/* Mobile: the masthead stacks — "coming", the logo, then "soon" — so none of
+   the three has to give up size to share one row (client, 2026-11-10). The
+   row gap is the flank gap, so the one measure still tunes the masthead. */
 @media screen and (max-width: 749px) {
   .wc-coming-soon {
     --coming-soon-flank-gap: var(--space-sm);
@@ -141,8 +179,24 @@
     object-position: 48% 0;
   }
 
+  .wc-coming-soon__masthead {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    row-gap: var(--coming-soon-flank-gap);
+  }
+
+  /* All three share the one column. The logo's `grid-column: 2` has to be
+     reset with them, or grid opens an implicit second column for it and the
+     masthead goes back to two columns instead of stacking. */
+  .wc-coming-soon__flank--start,
+  .wc-coming-soon__logo,
+  .wc-coming-soon__flank--end {
+    grid-column: 1;
+    justify-self: center;
+  }
+
   .wc-coming-soon__logo {
-    width: min(var(--coming-soon-logo-width), 46vw);
+    width: min(var(--coming-soon-logo-width), 62vw);
   }
 
   .wc-coming-soon__description {
@@ -151,5 +205,18 @@
 
   .wc-coming-soon__body > .wc-coming-soon__form:first-child {
     margin-top: var(--space-3xl);
+  }
+
+  /* The pill keeps the 30px it is drawn at; the touch target is grown around
+     it instead, so the shape is unchanged and the tappable box still clears
+     44px (30 + 7 above + 7 below). */
+  .wc-coming-soon__join {
+    position: relative;
+  }
+
+  .wc-coming-soon__join::after {
+    content: '';
+    position: absolute;
+    inset: -7px 0;
   }
 }

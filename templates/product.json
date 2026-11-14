@@ -12,8 +12,8 @@
     "main": {
       "type": "wc-main-product",
       "settings": {
-        "story_heading": "Why we love it:",
-        "show_quantity": true,
+        "story_heading": "Why you’ll crush on it:",
+        "show_quantity": false,
         "label_profile": "profile",
         "label_size": "size",
         "label_region": "region",

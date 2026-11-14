@@ -10,9 +10,17 @@
  * the half-filled form and navigated away. So the arrow is a plain button,
  * Enter is handled here, and any stray submit is stopped at the form.
  *
- * The final step posts with fetch (no reload). Success is only shown when
- * Shopify confirms it; if Shopify asks for a human check (hCaptcha / bot
- * challenge), the form hands over to Shopify's own protected native submit.
+ * The final step posts with `fetch`, so the page never reloads: Shopify
+ * answers a customer POST with a redirect back to this page carrying
+ * `customer_posted=true`, or re-renders it with `form.errors`, and both are
+ * read straight out of the response. See `submitForm()`.
+ *
+ * That needs storefront spam protection to be OFF. With it on, Shopify answers
+ * with a challenge page that only ever clears in a top-level document, which a
+ * fetch cannot resolve — so anything unreadable falls back to posting the form
+ * as an ordinary navigation, the way Dawn's own newsletter does. Shopify sees
+ * the challenge through and returns here in its success or error state, both of
+ * which the snippet already renders. See `finish()` and `submitNatively()`.
  */
 class WcSignupForm extends HTMLElement {
   connectedCallback() {
@@ -41,7 +49,7 @@ class WcSignupForm extends HTMLElement {
     if (this.steps.length === 0 || !this.submitButton) return;
 
     this.busy = false;
-    this.nativeFallback = false;
+    this.posting = false;
 
     // Without JS the arrow is a real submit button and all fields show at once.
     this.submitButton.type = 'button';
@@ -80,8 +88,10 @@ class WcSignupForm extends HTMLElement {
   }
 
   onSubmit(event) {
-    // The only submit allowed through is the hand-over to Shopify's protected flow.
-    if (this.nativeFallback) return;
+    // The fallback navigation in `submitNatively()` is the one submit allowed
+    // through — Shopify's protection listens on the document and has to see it
+    // to attach the form key. Every other submit is a step change.
+    if (this.posting) return;
     event.preventDefault();
     event.stopPropagation();
     this.advance();
@@ -149,59 +159,112 @@ class WcSignupForm extends HTMLElement {
         // The browser's own type=email check, plus a dot in the domain, which
         // the spec allows to be absent but no real inbox is without.
         return value && input.checkValidity() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : this.dataset.errorEmail;
-      case 'phone': {
-        // Permissive on formatting (spaces, dashes, dots, brackets, leading +),
-        // strict only on length: E.164 allows at most 15 digits.
-        const digits = value.replace(/\D/g, '');
-        const shapeOk = /^\+?[\d\s().-]+$/.test(value);
-        return shapeOk && digits.length >= 8 && digits.length <= 15 ? '' : this.dataset.errorPhone;
-      }
+      case 'phone':
+        return this.auPhone(value) ? '' : this.dataset.errorPhone;
       default:
         return '';
     }
   }
 
+  /**
+   * The shop is Australian and every number it collects is an Australian one,
+   * so this accepts the national form (mobile 04xx xxx xxx, landlines on 02 /
+   * 03 / 07 / 08) and the international form (+61…, 0061…, 61…) in any common
+   * spacing — and a leading trunk 0 left in after the country code, which is
+   * the usual way people mistype it.
+   *
+   * Returns E.164 (`+61…`) because that is what Shopify stores a customer
+   * phone as; a bare local number is what it rejects. Returns '' when the
+   * number is not a valid Australian subscriber number.
+   */
+  auPhone(value) {
+    const compact = value.replace(/[\s().-]/g, '');
+    if (!/^(\+|00)?\d+$/.test(compact)) return '';
+
+    const international = compact.replace(/^(\+61|0061|61)/, '');
+    // With no country code it is a national number, so drop the trunk 0.
+    const nsn = (international === compact ? compact : international).replace(/^0/, '');
+
+    // 9 digits: 4 for mobiles, 2 / 3 / 7 / 8 for the geographic areas.
+    return /^[23478]\d{8}$/.test(nsn) ? `+61${nsn}` : '';
+  }
+
+  /**
+   * Posts with fetch; the page never reloads. `response.url` is the URL the
+   * redirect landed on, which carries `customer_posted=true` when Shopify
+   * accepted the sign-up. A rejected field comes back as this page re-rendered
+   * with `form.errors` in it.
+   *
+   * Disabled inputs are left out of FormData, which is how an empty last name
+   * stays out of the post (see `prepare()`).
+   */
   async submitForm() {
     this.setBusy(true);
     this.clearError();
     this.prepare();
     this.track('wc_newsletter_submit');
+    this.posting = true;
 
+    let url = '';
+    let doc = null;
     try {
-      const response = await fetch(this.form.action.split('#')[0], {
+      const response = await fetch(this.form.action, {
         method: 'POST',
         body: new FormData(this.form),
         headers: { Accept: 'text/html' },
-        credentials: 'same-origin',
       });
-
-      // Shopify asked for a human check: let its own protected flow take over.
-      if (response.status === 403 || response.status === 429 || /\/challenge\b/.test(response.url)) {
-        this.submitNatively();
-        return;
+      url = response.url || '';
+      // Read the body unless it is a challenge (solvable only up in the tab) or
+      // an outright refusal. Status is not the test: Shopify re-renders a form
+      // it rejected with a 4xx, and that page carries the message to show.
+      if (!url.includes('/challenge') && response.status !== 403) {
+        doc = new DOMParser().parseFromString(await response.text(), 'text/html');
       }
+    } catch (error) {
+      // Network failure, or the edge refused us outright. Same as no answer.
+    }
 
-      const html = await response.text();
-      const returned = new DOMParser().parseFromString(html, 'text/html').getElementById(this.form.id);
+    this.finish(url, doc);
+  }
 
-      if (response.ok && (/[?&]customer_posted=true\b/.test(response.url) || returned?.querySelector('[data-signup-success]'))) {
-        this.showSuccess();
-        return;
-      }
+  finish(url, doc) {
+    if (!this.posting) return;
+    this.posting = false;
 
-      // Shopify re-renders this form with its validation errors (e.g. a phone
-      // number it can't parse, or one already on another customer).
-      const serverError = returned?.querySelector('[data-signup-error]:not([hidden])')?.textContent.trim();
-      const startStep = parseInt(returned?.querySelector('[data-signup-row]')?.dataset.startStep, 10) || 0;
+    const returned = doc ? doc.getElementById(this.form.id) : null;
+
+    if (/[?&]customer_posted=true\b/.test(url) || returned?.querySelector('[data-signup-success]')) {
+      this.showSuccess();
+      return;
+    }
+
+    // This page came back, so Shopify re-rendered the form with its own
+    // validation errors (e.g. a phone number it can't parse, or one already on
+    // another customer). Re-open the step it rejected and say why.
+    if (returned) {
+      const serverError = returned.querySelector('[data-signup-error]:not([hidden])')?.textContent.trim();
+      const startStep = parseInt(returned.querySelector('[data-signup-row]')?.dataset.startStep, 10) || 0;
       this.restore();
       this.setBusy(false);
       this.go(serverError ? startStep : this.index, { focus: false });
       this.showError(serverError || this.dataset.errorGeneric);
-    } catch (error) {
-      this.restore();
-      this.setBusy(false);
-      this.showError(this.dataset.errorGeneric);
+      return;
     }
+
+    // Nothing readable: a challenge fetch cannot clear, or no answer at all.
+    // Post it again the plain way so the browser can see it through.
+    this.submitNatively();
+  }
+
+  /**
+   * The fallback post: the same form, submitted as an ordinary navigation —
+   * Dawn's newsletter mechanism. Shopify returns to this page with
+   * `customer_posted=true` and the snippet renders the success message, or
+   * re-renders the form carrying `form.errors`.
+   */
+  submitNatively() {
+    this.posting = true;
+    this.form.requestSubmit();
   }
 
   // Shopify customers have separate first/last names and a parseable phone.
@@ -214,8 +277,14 @@ class WcSignupForm extends HTMLElement {
       const [first, ...rest] = nameInput.value.split(/\s+/);
       nameInput.value = first;
       this.lastName.value = rest.join(' ');
+      // Shopify discards a customer post that carries an empty last name — no
+      // error, nothing created — and a one-word name ("Zohaib") leaves it
+      // blank. So the field is left out of the post rather than sent empty.
+      this.lastName.disabled = !this.lastName.value;
     }
-    if (phoneInput) phoneInput.value = phoneInput.value.replace(/[\s().-]/g, '');
+    // E.164 — Shopify rejects a customer phone it cannot parse, and a bare
+    // national number ("0412 345 678") is one of those.
+    if (phoneInput) phoneInput.value = this.auPhone(phoneInput.value) || phoneInput.value;
   }
 
   // Put back what the person typed after a failed attempt.
@@ -231,12 +300,6 @@ class WcSignupForm extends HTMLElement {
   fieldInput(name) {
     const step = this.steps.find((item) => item.dataset.signupStep === name);
     return step ? this.input(step) : null;
-  }
-
-  submitNatively() {
-    this.nativeFallback = true;
-    this.submitButton.type = 'submit';
-    this.form.requestSubmit(this.submitButton);
   }
 
   setBusy(busy) {

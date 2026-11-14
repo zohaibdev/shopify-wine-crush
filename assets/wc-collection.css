@@ -84,6 +84,26 @@
   padding: 18px 0 0 16px;
 }
 
+/* Desktop: the filters follow the products instead of scrolling away with
+   them (client, Ovais round 2). `align-self: start` is what makes this work —
+   a stretched grid item is as tall as its row, so there is nothing for sticky
+   to travel through. The column stays in its own grid track and stops at the
+   foot of the results, so it never reaches the footer; a long filter list
+   scrolls inside the pinned column rather than past the bottom of the screen.
+   Neither the layout grid nor the section above it clips overflow, so no
+   ancestor cancels the sticky. */
+@media screen and (min-width: 990px) {
+  .wc-collection__filters {
+    position: sticky;
+    top: calc(var(--header-height) + 18px);
+    align-self: start;
+    max-height: calc(100svh - var(--header-height) - 18px);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+}
+
 /* --- Grid (4 × 285, 15px gaps both ways: 537 − 522, 849 − 834) --- */
 
 .wc-collection__grid {

@@ -101,8 +101,20 @@
         >
           <div class="wc-megamenu__inner">
             <div class="wc-megamenu__body">
+              {%- comment -%}
+                The panel heading carries the panel's own destination: its own
+                link setting, else wherever the trigger label goes. With
+                neither it stays plain text rather than a link to nowhere.
+              {%- endcomment -%}
+              {%- assign heading_url = block.settings.heading_url | default: block.settings.url -%}
               {%- if block.settings.heading != blank -%}
-                <p class="wc-megamenu__heading">{{ block.settings.heading }}</p>
+                {%- if heading_url != blank -%}
+                  <a href="{{ heading_url }}" class="wc-megamenu__heading wc-underline">
+                    {{- block.settings.heading -}}
+                  </a>
+                {%- else -%}
+                  <p class="wc-megamenu__heading">{{ block.settings.heading }}</p>
+                {%- endif -%}
               {%- endif -%}
 
               <div class="wc-megamenu__columns">
@@ -205,8 +217,15 @@
             {%- endif -%}
 
             <div class="wc-megamenu__info-body">
+              {%- assign heading_url = block.settings.heading_url | default: block.settings.url -%}
               {%- if block.settings.heading != blank -%}
-                <p class="wc-megamenu__heading">{{ block.settings.heading }}</p>
+                {%- if heading_url != blank -%}
+                  <a href="{{ heading_url }}" class="wc-megamenu__heading wc-underline">
+                    {{- block.settings.heading -}}
+                  </a>
+                {%- else -%}
+                  <p class="wc-megamenu__heading">{{ block.settings.heading }}</p>
+                {%- endif -%}
               {%- endif -%}
 
               {%- for i in (1..3) -%}
@@ -482,6 +501,12 @@
           "default": "Shop"
         },
         {
+          "type": "url",
+          "id": "heading_url",
+          "label": "Panel heading link",
+          "info": "Leave blank to use the menu label's own link. With neither set the heading is plain text."
+        },
+        {
           "type": "header",
           "content": "Menu columns"
         },
@@ -591,6 +616,12 @@
           "id": "heading",
           "label": "Panel heading",
           "default": "Info"
+        },
+        {
+          "type": "url",
+          "id": "heading_url",
+          "label": "Panel heading link",
+          "info": "Leave blank to use the menu label's own link. With neither set the heading is plain text."
         },
         {
           "type": "image_picker",

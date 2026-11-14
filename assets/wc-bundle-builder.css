@@ -165,9 +165,80 @@
   background-color: var(--color-surface-card);
 }
 
+/* The panel follows the cards, and it has to arrive whole: pinning a panel
+   taller than the screen left the subtotal and "add bundle to cart" below the
+   fold until the page bottom (client, Ovais round 2). So it is capped to the
+   screen under the sticky header, the slot list takes the squeeze, and the
+   foot stays on the panel's floor. The cap also lowers the 764px floor —
+   min-height beats max-height, so leaving it would defeat the cap on a short
+   window. Sticky inside the grid row stops the panel at the foot of the card
+   grid, well above the footer. */
 .wc-bundle-builder__layout--sticky .wc-bundle-builder__panel {
+  --bundle-panel-height: calc(100svh - var(--header-height) - 2 * var(--bundle-gap));
+
   position: sticky;
   top: calc(var(--header-height) + var(--bundle-gap));
+  min-height: min(764px, var(--bundle-panel-height));
+  max-height: var(--bundle-panel-height);
+}
+
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__slots {
+  /* A flex child's default `min-height: auto` would refuse to shrink, pushing
+     the foot back off the panel. */
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  /* The bar is drawn in the panel's own hairline, so the slot rules stop short
+     of it rather than running underneath. */
+  padding-inline-end: var(--space-2xs);
+}
+
+/* The slot list's scrollbar, in the panel's own language: the Sorbet-50%
+   hairline that rules the slot rows becomes the thumb, rounded on the pill
+   radius, over no track at all. Scoped to this list — the storefront's other
+   scrollers keep their own.
+
+   The two engines are addressed separately on purpose. Chromium ignores every
+   `::-webkit-scrollbar` rule the moment `scrollbar-width` or `scrollbar-color`
+   is set to anything but `auto`, so the standard properties are kept behind
+   `@supports not selector(::-webkit-scrollbar)` — true in Firefox, false in
+   Chromium and Safari, which take the pseudo-elements instead. Anything that
+   understands neither keeps its native scrollbar, which still scrolls.
+
+   Width, radius and the transparent track follow the cart drawer's scrollbar
+   (assets/wc-cart-drawer.css), which is the theme's existing idiom for this.
+   The colour does not: the drawer uses --color-divider, Ivory at 18%, which
+   is close to invisible on this panel's Crimson. The panel's own slot rules
+   are the measure here, so the thumb is --color-hairline. */
+@supports not selector(::-webkit-scrollbar) {
+  .wc-bundle-builder__layout--sticky .wc-bundle-builder__slots {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-hairline) transparent;
+  }
+}
+
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__slots::-webkit-scrollbar {
+  width: 4px;
+}
+
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__slots::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__slots::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background-color: var(--color-hairline);
+}
+
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__slots:hover::-webkit-scrollbar-thumb,
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__slots::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-accent);
+}
+
+/* Whatever the list does, the subtotal and the button stay put. */
+.wc-bundle-builder__layout--sticky .wc-bundle-builder__foot {
+  flex: none;
 }
 
 .wc-bundle-builder__panel-title {

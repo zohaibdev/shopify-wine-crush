@@ -27,6 +27,14 @@
   min-height: 100svh;
 }
 
+/* Do not cap this frame's height against the viewport. A `max-height` beats
+   `aspect-ratio`, so on any window shorter than width / 1.604 the frame is
+   compressed: the photograph re-crops and the lede (38.42%) and wordmark
+   (73.72%) — both positioned as shares of the frame — ride up with it. That
+   was tried in round 2 to pull the wordmark above the fold on a short window
+   and it cost the artboard composition at every normal desktop size, so it is
+   out (client, round 3). The frame is the artboard's, full stop. */
+
 .wc-hero__media {
   position: absolute;
   inset: 0;
@@ -67,7 +75,6 @@
   margin-bottom: 0;
 }
 
-/* Sits above the band so the wordmark straddles the band edge, as designed. */
 .wc-hero__wordmark {
   position: absolute;
   top: var(--hero-wordmark-top);
@@ -81,6 +88,64 @@
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Wordmark layout: the logo leads, the opening line follows it (client,
+   round 4 — it used to straddle the claret band at the hero's foot).
+
+   The two become one centred stack in the hero's own flow rather than two
+   absolute percentage offsets, so the gap between them is stated once and
+   neither can land on the other, or under the header, at any width. They stay
+   `position: relative` so they keep their z-index over the photograph, which
+   is absolute; as static elements the media would paint on top of them.
+
+   `padding-top` is the header plus one 3xl step, which at 1440 puts the
+   opening line's top at 344px — the artboard's own 345 (38.42% of 898). So
+   the composition below the logo is where it was drawn; only the logo has
+   moved. The frame, the photograph and the claret band are untouched.
+   -------------------------------------------------------------------------- */
+/* The stack is centred in the hero's *available* height, not in the frame:
+   the padding states the two bands the content cannot use — the sticky header
+   it is pulled up under, and the claret cap at the foot, which is an ::after
+   on this element and so paints over anything that reaches it. Centring
+   between them is what puts the block in the optical middle. (No term for the
+   announcement bar: the hero's negative margin only lifts it under the header,
+   so an announcement bar above that sits clear of the hero entirely.)
+
+   `safe center` so that a frame too short for the stack falls back to packing
+   from the top rather than overflowing equally and sliding the logo up under
+   the header; the plain `center` before it is the fallback for browsers that
+   do not know the keyword.
+
+   No inline padding: both children already hold themselves inside the frame
+   (`min(…, 88%)` and `min(449px, 78%)`), and a gutter here would take 36px off
+   the wordmark's 706px artboard width. */
+.wc-hero--wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-content: safe center;
+  padding-top: var(--header-height);
+  padding-bottom: var(--band-overlap);
+}
+
+.wc-hero--wordmark .wc-hero__lede,
+.wc-hero--wordmark .wc-hero__wordmark {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  transform: none;
+}
+
+/* `order` rather than a Liquid change: the opening line stays first in the
+   document, where it reads as the hero's own text, and the logo — which is
+   decorative repetition of the site name — is lifted above it visually. */
+.wc-hero--wordmark .wc-hero__wordmark {
+  order: -1;
+  margin-bottom: var(--space-3xl);
 }
 
 /* Page heading layout: the title is the page's h1 and must be read without

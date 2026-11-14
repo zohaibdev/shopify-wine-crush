@@ -114,6 +114,13 @@
 
 /* Phones: the panels stack; the outer radii move to the top and bottom. */
 @media screen and (max-width: 749px) {
+  /* With the panels stacked under it the heading has no left rail to sit on,
+     so it centres over them (client, Ovais round 2). The negative bottom
+     margin that tucks it over the first panel is unchanged. */
+  .wc-split__heading {
+    text-align: center;
+  }
+
   .wc-split__panels {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -116,7 +116,7 @@
     "step": "Step [current] of [total]",
     "error_name": "Please enter your name.",
     "error_email": "Please enter a valid email address.",
-    "error_phone": "Please enter a valid phone number, e.g. 0412 345 678 or +61 412 345 678.",
+    "error_phone": "Please enter an Australian phone number, e.g. 0412 345 678 or +61 412 345 678.",
     "error_generic": "Sorry, we could not sign you up just now. Please try again."
   },
   "accessibility": {
